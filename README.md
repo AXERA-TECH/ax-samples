@@ -96,7 +96,7 @@ tar -zxvf msp.tgz
 
 ### 3rdparty 准备
 
-- 从 []() 下载预编译好的 OpenCV 库文件；
+- **[下载](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)** 预编译好的 OpenCV 库文件；
 - 在 ax-samaples 创建 3rdparty 文件，并将下载好的 OpenCV 库文件压缩包解压到该文件夹中。
 
 ### 源码编译
