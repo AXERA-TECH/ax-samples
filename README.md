@@ -1,15 +1,17 @@
 # AX-Samples
 
-`AX-Samples` 项目由 **[爱芯元智](https://www.axera-tech.com/)** 开源维护，提供常见的深度学习算法模型在 **爱芯元智** 推出的 **AX620** 系列 **AI SoC** 上的运行示例代码，便于社区开发者快速评估和适配。 
+## 简介
 
-支持以下芯片平台
+`AX-Samples` 由 **[爱芯元智](https://www.axera-tech.com/)** 主导开发。该项目实现了常见深度学习算法模型在 **爱芯元智** 的 **AI SoC** 上的示例代码，方便社区开发者进行快速评估和适配。 
+
+目前已支持以下芯片平台
 
 - AX620A
 - AX620U
 
-## 1. 示例分类
+## 示例分类
 
-### 1.1 NPU 模型推理：
+### NPU 模型推理：
 
 - 分类模型
 
@@ -34,11 +36,11 @@
 
   - HRNet
 
-### 1.2 NPU CV 
+### NPU CV 
 
 - CropResize
 
-### 1.3 Pipeline
+### Pipeline
 
 - NV12 -> CropResize -> NN(Classification)
 
@@ -55,22 +57,20 @@ $ tree -L 2
 │   └── summary.cmake
 ├── examples
 │   ├── CMakeLists.txt
-│   ├── ax_classification_accuracy.cc
 │   ├── ax_classification_nv12_resize_steps.cc
-│   ├── ax_classification_steps.cc
+│   ├── ax_classification_steps.cc              # 分类模型
 │   ├── ax_crop_resize_nv12.cc
-│   ├── ax_hrnet_steps.cc
-│   ├── ax_nanodet_steps.cc
-│   ├── ax_paddle_yolov3_steps.cc
-│   ├── ax_yolo_fastest_body_steps.cc
+│   ├── ax_hrnet_steps.cc                       # 人体关键点
+│   ├── ax_nanodet_steps.cc                     # 物体检测
+│   ├── ax_paddle_yolov3_steps.cc               # PaddleDetection 物体检测
+│   ├── ax_yolo_fastest_body_steps.cc           # 人体检测
 │   ├── ax_yolo_fastest_steps.cc
-│   ├── ax_yolov3_accuracy.cc
-│   ├── ax_yolov3_steps.cc
+│   ├── ax_yolov3_steps.cc                      # YOLOv3
 │   ├── ax_yolov3_tiny_steps.cc
-│   ├── ax_yolov4_steps.cc
+│   ├── ax_yolov4_steps.cc                      # YOLOv4
 │   ├── ax_yolov4_tiny_steps.cc
-│   ├── ax_yolov5s_steps.cc
-│   ├── ax_yoloxs_steps.cc
+│   ├── ax_yolov5s_steps.cc                     # YOLOv5
+│   ├── ax_yoloxs_steps.cc                      # YOLOX
 │   ├── base
 │   ├── cv
 │   ├── middleware
@@ -79,13 +79,13 @@ $ tree -L 2
     └── arm-linux-gnueabihf.toolchain.cmake
 ```
 
-## 2. 开发环境
+## 使用指南
 
-### 2.1 编译依赖
+### 编译环境
 - cmake 版本大于等于 3.13
 - AX620A 配套的交叉编译工具链 `arm-linux-gnueabihf-gxx` 已添加到环境变量中
 
-### 2.2 BSP 准备
+### BSP 准备
 
 联系 FAE 获取 AX620 BSP 开发包，执行如下操作
 ```
@@ -94,12 +94,12 @@ cd AX620_SDK_XXX/package
 tar -zxvf msp.tgz
 ```
 
-### 2.3 3rdparty 准备
+### 3rdparty 准备
 
 - 从 []() 下载预编译好的 OpenCV 库文件；
 - 在 ax-samaples 创建 3rdparty 文件，并将下载好的 OpenCV 库文件压缩包解压到该文件夹中。
 
-### 3. 源码编译
+### 源码编译
 进入 ax-samples 根目录，创建 cmake 编译任务：
 
 ```bash
@@ -130,9 +130,9 @@ install
     └── ax_yoloxs
 ```
 
-## 4. 运行示例
+## 运行示例
 
-### 4.1 运行准备
+### 运行准备
 
 登录 AX620A 开发板，在 `root` 路径下创建 `samples` 文件夹。
 
@@ -151,7 +151,7 @@ total 40644
 -rw-------    1 root     root      29217004 Mar 22 14:04 yolov5s.joint
 ```
 
-### 4.2 运行示例
+### 运行示例
 
 #### 分类模型
 
