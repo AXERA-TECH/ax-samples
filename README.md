@@ -87,7 +87,7 @@ $ tree -L 2
 
 ### BSP 准备
 
-联系 FAE 获取 AX620 BSP 开发包，执行如下操作
+请联系 FAE 获取 AX620 BSP 开发包，执行如下操作
 ```
 tar -zxvf AX620_SDK_XXX.tgz
 cd AX620_SDK_XXX/package
@@ -137,7 +137,7 @@ install
 登录 AX620A 开发板，在 `root` 路径下创建 `samples` 文件夹。
 
 - 将上一章节 `build/install/bin/` 中编译生成的可执行示例拷贝到 `/root/samples/` 路径下；
-- 将 **ModelZoo** 中相应的 **joint** 模型 `mobilenetv2.joint` 、 `yolov5s.joint` 拷贝到  `/root/samples/` 路径下；
+- 将 **[ModelZoo](https://pan.baidu.com/s/1zm2M-vqiss4Rmk-uSoGO7w)** (*pwd: euy7*) 中相应的 **joint** 模型 `mobilenetv2.joint` 、 `yolov5s.joint` 拷贝到  `/root/samples/` 路径下；
 - 将测试图片拷贝到 `/root/samples` 路径下。
 
 ```
