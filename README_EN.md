@@ -1,30 +1,30 @@
-简体中文 | [English](./README_EN.md)
+English | [简体中文](./README.md)
 
 # AX-Samples
 
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://raw.githubusercontent.com/AXERA-TECH/ax-samples/main/LICENSE)
 
-## 简介
+## Introduction
 
-**AX-Samples** 由 **[爱芯元智](https://www.axera-tech.com/)** 主导开发。该项目实现了常见的 **深度学习开源算法** 在 **爱芯元智** 的 **AI SoC** 上的示例代码，方便社区开发者进行快速评估和适配。 
+**AX-Samples** is developed by **[Axera](https://www.axera-tech.com/)** . This project implements the sample code of common **deep learning open source algorithms** on **Axera's** **AI SoC** , which is convenient for community developers to quickly evaluate and adapt.
 
-目前已支持以下芯片平台
+The following chip platforms are currently supported
 
 - AX620A
 - AX620U
 
-## 示例分类
+## Example Classification
 
-### NPU 模型推理：
+### NPU Inference Models：
 
-- 分类模型
+- Classification Models:
 
   - MobileNetv1
   - MobileNetv2
   - ResNet18
   - ResNet50
 
-- 检测模型
+- Detection Models:
 
   - YOLOv3
   - YOLOv3-Tiny
@@ -36,7 +36,7 @@
   - YOLO-Fastest-Body
   - NanoDet
 
-- 姿态模型
+- Pose Models:
 
   - HRNet
 
@@ -49,7 +49,7 @@
 - NV12 -> CropResize -> NN(Classification)
 
 
-## 目录说明
+## Directory Description
 
 ```bash
 $ tree -L 2
@@ -62,12 +62,12 @@ $ tree -L 2
 ├── examples
 │   ├── CMakeLists.txt
 │   ├── ax_classification_nv12_resize_steps.cc
-│   ├── ax_classification_steps.cc              # 分类模型
+│   ├── ax_classification_steps.cc              # Classification Model
 │   ├── ax_crop_resize_nv12.cc
-│   ├── ax_hrnet_steps.cc                       # 人体关键点
-│   ├── ax_nanodet_steps.cc                     # 物体检测
-│   ├── ax_paddle_yolov3_steps.cc               # PaddleDetection 物体检测
-│   ├── ax_yolo_fastest_body_steps.cc           # 人体检测
+│   ├── ax_hrnet_steps.cc                       # Human key points
+│   ├── ax_nanodet_steps.cc                     # Object detection
+│   ├── ax_paddle_yolov3_steps.cc               # PaddleDetection object detection
+│   ├── ax_yolo_fastest_body_steps.cc           # Human detection
 │   ├── ax_yolo_fastest_steps.cc
 │   ├── ax_yolov3_steps.cc                      # YOLOv3
 │   ├── ax_yolov3_tiny_steps.cc
@@ -83,28 +83,28 @@ $ tree -L 2
     └── arm-linux-gnueabihf.toolchain.cmake
 ```
 
-## 使用指南
+## User Guide
 
-### 编译环境
-- cmake 版本大于等于 3.13
-- AX620A 配套的交叉编译工具链 `arm-linux-gnueabihf-gxx` 已添加到环境变量中
+### Compiler Environment
+- cmake version must be greater than 3.13
+- The cross-compilation toolchain `arm-linux-gnueabihf-gxx` for AX620A has been added to the environment variable
 
-### BSP 准备
+### BSP preparation
 
-请联系 FAE 获取 AX620 BSP 开发包，执行如下操作
+Please contact FAE to obtain the AX620 BSP development kit, do the following
 ```
 tar -zxvf AX620_SDK_XXX.tgz
 cd AX620_SDK_XXX/package
 tar -zxvf msp.tgz
 ```
 
-### 3rdparty 准备
+### 3rdparty preparation
 
-- **[下载](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)** 预编译好的 OpenCV 库文件；
-- 在 ax-samaples 创建 3rdparty 文件，并将下载好的 OpenCV 库文件压缩包解压到该文件夹中。
+- **[Download](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)** Precompiled OpenCV library files；
+- Create a 3rdparty file in ax-samaples and unzip the downloaded OpenCV library file into this folder.
 
-### 源码编译
-进入 ax-samples 根目录，创建 cmake 编译任务：
+### Source code compilation
+Go to the ax-samples root directory and create a cmake compilation task:
 
 ```bash
 $ mkdir build
@@ -113,7 +113,7 @@ $ cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake
 $ make install
 ```
 
-编译完成后，生成的可执行示例存放在 build/install/bin/ 文件夹中：
+After compiling, the generated executable examples are stored in the build/install/bin/ folder:
 
 ```bash
 /console/build$ tree install
@@ -134,18 +134,18 @@ install
     └── ax_yoloxs
 ```
 
-## 运行示例
+## Running Case Example
 
-### 运行准备
+### Running preparation
 
-登录 AX620A 开发板，在 `root` 路径下创建 `samples` 文件夹。
+Log in to the AX620A development board and create a `samples` folder in the `root` path.
 
-- 将上一章节 `build/install/bin/` 中编译生成的可执行示例拷贝到 `/root/samples/` 路径下；
-- 将 **[ModelZoo](https://pan.baidu.com/s/1zm2M-vqiss4Rmk-uSoGO7w)** (*pwd: euy7*) 中相应的 **joint** 模型 `mobilenetv2.joint` 、 `yolov5s.joint` 拷贝到  `/root/samples/` 路径下；
-- 将测试图片拷贝到 `/root/samples` 路径下。
+- Copy the executable samples compiled and generated in the previous chapter `build/install/bin/` to the `/root/samples/` path;
+- Copy the corresponding **joint** models `mobilenetv2.joint`, `yolov5s.joint` in **[ModelZoo](https://pan.baidu.com/s/1zm2M-vqiss4Rmk-uSoGO7w)** (*pwd: euy7*)  to `/root/samples/` path;
+- Copy the test images to the `/root/samples` path.
 
 ```
-/root/samples # ls -l
+/root/sample # ls -l
 total 40644
 -rwx--x--x    1 root     root       3805332 Mar 22 14:01 ax_classification
 -rwx--x--x    1 root     root       3979652 Mar 22 14:01 ax_yolov5s
@@ -155,9 +155,9 @@ total 40644
 -rw-------    1 root     root      29217004 Mar 22 14:04 yolov5s.joint
 ```
 
-### 运行示例
+### Running Case Example
 
-#### 分类模型
+#### Classification model
 
 ```
 /root/samples # ./ax_classification -m mobilenetv2.joint -i cat.jpg -r 100
@@ -182,7 +182,7 @@ Create handle took 198.25 ms (neu 6.09 ms, axe 0.00 ms, overhead 192.15 ms)
 Repeat 100 times, avg time 4.33 ms, max_time 4.88 ms, min_time 4.31 ms
 ```
 
-#### 检测模型
+#### Detection model
 
 ```
 /root/samples # ./ax_yolov5s -m yolov5s.joint -i dog.jpg -r 100
@@ -208,8 +208,8 @@ detection num: 3
  1:  54%, [ 156,  122,  572,  420], bicycle
 ```
 
-## 技术讨论
+## Technical discussions
 
 - Github issues
-- QQ 群: 139953715
-- Email: Business@axera-tech.com (商务合作)
+- QQ Group: 139953715
+- Email: Business@axera-tech.com (Business Cooperation)
