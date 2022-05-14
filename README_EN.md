@@ -4,9 +4,9 @@ English | [简体中文](./README.md)
 
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://raw.githubusercontent.com/AXERA-TECH/ax-samples/main/LICENSE)
 
-## 简介
+## Introduction
 
-`AX-Samples` is developed by **[Axera](https://www.axera-tech.com/)** . This project implements the sample code of common **deep learning open source algorithms** on **Axera's** **AI SoC** , which is convenient for community developers to quickly evaluate and adapt.
+**AX-Samples** is developed by **[Axera](https://www.axera-tech.com/)** . This project implements the sample code of common **deep learning open source algorithms** on **Axera's** **AI SoC** , which is convenient for community developers to quickly evaluate and adapt.
 
 The following chip platforms are currently supported
 
