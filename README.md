@@ -17,7 +17,7 @@
 
 ### 编译
 
-- [快速编译](docs/compile) 基于 cmake 实现简单的跨平台编译。
+- [快速编译](docs/compile.md) 基于 cmake 实现简单的跨平台编译。
 
 ### 示例
 
