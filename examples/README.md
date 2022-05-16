@@ -8,7 +8,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - ResNet18
   - ResNet50
 - 物体检测
-  - PP-YOLOv3
+  - [PP-YOLOv3](#PP-YOLOv3)
   - YOLOv3
   - YOLOv3-Tiny
   - YOLOv4
@@ -99,4 +99,58 @@ detection num: 3
 16:  92%, [ 135,  209,  310,  545], dog
  2:  77%, [ 470,   78,  691,  174], car
  1:  54%, [ 156,  122,  572,  420], bicycle
+```
+## 模型说明
+### PP-YOLOv3
+PP-YOLOv3 源自国内优秀的深度学习物体检测开源项目 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 ResNet34 Backbone 的 [YOLOv3-Res34-416](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
+
+#### 下载模型
+
+```
+wget https://paddledet.bj.bcebos.com/models/yolov3_r34_270e_coco.pdparams
+```
+
+#### Paddle2ONNX
+
+需要使用 Paddle2ONNX 工具将 `pdparams` 转 `ONNX` 模型
+
+```
+pip install paddle2onnx
+paddle2onnx --model_dir inference_model/yolov3_darknet53_270e_coco \
+            --model_filename model.pdmodel \
+            --params_filename model.pdiparams \
+            --opset_version 11 \
+            --save_file yolov3.onnx
+```
+
+#### ONNX2Joint
+
+- 目前需通过 FAE 获取AI工具链进行尝试
+- 可通过 ModelZoo 中预先转换好的 `yolov3-paddle-416.joint` 进行体现
+
+#### Sample
+
+```
+/root/samples # ./ax_paddle_yolov3 -m yolov3-paddle-416.joint -i dog.jpg -r 100
+--------------------------------------
+model file : yolov3-paddle-416.joint
+image file : dog.jpg
+img_h, img_w : 416 416
+Run-Joint Runtime version: 0.5.6
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.0.22
+2ed4ac96
+run over: output len 3
+YoloDetectionOutput init param[0]
+--------------------------------------
+Create handle took 1676.07 ms (neu 27.90 ms, axe 0.00 ms, overhead 1648.17 ms)
+--------------------------------------
+Repeat 100 times, avg time 40.59 ms, max_time 42.25 ms, min_time 40.44 ms
+--------------------------------------
+detection num: 3
+ 1:  94%, [ 119,  132,  569,  434], bicycle
+ 2:  76%, [ 467,   82,  684,  168], car
+16:  59%, [ 127,  201,  323,  534], dog
 ```
