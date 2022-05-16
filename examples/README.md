@@ -8,7 +8,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - ResNet18
   - ResNet50
 - 物体检测
-  - [YOLOv3(Paddle)](#YOLOv3(Paddle))
+  - [YOLOv3(Paddle)](#yolov3paddle)
   - YOLOv3
   - YOLOv3-Tiny
   - YOLOv4
