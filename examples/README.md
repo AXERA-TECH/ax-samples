@@ -8,7 +8,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - ResNet18
   - ResNet50
 - 物体检测
-  - [PP-YOLOv3](#PP-YOLOv3)
+  - [YOLOv3(Paddle)](#yolov3paddle)
   - YOLOv3
   - YOLOv3-Tiny
   - YOLOv4
@@ -101,8 +101,8 @@ detection num: 3
  1:  54%, [ 156,  122,  572,  420], bicycle
 ```
 ## 模型说明
-### PP-YOLOv3
-PP-YOLOv3 源自国内优秀的深度学习物体检测开源项目 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 ResNet34 Backbone 的 [YOLOv3-Res34-416](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
+### YOLOv3(Paddle)
+YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
 
 #### 下载模型
 
