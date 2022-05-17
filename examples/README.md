@@ -104,29 +104,15 @@ detection num: 3
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
 
-#### 下载模型
-
-```
-wget https://paddledet.bj.bcebos.com/models/yolov3_r34_270e_coco.pdparams
-```
-
 #### Paddle2ONNX
 
-需要使用 Paddle2ONNX 工具将 `pdparams` 转 `ONNX` 模型
-
-```
-pip install paddle2onnx
-paddle2onnx --model_dir inference_model/yolov3_darknet53_270e_coco \
-            --model_filename model.pdmodel \
-            --params_filename model.pdiparams \
-            --opset_version 11 \
-            --save_file yolov3.onnx
-```
+- git clone https://github.com/PaddlePaddle/PaddleDetection.git
+- 参考 PaddleDetection/deploy/EXPORT_ONNX_MODEL.md 导出 onnx 模型
 
 #### ONNX2Joint
 
 - 目前需通过 FAE 获取AI工具链进行尝试
-- 可通过 ModelZoo 中预先转换好的 `yolov3-paddle-416.joint` 进行体现
+- 可通过 ModelZoo 中预先转换好的 `yolov3-paddle-416.joint` 进行体验
 
 #### Sample
 
