@@ -104,4 +104,16 @@ namespace common
         }
         return false;
     }
+
+    bool save_file(const char* fn, const void* data, size_t size)
+    {
+        FILE* fp = fopen(fn, "wb+");
+        if (fp != nullptr)
+        {
+            auto save_size = fwrite(data, size, 1, fp);
+            fclose(fp);
+            return save_size == 1;
+        }
+        return false;
+    }
 } // namespace common

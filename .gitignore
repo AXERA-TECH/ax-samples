@@ -52,3 +52,7 @@ build*/
 # Python
 *.egg-info/
 __pycache__/
+
+
+# msp
+out*/

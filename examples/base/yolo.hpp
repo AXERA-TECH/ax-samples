@@ -176,6 +176,7 @@ namespace yolo
     public:
         int init(int version, float nms_threshold = 0.45f, float confidence_threshold = 0.48f);
         int forward(const std::vector<TMat>& bottom_blobs, std::vector<TMat>& top_blobs);
+        int forward_nhwc(const std::vector<TMat>& bottom_blobs, std::vector<TMat>& top_blobs);
 
     private:
         int m_num_box;
@@ -184,6 +185,7 @@ namespace yolo
         float m_biases[32];
         int m_mask[32];
         float m_confidence_threshold;
+        float m_confidence_threshold_unsigmoid;
         float m_nms_threshold;
     };
 
@@ -294,7 +296,129 @@ namespace yolo
 
         m_confidence_threshold = confidence_threshold;
         m_nms_threshold = nms_threshold;
+        m_confidence_threshold_unsigmoid = -1.0f * (float)log((1.0f / m_confidence_threshold) - 1.0f);
 
+        return 0;
+    }
+
+    int YoloDetectionOutput::forward_nhwc(const std::vector<TMat>& bottom_blobs, std::vector<TMat>& top_blobs)
+    {
+        // gather all box
+        std::vector<BBoxRect> all_bbox_rects;
+        for (size_t b = 0; b < m_num_box; b++)
+        {
+            std::vector<std::vector<BBoxRect> > all_box_bbox_rects;
+            all_box_bbox_rects.resize(m_num_box);
+            const TMat& bottom_top_blobs = bottom_blobs[b];
+
+            int w = bottom_top_blobs.w;
+            int h = bottom_top_blobs.h;
+            size_t mask_offset = b * m_num_box;
+            int net_w = (int)(m_anchors_scale[b] * w);
+            int net_h = (int)(m_anchors_scale[b] * h);
+
+            auto feature_ptr = (float*)bottom_top_blobs.data;
+            for (int i = 0; i < h; i++)
+            {
+                for (int j = 0; j < w; j++)
+                {
+                    for (int box = 0; box < m_num_box; ++box)
+                    {
+                        if (feature_ptr[4] < m_confidence_threshold_unsigmoid)
+                        {
+                            feature_ptr += (m_num_class + 5);
+                            continue;
+                        }
+
+                        int biases_index = (int)(m_mask[box + mask_offset]);
+                        const float bias_w = m_biases[biases_index * 2];
+                        const float bias_h = m_biases[biases_index * 2 + 1];
+
+                        int class_index = 0;
+                        float class_score = -FLT_MAX;
+                        for (int k = 5; k < m_num_class + 5; ++k)
+                        {
+                            if (class_score < feature_ptr[k])
+                            {
+                                class_score = feature_ptr[k];
+                                class_index = k - 5;
+                            }
+                        }
+
+                        //sigmoid(box_score) * sigmoid(class_score)
+                        float confidence_1 = 1.f / ((1.f + exp(-feature_ptr[4])) * (1.f + exp(-class_score)));
+                        if (confidence_1 >= m_confidence_threshold)
+                        {
+                            // region box
+                            // fprintf(stderr, "%f %f %d \n", class_score, feature_ptr[4], class_index);
+                            float bbox_cx = (j + sigmoid(feature_ptr[0])) / w;
+                            float bbox_cy = (i + sigmoid(feature_ptr[1])) / h;
+                            auto bbox_w = (float)(exp(feature_ptr[2]) * bias_w / net_w);
+                            auto bbox_h = (float)(exp(feature_ptr[3]) * bias_h / net_h);
+
+                            float bbox_xmin = bbox_cx - bbox_w * 0.5f;
+                            float bbox_ymin = bbox_cy - bbox_h * 0.5f;
+                            float bbox_xmax = bbox_cx + bbox_w * 0.5f;
+                            float bbox_ymax = bbox_cy + bbox_h * 0.5f;
+
+                            float area = bbox_w * bbox_h;
+
+                            BBoxRect c = {confidence_1, bbox_xmin, bbox_ymin, bbox_xmax, bbox_ymax, area, class_index};
+                            all_box_bbox_rects[box].push_back(c);
+                        }
+
+                        feature_ptr += (m_num_class + 5);
+                    }
+
+                    for (int ii = 0; ii < m_num_box; ii++)
+                    {
+                        const std::vector<BBoxRect>& box_bbox_rects = all_box_bbox_rects[ii];
+
+                        all_bbox_rects.insert(all_bbox_rects.end(), box_bbox_rects.begin(), box_bbox_rects.end());
+                    }
+                }
+            }
+        }
+
+        // global sort inplace
+        qsort_descent_inplace(all_bbox_rects);
+
+        // apply nms
+        std::vector<size_t> picked;
+        nms_sorted_bboxes(all_bbox_rects, picked, m_nms_threshold);
+
+        // select
+        std::vector<BBoxRect> bbox_rects;
+
+        for (unsigned int z : picked)
+        {
+            bbox_rects.push_back(all_bbox_rects[z]);
+        }
+
+        // fill result
+        int num_detected = (int)(bbox_rects.size());
+        if (num_detected == 0)
+        {
+            top_blobs[0].h = 0;
+            return 0;
+        }
+
+        TMat& top_blob = top_blobs[0];
+
+        for (int i = 0; i < num_detected; i++)
+        {
+            const BBoxRect& r = bbox_rects[i];
+            float score = r.score;
+            float* outptr = top_blob.row(i);
+
+            outptr[0] = (float)r.label; // +1 for prepend background class
+            outptr[1] = score;
+            outptr[2] = r.xmin;
+            outptr[3] = r.ymin;
+            outptr[4] = r.xmax;
+            outptr[5] = r.ymax;
+        }
+        top_blob.h = num_detected;
         return 0;
     }
 
@@ -364,6 +488,7 @@ namespace yolo
                         float confidence = 1.f / ((1.f + exp(-box_score_ptr[0]) * (1.f + exp(-class_score))));
                         if (confidence >= m_confidence_threshold)
                         {
+                            // fprintf(stderr, "%f %d \n", class_score, class_index);
                             // region box
                             float bbox_cx = (j + sigmoid(xptr[0])) / w;
                             float bbox_cy = (i + sigmoid(yptr[0])) / h;

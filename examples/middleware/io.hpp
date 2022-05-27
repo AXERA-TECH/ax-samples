@@ -1,22 +1,26 @@
 /*
- * AXERA is pleased to support the open source community by making ax-samples available.
- * 
- * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
- * 
- * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * https://opensource.org/licenses/BSD-3-Clause
- * 
- * Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
+* Licensed to the Apache Software Foundation (ASF) under one
+* or more contributor license agreements.  See the NOTICE file
+* distributed with this work for additional information
+* regarding copyright ownership.  The ASF licenses this file
+* to you under the Apache License, Version 2.0 (the
+* License); you may not use this file except in compliance
+* with the License.  You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 
 /*
- * Author: ls.wang
- */
+* Copyright (c) 2022, AXERA TECH
+* Author: ls.wang
+*/
 
 #pragma once
 
@@ -38,7 +42,7 @@ namespace middleware
         auto ret = AX_JOINT_GetJointModelType(data, data_size, &npu_type);
         if (AX_ERR_NPU_JOINT_SUCCESS != ret)
         {
-            fprintf(stderr, "[ERR]: Get joint model type failed.\n");
+            fprintf(stderr, "[ERR]: Get joint model type failed. %X \n", ret);
             return -1;
         }
 
@@ -124,6 +128,17 @@ namespace middleware
             }
         }
         return AX_ERR_NPU_JOINT_SUCCESS;
+    }
+
+    std::vector<int> io_get_input_size(const AX_JOINT_IO_INFO_T* io_info)
+    {
+        const AX_JOINT_IOMETA_T* pMeta = io_info->pInputs;
+        if (pMeta->nShapeSize <= 0)
+        {
+            fprintf(stderr, "[ERR] Dimension(%u) of shape is not allowed.\n", (uint32_t)pMeta->nShapeSize);
+        }
+
+        return {pMeta->pShape[1], pMeta->pShape[2]};
     }
 
     AX_JOINT_IO_BUFFER_T* prepare_io_no_copy(const size_t& size, AX_JOINT_IO_T& io, const AX_JOINT_IO_INFO_T* io_info, const uint32_t& batch = 1)

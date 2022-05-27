@@ -1,22 +1,26 @@
 /*
- * AXERA is pleased to support the open source community by making ax-samples available.
- * 
- * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
- * 
- * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * https://opensource.org/licenses/BSD-3-Clause
- * 
- * Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
+* Licensed to the Apache Software Foundation (ASF) under one
+* or more contributor license agreements.  See the NOTICE file
+* distributed with this work for additional information
+* regarding copyright ownership.  The ASF licenses this file
+* to you under the Apache License, Version 2.0 (the
+* License); you may not use this file except in compliance
+* with the License.  You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 
 /*
- * Author: hebing
- */
+* Copyright (c) 2022, AXERA TECH
+* Author: hebing
+*/
 
 #include <cstdio>
 #include <cstring>
@@ -24,10 +28,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "base/detection.hpp"
-#include "base/yolo.hpp"
-#include "base/transform.hpp"
-#include "base/common.hpp"
+#include "base/topk.hpp"
+
 #include "middleware/io.hpp"
 
 #include "utilities/args.hpp"
@@ -40,31 +42,21 @@
 #include "joint.h"
 #include "joint_adv.h"
 
-#include <iostream>
-#include <fstream>
+#include <fcntl.h>
+#include <sys/mman.h>
 
-const int DEFAULT_IMG_H = 416;
-const int DEFAULT_IMG_W = 416;
-
-const char* CLASS_NAMES[] = {
-    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
-    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
-    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
-    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
-    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
-    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
-    "hair drier", "toothbrush"};
+const int DEFAULT_IMG_H = 224;
+const int DEFAULT_IMG_W = 224;
 
 const int DEFAULT_LOOP_COUNT = 1;
+
 namespace ax
 {
-    namespace det = detection;
+    namespace cls = classification;
     namespace mw = middleware;
     namespace utl = utilities;
 
-    bool run_detection(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, uint32_t input_h, uint32_t input_w)
+    bool run_classification(const std::string& model, const std::vector<uint8_t>& data, const int& repeat)
     {
         // 1. create a runtime handle and load the model
         AX_JOINT_HANDLE joint_handle;
@@ -73,39 +65,42 @@ namespace ax
         AX_JOINT_SDK_ATTR_T joint_attr;
         std::memset(&joint_attr, 0, sizeof(joint_attr));
 
-        // 1.1 read model file to buffer
-        std::vector<char> model_buffer;
-        if (!ax::utl::read_file(model, model_buffer))
+        // 1.1 read model file use mmap
+        auto* file_fp = fopen(model.c_str(), "r");
+        if (!file_fp)
         {
-            fprintf(stderr, "Read Run-Joint model(%s) file failed.\n", model.c_str());
+            fprintf(stderr, "read model file fail \n");
             return false;
         }
 
-        // 1.2 parse model from buffer
-        //   if the device do not have enough memory to create a buffer at step 3.1,
-        //     consider using linux API 'mmap' to map the model file to a pointer,
-        //     then use the pointer which returned by mmap to parse the run-joint
-        //     model from the file.
-        //   it will reduce the peak allocated memory(compared with creating a full
-        //     size buffer).
-        auto ret = ax::mw::parse_npu_mode_from_joint(model_buffer.data(), model_buffer.size(), &joint_attr.eNpuMode);
-        if (AX_ERR_NPU_JOINT_SUCCESS != ret)
-        {
-            fprintf(stderr, "Load Run-Joint model(%s) failed.\n", model.c_str());
-            return false;
-        }
+        fseek(file_fp, 0, SEEK_END);
+        int model_size = ftell(file_fp);
+        fclose(file_fp);
+
+        int fd = open(model.c_str(), O_RDWR, 0644);
+        void* mmap_add = mmap(NULL, model_size, PROT_WRITE, MAP_SHARED, fd, 0);
+
+//        auto ret = ax::mw::parse_npu_mode_from_joint((const AX_CHAR*)mmap_add, model_size, &joint_attr.eNpuMode);
+//        if (AX_ERR_NPU_JOINT_SUCCESS != ret)
+//        {
+//            fprintf(stderr, "Load Run-Joint model(%s) failed.\n", model.c_str());
+//            return false;
+//        }
+
+        joint_attr.eNpuMode = AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_1_1;
 
         // 1.3 init model
-        ret = AX_JOINT_Adv_Init(&joint_attr);
+        auto ret = AX_JOINT_Adv_Init(&joint_attr);
         if (AX_ERR_NPU_JOINT_SUCCESS != ret)
         {
             fprintf(stderr, "Init Run-Joint model(%s) failed.\n", model.c_str());
             return false;
         }
 
-        auto deinit_joint = [&joint_handle]() {
+        auto deinit_joint = [&joint_handle, &mmap_add, model_size]() {
             AX_JOINT_DestroyHandle(joint_handle);
             AX_JOINT_Adv_Deinit();
+            munmap(mmap_add, model_size);
             return false;
         };
 
@@ -113,7 +108,7 @@ namespace ax
         uint32_t duration_hdl_init_us = 0;
         {
             timer init_timer;
-            ret = AX_JOINT_CreateHandle(&joint_handle, model_buffer.data(), model_buffer.size());
+            ret = AX_JOINT_CreateHandle(&joint_handle, mmap_add, model_size);
             duration_hdl_init_us = (uint32_t)(init_timer.cost() * 1000);
             if (AX_ERR_NPU_JOINT_SUCCESS != ret)
             {
@@ -126,13 +121,13 @@ namespace ax
         const AX_CHAR* version = AX_JOINT_GetModelToolsVersion(joint_handle);
         fprintf(stdout, "Tools version: %s\n", version);
 
-        // 1.6 drop the model buffer
-        std::vector<char>().swap(model_buffer);
+        // 1.6 get joint io message
         auto io_info = AX_JOINT_GetIOInfo(joint_handle);
 
         // 1.7 create context
         AX_JOINT_EXECUTION_CONTEXT joint_ctx;
         AX_JOINT_EXECUTION_CONTEXT_SETTING_T joint_ctx_settings;
+        // joint_ctx_settings.bNoCacheMem = AX_TRUE;
         std::memset(&joint_ctx, 0, sizeof(joint_ctx));
         std::memset(&joint_ctx_settings, 0, sizeof(joint_ctx_settings));
         ret = AX_JOINT_CreateExecutionContextV2(joint_handle, &joint_ctx, &joint_ctx_settings);
@@ -157,7 +152,7 @@ namespace ax
         }
         joint_io_arr.pIoSetting = &joint_io_setting;
 
-        auto clear_and_exit = [&joint_io_arr, &joint_ctx, &joint_handle]() {
+        auto clear_and_exit = [&joint_io_arr, &joint_ctx, &joint_handle, &mmap_add, model_size]() {
             for (size_t i = 0; i < joint_io_arr.nInputSize; ++i)
             {
                 AX_JOINT_IO_BUFFER_T* pBuf = joint_io_arr.pInputs + i;
@@ -174,6 +169,7 @@ namespace ax
             AX_JOINT_DestroyExecutionContext(joint_ctx);
             AX_JOINT_DestroyHandle(joint_handle);
             AX_JOINT_Adv_Deinit();
+            munmap(mmap_add, model_size);
 
             return false;
         };
@@ -251,55 +247,26 @@ namespace ax
                 }
             }
         }
-        fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
 
-        // 5. get bbox
-        yolo::YoloDetectionOutput yolo{};
-        std::vector<yolo::TMat> yolo_inputs, yolo_outputs;
-        yolo.init(yolo::YOLOV4_TINY, 0.3, 0.4);
-        yolo_inputs.resize(io_info->nOutputSize);
-        yolo_outputs.resize(1);
-
+        // 5. get top K
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
             auto& output = io_info->pOutputs[i];
             auto& info = joint_io_arr.pOutputs[i];
 
             auto ptr = (float*)info.pVirAddr;
+            auto actual_data_size = output.nSize / output.pShape[0] / sizeof(float);
 
-            yolo_inputs[i].batch = output.pShape[0];
-            yolo_inputs[i].c = output.pShape[1];
-            yolo_inputs[i].h = output.pShape[2];
-            yolo_inputs[i].w = output.pShape[3];
-            yolo_inputs[i].data = ptr;
+            std::vector<cls::score> result(actual_data_size);
+            for (uint32_t id = 0; id < actual_data_size; id++)
+            {
+                result[id].id = id;
+                result[id].score = ptr[id];
+            }
+
+            cls::sort_score(result);
+            cls::print_score(result, 5);
         }
-
-        std::vector<float> output_buf;
-        output_buf.resize(1000 * 6, 0);
-        yolo_outputs[0].batch = 1;
-        yolo_outputs[0].c = 1;
-        yolo_outputs[0].h = 1000;
-        yolo_outputs[0].w = 6;
-        yolo_outputs[0].data = output_buf.data();
-
-        yolo.forward(yolo_inputs, yolo_outputs);
-
-        std::vector<det::Object> objects;
-        for (size_t i = 0; i < yolo_outputs[0].h; i++)
-        {
-            float* data_row = yolo_outputs[0].row(i);
-            det::Object object;
-            object.rect.x = data_row[2] * DEFAULT_IMG_W;
-            object.rect.y = data_row[3] * DEFAULT_IMG_H;
-            object.rect.width = (data_row[4] - data_row[2]) * DEFAULT_IMG_W;
-            object.rect.height = (data_row[5] - data_row[3]) * DEFAULT_IMG_H;
-            object.label = data_row[0];
-            object.prob = data_row[1];
-            objects.push_back(object);
-        }
-
-        std::vector<det::Object> objects_reverse_letterbox;
-        det::reverse_letterbox(objects, objects_reverse_letterbox, DEFAULT_IMG_H, DEFAULT_IMG_W, mat.rows, mat.cols);
 
         // 6. show time costs
         fprintf(stdout, "--------------------------------------\n");
@@ -320,10 +287,7 @@ namespace ax
                 total_time / (float)repeat,
                 *min_max_time.second,
                 *min_max_time.first);
-        fprintf(stdout, "--------------------------------------\n");
-        fprintf(stdout, "detection num: %d\n", objects.size());
 
-        det::draw_objects(mat, objects_reverse_letterbox, CLASS_NAMES, "yolov4_tiny_out");
         clear_and_exit();
         return true;
     }
@@ -369,9 +333,7 @@ int main(int argc, char* argv[])
         auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
-
-        if (!input_size_flag) { show_error("size", input_size_string); }
-
+        show_error("size", input_size_string);
         return -1;
     }
 
@@ -385,16 +347,15 @@ int main(int argc, char* argv[])
     fprintf(stdout, "img_h, img_w : %d %d\n", input_size[0], input_size[1]);
 
     // 2. read image & resize & transpose
-    std::vector<uint8_t> image(input_size[0] * input_size[1] * 3, 0);
+    std::vector<uint8_t> image(input_size[1] * input_size[0] * 3);
     cv::Mat mat = cv::imread(image_file);
-    if (mat.empty())
-    {
-        fprintf(stderr, "Read image failed.\n");
-        return -1;
-    }
-    int src_w = mat.cols;
-    int src_h = mat.rows;
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
+//    if (mat.empty())
+//    {
+//        fprintf(stderr, "Read image failed.\n");
+//        return -1;
+//    }
+//    cv::Mat img_new(input_size[0], input_size[1], CV_8UC3, image.data());
+//    cv::resize(mat, img_new, cv::Size(input_size[1], input_size[0]));
 
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
@@ -415,7 +376,7 @@ int main(int argc, char* argv[])
     fprintf(stdout, "--------------------------------------\n");
 
     // 5. run the processing
-    auto flag = ax::run_detection(model_file, image, repeat, mat, input_size[0], input_size[1]);
+    auto flag = ax::run_classification(model_file, image, repeat);
     if (!flag)
     {
         fprintf(stderr, "Run classification failed.\n");

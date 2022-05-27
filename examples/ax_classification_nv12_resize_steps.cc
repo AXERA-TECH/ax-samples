@@ -15,11 +15,12 @@
  */
 
 /*
- * Author: ls.wang
+ * Author: hebing
  */
 
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <numeric>
 
 #include <opencv2/opencv.hpp>
@@ -443,8 +444,8 @@ int main(int argc, char* argv[])
     //    use sys_npu_api so sys_init before process nv12
     std::vector<uint8_t> model_input(MODEL_BGR_INPUT_W * MODEL_BGR_INPUT_H * 3 / 2);
     {
-        auto crop_resize_helper = std::unique_ptr<ax::ax_crop_resize_nv12>(new ax::ax_crop_resize_nv12);
-        crop_resize_helper->init(input_h, input_w, MODEL_BGR_INPUT_H, MODEL_BGR_INPUT_W, model_type);
+        auto crop_resize_helper = std::make_unique<ax::ax_crop_resize_nv12>();
+        crop_resize_helper->init((int)input_h, (int)input_w, MODEL_BGR_INPUT_H, MODEL_BGR_INPUT_W, model_type);
         timer crop_resize_timer;
         for (size_t i = 0; i < 10; i++)
         {

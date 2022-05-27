@@ -254,7 +254,7 @@ namespace ax
         fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
 
         // 5. get bbox
-        yolo::YoloDetectionOutput yolo;
+        yolo::YoloDetectionOutput yolo{};
         std::vector<yolo::TMat> yolo_inputs, yolo_outputs;
         yolo.init(yolo::YOLOV3);
         yolo_inputs.resize(io_info->nOutputSize);

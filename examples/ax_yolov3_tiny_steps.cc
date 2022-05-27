@@ -99,7 +99,7 @@ namespace ax
         ret = AX_JOINT_Adv_Init(&joint_attr);
         if (AX_ERR_NPU_JOINT_SUCCESS != ret)
         {
-            fprintf(stderr, "Init Run-Joint model(%s) failed.\n", model.c_str());
+            fprintf(stderr, "Init Run-Joint model(%s) failed. (%x) \n", model.c_str(), ret);
             return false;
         }
 
