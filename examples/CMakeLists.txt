@@ -15,6 +15,10 @@
 # Author: ls.wang
 #
 
+if (NOT BSP_MSP_DIR)
+    set (BSP_MSP_DIR ${CMAKE_SOURCE_DIR}/out)
+endif ()
+
 # example generation function
 function (axera_example name)
     add_executable(${name})
@@ -51,7 +55,7 @@ find_package(OpenCV REQUIRED)
 # add_definitions("-g -O0")
 
 axera_example (ax_classification ax_classification_steps.cc)
-axera_example (ax_classification_nv12 ax_classification_nv12_resize_steps)
+axera_example (ax_classification_nv12 ax_classification_nv12_resize_steps.cc)
 axera_example (ax_yolov5s        ax_yolov5s_steps.cc)
 axera_example (ax_yoloxs         ax_yoloxs_steps.cc)
 axera_example (ax_yolo_fastest   ax_yolo_fastest_steps.cc)
@@ -65,3 +69,5 @@ axera_example (ax_nanodet        ax_nanodet_steps.cc)
 axera_example (ax_paddle_yolov3  ax_paddle_yolov3_steps.cc)
 
 axera_example (ax_cv_test        ax_crop_resize_nv12.cc)
+axera_example (ax_classification_accuracy  ax_classification_accuracy.cc)
+axera_example (ax_yolov3_accuracy     ax_yolov3_accuracy.cc)

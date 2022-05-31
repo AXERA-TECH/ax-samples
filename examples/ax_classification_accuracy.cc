@@ -1,33 +1,38 @@
 /*
- * AXERA is pleased to support the open source community by making ax-samples available.
- * 
- * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
- * 
- * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * https://opensource.org/licenses/BSD-3-Clause
- * 
- * Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
+* Licensed to the Apache Software Foundation (ASF) under one
+* or more contributor license agreements.  See the NOTICE file
+* distributed with this work for additional information
+* regarding copyright ownership.  The ASF licenses this file
+* to you under the Apache License, Version 2.0 (the
+* License); you may not use this file except in compliance
+* with the License.  You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 
 /*
- * Author: hebing
- */
+* Copyright (c) 2022, AXERA TECH
+* Author: hebing
+*/
 
 #include <cstdio>
 #include <cstring>
 #include <numeric>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <fcntl.h>
+#include <sys/mman.h>
 
-#include "base/detection.hpp"
-#include "base/yolo.hpp"
-#include "base/transform.hpp"
-#include "base/common.hpp"
+#include "base/topk.hpp"
+
 #include "middleware/io.hpp"
 
 #include "utilities/args.hpp"
@@ -40,31 +45,35 @@
 #include "joint.h"
 #include "joint_adv.h"
 
-#include <iostream>
-#include <fstream>
-
-const int DEFAULT_IMG_H = 416;
-const int DEFAULT_IMG_W = 416;
-
-const char* CLASS_NAMES[] = {
-    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
-    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
-    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
-    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
-    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
-    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
-    "hair drier", "toothbrush"};
-
-const int DEFAULT_LOOP_COUNT = 1;
 namespace ax
 {
-    namespace det = detection;
+    namespace cls = classification;
     namespace mw = middleware;
     namespace utl = utilities;
 
-    bool run_detection(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, uint32_t input_h, uint32_t input_w)
+    static void softmax(std::vector<cls::score>& input, int n, int stride)
+    {
+        int i;
+        float sum = 0;
+        float largest = input[0].score;
+        for (i = 0; i < n; ++i)
+        {
+            if (input[i * stride].score > largest)
+                largest = input[i * stride].score;
+        }
+        for (i = 0; i < n; ++i)
+        {
+            float e = exp(input[i * stride].score - largest);
+            sum += e;
+            input[i * stride].score = e;
+        }
+        for (i = 0; i < n; ++i)
+        {
+            input[i * stride].score /= sum;
+        }
+    }
+
+    bool run_classification(const std::string& model, const std::string& image_dir, const std::string& val_file)
     {
         // 1. create a runtime handle and load the model
         AX_JOINT_HANDLE joint_handle;
@@ -73,13 +82,19 @@ namespace ax
         AX_JOINT_SDK_ATTR_T joint_attr;
         std::memset(&joint_attr, 0, sizeof(joint_attr));
 
-        // 1.1 read model file to buffer
-        std::vector<char> model_buffer;
-        if (!ax::utl::read_file(model, model_buffer))
+        // 1.1 read model use
+        auto* file_fp = fopen(model.c_str(), "r");
+        if (!file_fp)
         {
-            fprintf(stderr, "Read Run-Joint model(%s) file failed.\n", model.c_str());
-            return false;
+            fprintf(stderr, "read model file fail \n");
         }
+
+        fseek(file_fp, 0, SEEK_END);
+        int model_size = ftell(file_fp);
+        fclose(file_fp);
+
+        int fd = open(model.c_str(), O_RDWR, 0644);
+        void* mmap_add = mmap(NULL, model_size, PROT_WRITE, MAP_SHARED, fd, 0);
 
         // 1.2 parse model from buffer
         //   if the device do not have enough memory to create a buffer at step 3.1,
@@ -88,24 +103,27 @@ namespace ax
         //     model from the file.
         //   it will reduce the peak allocated memory(compared with creating a full
         //     size buffer).
-        auto ret = ax::mw::parse_npu_mode_from_joint(model_buffer.data(), model_buffer.size(), &joint_attr.eNpuMode);
-        if (AX_ERR_NPU_JOINT_SUCCESS != ret)
-        {
-            fprintf(stderr, "Load Run-Joint model(%s) failed.\n", model.c_str());
-            return false;
-        }
+        // auto ret = ax::mw::parse_npu_mode_from_joint((char*)mmap_add, model_size, &joint_attr.eNpuMode);
+
+        joint_attr.eNpuMode = AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_1_1;
+        //   if (AX_ERR_NPU_JOINT_SUCCESS != ret)
+        //   {
+        //      fprintf(stderr, "Load Run-Joint model(%s) failed.\n", model.c_str());
+        //      return false;
+        //   }
 
         // 1.3 init model
-        ret = AX_JOINT_Adv_Init(&joint_attr);
+        auto ret = AX_JOINT_Adv_Init(&joint_attr);
         if (AX_ERR_NPU_JOINT_SUCCESS != ret)
         {
             fprintf(stderr, "Init Run-Joint model(%s) failed.\n", model.c_str());
             return false;
         }
 
-        auto deinit_joint = [&joint_handle]() {
+        auto deinit_joint = [&joint_handle, &mmap_add, model_size]() {
             AX_JOINT_DestroyHandle(joint_handle);
             AX_JOINT_Adv_Deinit();
+            munmap(mmap_add, model_size);
             return false;
         };
 
@@ -113,7 +131,7 @@ namespace ax
         uint32_t duration_hdl_init_us = 0;
         {
             timer init_timer;
-            ret = AX_JOINT_CreateHandle(&joint_handle, model_buffer.data(), model_buffer.size());
+            ret = AX_JOINT_CreateHandle(&joint_handle, mmap_add, model_size);
             duration_hdl_init_us = (uint32_t)(init_timer.cost() * 1000);
             if (AX_ERR_NPU_JOINT_SUCCESS != ret)
             {
@@ -127,7 +145,7 @@ namespace ax
         fprintf(stdout, "Tools version: %s\n", version);
 
         // 1.6 drop the model buffer
-        std::vector<char>().swap(model_buffer);
+        // std::vector<char>().swap(model_buffer);
         auto io_info = AX_JOINT_GetIOInfo(joint_handle);
 
         // 1.7 create context
@@ -148,16 +166,7 @@ namespace ax
         std::memset(&joint_io_arr, 0, sizeof(joint_io_arr));
         std::memset(&joint_io_setting, 0, sizeof(joint_io_setting));
 
-        ret = mw::prepare_io(data.data(), data.size(), joint_io_arr, io_info);
-        if (AX_ERR_NPU_JOINT_SUCCESS != ret)
-        {
-            fprintf(stderr, "Fill input failed.\n");
-            AX_JOINT_DestroyExecutionContext(joint_ctx);
-            return deinit_joint();
-        }
-        joint_io_arr.pIoSetting = &joint_io_setting;
-
-        auto clear_and_exit = [&joint_io_arr, &joint_ctx, &joint_handle]() {
+        auto clear_and_exit = [&joint_io_arr, &joint_ctx, &joint_handle, &mmap_add, model_size]() {
             for (size_t i = 0; i < joint_io_arr.nInputSize; ++i)
             {
                 AX_JOINT_IO_BUFFER_T* pBuf = joint_io_arr.pInputs + i;
@@ -174,6 +183,8 @@ namespace ax
             AX_JOINT_DestroyExecutionContext(joint_ctx);
             AX_JOINT_DestroyHandle(joint_handle);
             AX_JOINT_Adv_Deinit();
+
+            munmap(mmap_add, model_size);
 
             return false;
         };
@@ -211,21 +222,103 @@ namespace ax
             }
         }
 
+        auto input_sizes = mw::io_get_input_size(io_info);
+        fprintf(stderr, "[INFO] get input_size %d,%d", input_sizes[0], input_sizes[1]);
+        auto image_size = 3 * input_sizes[0] * input_sizes[1];
+        auto pBuf = mw::prepare_io_no_copy(image_size, joint_io_arr, io_info);
+
         // 4. run & benchmark
         uint32_t duration_neu_core_us = 0, duration_neu_total_us = 0;
         uint32_t duration_axe_core_us = 0, duration_axe_total_us = 0;
 
-        std::vector<float> time_costs(repeat, 0.f);
-        for (int i = 0; i < repeat; ++i)
+        std::ifstream val_file_1000(val_file);
+        if (!val_file_1000.is_open())
         {
+            fprintf(stderr, "[ERR] val_file_1000 open fail \n");
+            clear_and_exit();
+        }
+
+        std::vector<float> time_costs;
+        std::string val_file_1000_line_temp;
+        std::vector<uint8_t> image(image_size);
+        int top_1 = 0, top_5 = 0;
+        cv::Mat mat_input;
+        cv::Mat img_new(input_sizes[0], input_sizes[1], CV_8UC3, image.data());
+        std::vector<cls::score> result(1001);
+        int cur_index = 0;
+
+        while (getline(val_file_1000, val_file_1000_line_temp))
+        {
+            // 1.0 decode file path
+            std::stringstream val_1000_line_ss(val_file_1000_line_temp);
+            std::string file_name, gt_index;
+            getline(val_1000_line_ss, file_name, ' ');
+            getline(val_1000_line_ss, gt_index, ' ');
+            std::string image_file_path = image_dir + file_name;
+
+            // 1.1 prepare image precess
+            std::vector<char> image_data;
+            utl::read_file(image_file_path, image_data);
+            cv::_InputArray pic_arr(image_data.data(), (int)image_data.size());
+            mat_input = cv::imdecode(pic_arr, 1);
+            //mat_input = cv::imread(image_file_path);
+            if (mat_input.empty())
+            {
+                fprintf(stderr, "Read image failed.\n");
+                clear_and_exit();
+            }
+            cv::resize(mat_input, img_new, cv::Size(input_sizes[0], input_sizes[1]));
+            cv::cvtColor(img_new, img_new, cv::COLOR_BGR2RGB);
+            mat_input.release();
+            image_data.clear();
+
+            mw::copy_to_device(image.data(), image.size(), pBuf);
+            joint_io_arr.pIoSetting = &joint_io_setting;
+
             timer tick;
             ret = AX_JOINT_RunSync(joint_handle, joint_ctx, &joint_io_arr);
-            time_costs[i] = tick.cost();
+            time_costs.push_back(tick.cost());
             if (AX_ERR_NPU_JOINT_SUCCESS != ret)
             {
                 fprintf(stderr, "Inference failed(%d).\n", ret);
                 return clear_and_exit();
             }
+
+            auto& output = io_info->pOutputs[0];
+            auto& info = joint_io_arr.pOutputs[0];
+
+            auto ptr = (float*)info.pVirAddr;
+            auto actual_data_size = output.nSize / output.pShape[0] / sizeof(float);
+
+            for (uint32_t id = 0; id < actual_data_size; id++)
+            {
+                result[id].id = id;
+                result[id].score = ptr[id];
+            }
+            softmax(result, 1001, 1);
+            cls::sort_score(result);
+            auto gt_index_1 = std::stoi(gt_index) + 1;
+            if (result[0].id == gt_index_1)
+            {
+                top_1++;
+            }
+            for (int j = 0; j < 5; ++j)
+            {
+                if (result[j].id == gt_index_1)
+                {
+                    top_5++;
+                    break;
+                }
+            }
+
+            cur_index++;
+            fprintf(stderr, "%d \n", cur_index);
+            //            fprintf(stderr, "[标签]: %d \n", gt_index_1);
+            //            fprintf(stderr, "top1 [分类号]:%d : [置信度]:%f\n", result[0].id, result[0].score);
+            //            fprintf(stderr, "top2 [分类号]:%d : [置信度]:%f\n", result[1].id, result[1].score);
+            //            fprintf(stderr, "top3 [分类号]:%d : [置信度]:%f\n", result[2].id, result[2].score);
+            //            fprintf(stderr, "top4 [分类号]:%d : [置信度]:%f\n", result[3].id, result[3].score);
+            //            fprintf(stderr, "top5 [分类号]:%d : [置信度]:%f\n", result[4].id, result[4].score);
 
             ret = AX_JOINT_ADV_GetComponents(joint_ctx, &joint_comps, &joint_comp_size);
             if (AX_ERR_NPU_JOINT_SUCCESS != ret)
@@ -251,55 +344,6 @@ namespace ax
                 }
             }
         }
-        fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
-
-        // 5. get bbox
-        yolo::YoloDetectionOutput yolo{};
-        std::vector<yolo::TMat> yolo_inputs, yolo_outputs;
-        yolo.init(yolo::YOLOV4_TINY, 0.3, 0.4);
-        yolo_inputs.resize(io_info->nOutputSize);
-        yolo_outputs.resize(1);
-
-        for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
-        {
-            auto& output = io_info->pOutputs[i];
-            auto& info = joint_io_arr.pOutputs[i];
-
-            auto ptr = (float*)info.pVirAddr;
-
-            yolo_inputs[i].batch = output.pShape[0];
-            yolo_inputs[i].c = output.pShape[1];
-            yolo_inputs[i].h = output.pShape[2];
-            yolo_inputs[i].w = output.pShape[3];
-            yolo_inputs[i].data = ptr;
-        }
-
-        std::vector<float> output_buf;
-        output_buf.resize(1000 * 6, 0);
-        yolo_outputs[0].batch = 1;
-        yolo_outputs[0].c = 1;
-        yolo_outputs[0].h = 1000;
-        yolo_outputs[0].w = 6;
-        yolo_outputs[0].data = output_buf.data();
-
-        yolo.forward(yolo_inputs, yolo_outputs);
-
-        std::vector<det::Object> objects;
-        for (size_t i = 0; i < yolo_outputs[0].h; i++)
-        {
-            float* data_row = yolo_outputs[0].row(i);
-            det::Object object;
-            object.rect.x = data_row[2] * DEFAULT_IMG_W;
-            object.rect.y = data_row[3] * DEFAULT_IMG_H;
-            object.rect.width = (data_row[4] - data_row[2]) * DEFAULT_IMG_W;
-            object.rect.height = (data_row[5] - data_row[3]) * DEFAULT_IMG_H;
-            object.label = data_row[0];
-            object.prob = data_row[1];
-            objects.push_back(object);
-        }
-
-        std::vector<det::Object> objects_reverse_letterbox;
-        det::reverse_letterbox(objects, objects_reverse_letterbox, DEFAULT_IMG_H, DEFAULT_IMG_W, mat.rows, mat.cols);
 
         // 6. show time costs
         fprintf(stdout, "--------------------------------------\n");
@@ -315,15 +359,14 @@ namespace ax
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
         auto min_max_time = std::minmax_element(time_costs.begin(), time_costs.end());
         fprintf(stdout,
-                "Repeat %d times, avg time %.2f ms, max_time %.2f ms, min_time %.2f ms\n",
-                repeat,
-                total_time / (float)repeat,
+                "run model %d times, avg time %.2f ms, max_time %.2f ms, min_time %.2f ms\n",
+                time_costs.size(),
+                total_time / (float)time_costs.size(),
                 *min_max_time.second,
                 *min_max_time.first);
-        fprintf(stdout, "--------------------------------------\n");
-        fprintf(stdout, "detection num: %d\n", objects.size());
 
-        det::draw_objects(mat, objects_reverse_letterbox, CLASS_NAMES, "yolov4_tiny_out");
+        fprintf(stdout, "top_1:%d top5:%d acc_top1:%.4f acc_top5:%.5f \n", top_1, top_5, top_1 / (float)time_costs.size(), top_5 / (float)time_costs.size());
+
         clear_and_exit();
         return true;
     }
@@ -333,68 +376,36 @@ int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
-    cmd.add<std::string>("image", 'i', "image file", true, "");
-    cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(DEFAULT_IMG_H) + "," + std::to_string(DEFAULT_IMG_W));
+    cmd.add<std::string>("images", 'i', "image file", true, "");
+    cmd.add<std::string>("val", 'v', "val file", true, "");
 
-    cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
     cmd.parse_check(argc, argv);
 
     // 0. get app args, can be removed from user's app
     auto model_file = cmd.get<std::string>("model");
-    auto image_file = cmd.get<std::string>("image");
+    auto image_file = cmd.get<std::string>("images");
+    auto val_file = cmd.get<std::string>("val");
 
     auto model_file_flag = utilities::file_exist(model_file);
-    auto image_file_flag = utilities::file_exist(image_file);
+    auto val_file_flag = utilities::file_exist(val_file);
 
-    if (!model_file_flag | !image_file_flag)
+    if (!model_file_flag | !val_file_flag)
     {
         auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
         if (!model_file_flag) { show_error("model", model_file); }
-        if (!image_file_flag) { show_error("image", image_file); }
+        if (!val_file_flag) { show_error("val", image_file); }
 
         return -1;
     }
-
-    auto input_size_string = cmd.get<std::string>("size");
-
-    std::array<int, 2> input_size = {DEFAULT_IMG_H, DEFAULT_IMG_W};
-
-    auto input_size_flag = utilities::parse_string(input_size_string, input_size);
-
-    if (!input_size_flag)
-    {
-        auto show_error = [](const std::string& kind, const std::string& value) {
-            fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
-        };
-
-        if (!input_size_flag) { show_error("size", input_size_string); }
-
-        return -1;
-    }
-
-    auto repeat = cmd.get<int>("repeat");
 
     // 1. print args
     fprintf(stdout, "--------------------------------------\n");
 
     fprintf(stdout, "model file : %s\n", model_file.c_str());
-    fprintf(stdout, "image file : %s\n", image_file.c_str());
-    fprintf(stdout, "img_h, img_w : %d %d\n", input_size[0], input_size[1]);
-
-    // 2. read image & resize & transpose
-    std::vector<uint8_t> image(input_size[0] * input_size[1] * 3, 0);
-    cv::Mat mat = cv::imread(image_file);
-    if (mat.empty())
-    {
-        fprintf(stderr, "Read image failed.\n");
-        return -1;
-    }
-    int src_w = mat.cols;
-    int src_h = mat.rows;
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
+    fprintf(stdout, "val file : %s\n", val_file.c_str());
 
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
@@ -415,7 +426,8 @@ int main(int argc, char* argv[])
     fprintf(stdout, "--------------------------------------\n");
 
     // 5. run the processing
-    auto flag = ax::run_detection(model_file, image, repeat, mat, input_size[0], input_size[1]);
+    auto flag
+        = ax::run_classification(model_file, image_file, val_file);
     if (!flag)
     {
         fprintf(stderr, "Run classification failed.\n");

@@ -38,7 +38,7 @@ namespace middleware
         auto ret = AX_JOINT_GetJointModelType(data, data_size, &npu_type);
         if (AX_ERR_NPU_JOINT_SUCCESS != ret)
         {
-            fprintf(stderr, "[ERR]: Get joint model type failed.\n");
+            fprintf(stderr, "[ERR]: Get joint model type failed. %X \n", ret);
             return -1;
         }
 
@@ -124,6 +124,17 @@ namespace middleware
             }
         }
         return AX_ERR_NPU_JOINT_SUCCESS;
+    }
+
+    std::vector<int> io_get_input_size(const AX_JOINT_IO_INFO_T* io_info)
+    {
+        const AX_JOINT_IOMETA_T* pMeta = io_info->pInputs;
+        if (pMeta->nShapeSize <= 0)
+        {
+            fprintf(stderr, "[ERR] Dimension(%u) of shape is not allowed.\n", (uint32_t)pMeta->nShapeSize);
+        }
+
+        return {pMeta->pShape[1], pMeta->pShape[2]};
     }
 
     AX_JOINT_IO_BUFFER_T* prepare_io_no_copy(const size_t& size, AX_JOINT_IO_T& io, const AX_JOINT_IO_INFO_T* io_info, const uint32_t& batch = 1)
