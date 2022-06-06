@@ -26,7 +26,6 @@
 
 #include "base/detection.hpp"
 #include "base/yolo.hpp"
-#include "base/transform.hpp"
 #include "base/common.hpp"
 #include "middleware/io.hpp"
 
@@ -39,9 +38,6 @@
 #include "ax_sys_api.h"
 #include "joint.h"
 #include "joint_adv.h"
-
-#include <iostream>
-#include <fstream>
 
 const int DEFAULT_IMG_H = 416;
 const int DEFAULT_IMG_W = 416;
@@ -254,7 +250,7 @@ namespace ax
         fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
 
         // 5. get bbox
-        yolo::YoloDetectionOutput yolo;
+        yolo::YoloDetectionOutput yolo{};
         std::vector<yolo::TMat> yolo_inputs, yolo_outputs;
         yolo.init(yolo::YOLOV4);
         yolo_inputs.resize(io_info->nOutputSize);
@@ -287,13 +283,13 @@ namespace ax
         std::vector<det::Object> objects;
         for (size_t i = 0; i < yolo_outputs[0].h; i++)
         {
-            float* data_row = yolo_outputs[0].row(i);
+            float* data_row = yolo_outputs[0].row((int)i);
             det::Object object;
             object.rect.x = data_row[2] * DEFAULT_IMG_W;
             object.rect.y = data_row[3] * DEFAULT_IMG_H;
             object.rect.width = (data_row[4] - data_row[2]) * DEFAULT_IMG_W;
             object.rect.height = (data_row[5] - data_row[3]) * DEFAULT_IMG_H;
-            object.label = data_row[0];
+            object.label = (int)data_row[0];
             object.prob = data_row[1];
             objects.push_back(object);
         }
@@ -370,7 +366,7 @@ int main(int argc, char* argv[])
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 
-        if (!input_size_flag) { show_error("size", input_size_string); }
+        show_error("size", input_size_string);
 
         return -1;
     }
@@ -392,8 +388,6 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    int src_w = mat.cols;
-    int src_h = mat.rows;
     common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. init ax system, if NOT INITED in other apps.
