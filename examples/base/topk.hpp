@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <vector>
 
 #include "base/score.hpp"
 

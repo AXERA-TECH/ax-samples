@@ -268,9 +268,9 @@ namespace ax
             auto ptr = (float*)info.pVirAddr;
 
             yolo_inputs[i].batch = output.pShape[0];
-            yolo_inputs[i].c = output.pShape[1];
-            yolo_inputs[i].h = output.pShape[2];
-            yolo_inputs[i].w = output.pShape[3];
+            yolo_inputs[i].h = output.pShape[1];
+            yolo_inputs[i].w = output.pShape[2];
+            yolo_inputs[i].c = output.pShape[3];
             yolo_inputs[i].data = ptr;
         }
 
@@ -282,18 +282,18 @@ namespace ax
         yolo_outputs[0].w = 6;
         yolo_outputs[0].data = output_buf.data();
 
-        yolo.forward(yolo_inputs, yolo_outputs);
+        yolo.forward_nhwc(yolo_inputs, yolo_outputs);
 
         std::vector<det::Object> objects;
         for (size_t i = 0; i < yolo_outputs[0].h; i++)
         {
-            float* data_row = yolo_outputs[0].row(i);
+            float* data_row = yolo_outputs[0].row((int)i);
             det::Object object;
             object.rect.x = data_row[2] * DEFAULT_IMG_W;
             object.rect.y = data_row[3] * DEFAULT_IMG_H;
             object.rect.width = (data_row[4] - data_row[2]) * DEFAULT_IMG_W;
             object.rect.height = (data_row[5] - data_row[3]) * DEFAULT_IMG_H;
-            object.label = data_row[0];
+            object.label = (int)data_row[0];
             object.prob = data_row[1];
             objects.push_back(object);
         }

@@ -26,7 +26,6 @@
 
 #include "base/detection.hpp"
 #include "base/yolo.hpp"
-#include "base/transform.hpp"
 #include "base/common.hpp"
 #include "middleware/io.hpp"
 
@@ -39,9 +38,6 @@
 #include "ax_sys_api.h"
 #include "joint.h"
 #include "joint_adv.h"
-
-#include <iostream>
-#include <fstream>
 
 const int DEFAULT_IMG_H = 320;
 const int DEFAULT_IMG_W = 320;
@@ -56,7 +52,7 @@ namespace ax
     namespace mw = middleware;
     namespace utl = utilities;
 
-    bool run_detection(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, uint32_t input_h, uint32_t input_w)
+    bool run_detection(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat)
     {
         // 1. create a runtime handle and load the model
         AX_JOINT_HANDLE joint_handle;
@@ -246,14 +242,12 @@ namespace ax
         fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
 
         // 5. get bbox
-        yolo::YoloDetectionOutput yolo;
+        yolo::YoloDetectionOutput yolo{};
         std::vector<yolo::TMat> yolo_inputs, yolo_outputs;
         yolo.init(yolo::YOLO_FASTEST_BODY);
         yolo_inputs.resize(io_info->nOutputSize);
         yolo_outputs.resize(1);
 
-        std::vector<std::vector<float> > nchw;
-        nchw.resize(io_info->nOutputSize);
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
             auto& output = io_info->pOutputs[i];
@@ -261,14 +255,11 @@ namespace ax
 
             auto ptr = (float*)info.pVirAddr;
 
-            nchw[i].resize(output.nSize / 4, 0);
-            transform::nhwc2nchw(ptr, nchw[i].data(), output.pShape[1], output.pShape[2], output.pShape[3]);
-
             yolo_inputs[i].batch = output.pShape[0];
             yolo_inputs[i].h = output.pShape[1];
             yolo_inputs[i].w = output.pShape[2];
             yolo_inputs[i].c = output.pShape[3];
-            yolo_inputs[i].data = nchw[i].data();
+            yolo_inputs[i].data = ptr;
         }
 
         std::vector<float> output_buf;
@@ -279,18 +270,18 @@ namespace ax
         yolo_outputs[0].w = 6;
         yolo_outputs[0].data = output_buf.data();
 
-        yolo.forward(yolo_inputs, yolo_outputs);
+        yolo.forward_nhwc(yolo_inputs, yolo_outputs);
 
         std::vector<det::Object> objects;
         for (size_t i = 0; i < yolo_outputs[0].h; i++)
         {
-            float* data_row = yolo_outputs[0].row(i);
+            float* data_row = yolo_outputs[0].row((int)i);
             det::Object object;
-            object.rect.x = data_row[2] * mat.cols;
-            object.rect.y = data_row[3] * mat.rows;
-            object.rect.width = (data_row[4] - data_row[2]) * mat.cols;
-            object.rect.height = (data_row[5] - data_row[3]) * mat.rows;
-            object.label = data_row[0];
+            object.rect.x = data_row[2] * (float)mat.cols;
+            object.rect.y = data_row[3] * (float)mat.rows;
+            object.rect.width = (data_row[4] - data_row[2]) * (float)mat.cols;
+            object.rect.height = (data_row[5] - data_row[3]) * (float)mat.rows;
+            object.label = (int)data_row[0];
             object.prob = data_row[1];
             objects.push_back(object);
         }
@@ -364,7 +355,7 @@ int main(int argc, char* argv[])
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 
-        if (!input_size_flag) { show_error("size", input_size_string); }
+        show_error("size", input_size_string);
 
         return -1;
     }
@@ -386,8 +377,6 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    int src_w = mat.cols;
-    int src_h = mat.rows;
     common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. init ax system, if NOT INITED in other apps.
@@ -409,7 +398,7 @@ int main(int argc, char* argv[])
     fprintf(stdout, "--------------------------------------\n");
 
     // 5. run the processing
-    auto flag = ax::run_detection(model_file, image, repeat, mat, input_size[0], input_size[1]);
+    auto flag = ax::run_detection(model_file, image, repeat, mat);
     if (!flag)
     {
         fprintf(stderr, "Run classification failed.\n");

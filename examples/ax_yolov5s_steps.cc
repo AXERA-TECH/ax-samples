@@ -258,7 +258,7 @@ namespace ax
         std::vector<det::Object> proposals;
         std::vector<det::Object> objects;
 
-        const char* file_name[] = {"out.bin", "353.bin", "367.bin"};
+        float prob_threshold_unsigmoid = -1.0f * (float)log((1.0f / PROB_THRESHOLD) - 1.0f);
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
             auto& output = io_info->pOutputs[i];
@@ -267,7 +267,7 @@ namespace ax
             auto ptr = (float*)info.pVirAddr;
 
             int32_t stride = (1 << i) * 8;
-            det::generate_proposals(stride, ptr, PROB_THRESHOLD, proposals, input_h, input_w, ANCHORS);
+            det::generate_proposals_255(stride, ptr, PROB_THRESHOLD, proposals, input_h, input_w, ANCHORS, prob_threshold_unsigmoid);
         }
 
         det::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
@@ -363,8 +363,6 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    int src_w = mat.cols;
-    int src_h = mat.rows;
     common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. init ax system, if NOT INITED in other apps.
