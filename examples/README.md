@@ -78,28 +78,27 @@ Repeat 100 times, avg time 4.33 ms, max_time 4.88 ms, min_time 4.31 ms
 - 物体检测：YOLOv5s
 
 ```
-/root/samples # ./ax_yolov5s -m yolov5s.joint -i dog.jpg -r 100
+/root/samples # ./ax_yolov5s_620u -m yolov5s.joint -i dog.jpg -r 10
 --------------------------------------
 model file : yolov5s.joint
 image file : dog.jpg
 img_h, img_w : 640 640
-Run-Joint Runtime version: 0.5.6
+Run-Joint Runtime version: 0.5.8
 --------------------------------------
-[INFO]: Virtual npu mode is 1_1
-
-Tools version: 0.6.0.22
-2ed4ac96
+Tools version: 0.6.0.30
+100b6396
 run over: output len 3
+post process cost time:5.52 ms
 --------------------------------------
-Create handle took 408.67 ms (neu 16.94 ms, axe 19.86 ms, overhead 371.88 ms)
+Create handle took 399.57 ms (neu 18.00 ms, axe 0.00 ms, overhead 381.57 ms)
 --------------------------------------
-Repeat 100 times, avg time 61.90 ms, max_time 237.61 ms, min_time 59.92 ms
+Repeat 10 times, avg time 26.52 ms, max_time 26.54 ms, min_time 26.51 ms
 --------------------------------------
-detection num: 3
-16:  92%, [ 135,  209,  310,  545], dog
- 2:  77%, [ 470,   78,  691,  174], car
- 1:  54%, [ 156,  122,  572,  420], bicycle
+detection num: 2
+16:  88%, [ 136,  215,  312,  556], dog
+ 2:  66%, [ 470,   77,  692,  170], car
 ```
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
