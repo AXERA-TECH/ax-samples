@@ -41,8 +41,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-const int DEFAULT_IMG_H = 960;
-const int DEFAULT_IMG_W = 960;
+const int DEFAULT_IMG_H = 640;
+const int DEFAULT_IMG_W = 640;
 
 const char* CLASS_NAMES[] = {
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
