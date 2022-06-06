@@ -35,4 +35,3 @@
 
 - Github issues
 - QQ 群: 139953715
-- Email: Business@axera-tech.com (商务合作)
