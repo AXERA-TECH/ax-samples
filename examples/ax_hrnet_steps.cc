@@ -248,27 +248,8 @@ namespace ax
         auto& output = io_info->pOutputs[0];
         auto& info = joint_io_arr.pOutputs[0];
         auto ptr = (float*)info.pVirAddr;
-        std::vector<float> nchw(output.nSize / output.pShape[0] / sizeof(float), 0);
 
-        float max = 0;
-        for (int i = 0; i < 64 * 48 * 17; ++i)
-        {
-            if (ptr[i] > max)
-            {
-                max = ptr[i];
-            }
-        }
-        std::cout << max << std::endl;
-
-        auto ptr_debug_out0 = ptr + 6 * (192 / 4) + 22;
-        std::cout << ptr_debug_out0[0] << " " << ptr_debug_out0[1] << " " << ptr_debug_out0[2] << std::endl;
-
-        transform::nhwc2nchw(ptr, nchw.data(), output.pShape[1], output.pShape[2], output.pShape[3]);
-
-        auto ptr_debug_out1 = nchw.data() + 6 * (192 / 4) + 22;
-        std::cout << ptr_debug_out1[0] << " " << ptr_debug_out1[1] << " " << ptr_debug_out1[2] << std::endl;
-
-        pose::post_process(nchw.data(), ai_point_result, HRNET_JOINTS, HRNET_H, HRNET_W);
+        pose::post_process(ptr, ai_point_result, HRNET_JOINTS, HRNET_H, HRNET_W);
 
         // 6. show time costs
         fprintf(stdout, "--------------------------------------\n");
