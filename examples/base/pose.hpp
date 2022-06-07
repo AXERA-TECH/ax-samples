@@ -156,8 +156,8 @@ namespace pose
             kp.score = max_score;
             pose.keypoints.push_back(kp);
 
-            std::cout << "x: " << pose.keypoints[c].x << ", y: " << pose.keypoints[c].y << ", score: "
-                      << pose.keypoints[c].score << std::endl;
+//            std::cout << "x: " << pose.keypoints[c].x << ", y: " << pose.keypoints[c].y << ", score: "
+//                      << pose.keypoints[c].score << std::endl;
         }
     }
 
