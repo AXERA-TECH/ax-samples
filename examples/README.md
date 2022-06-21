@@ -19,6 +19,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - NanoDet
 - 人型检测
   - YOLO-Fastest-Body
+- 障碍物检测 (扫地机场景)
+  - Robot-Obstacle-Detect
 - 人体关键点
   - HRNet
 - 传统 CV 操作
@@ -53,7 +55,7 @@ total 40644
 - 物体分类：MobileNetv2 
 
 ```
-/root/samples # ./ax_classification -m mobilenetv2.joint -i cat.jpg -r 100
+/root/samples # ./ax_classification -m mobilenetv2.joint -i cat.jpg -r 10
 --------------------------------------
 model file : mobilenetv2.joint
 image file : cat.jpg
@@ -62,41 +64,70 @@ Run-Joint Runtime version: 0.5.6
 --------------------------------------
 [INFO]: Virtual npu mode is 1_1
 
-Tools version: 0.6.0.22
-2ed4ac96
+Tools version: 0.6.0.32
+8a011dfa
 10.6865, 285
 10.3324, 283
 9.1559, 281
 9.1174, 356
 9.0098, 282
 --------------------------------------
-Create handle took 198.25 ms (neu 6.09 ms, axe 0.00 ms, overhead 192.15 ms)
+Create handle took 201.32 ms (neu 6.36 ms, axe 0.00 ms, overhead 194.96 ms)
 --------------------------------------
-Repeat 100 times, avg time 4.33 ms, max_time 4.88 ms, min_time 4.31 ms
+Repeat 10 times, avg time 4.20 ms, max_time 4.67 ms, min_time 4.14 ms
 ```
 
 - 物体检测：YOLOv5s
 
 ```
-/root/samples # ./ax_yolov5s_620u -m yolov5s.joint -i dog.jpg -r 10
+/root/samples # ./ax_yolov5s -m yolov5s.joint -i dog.jpg -r 10
 --------------------------------------
 model file : yolov5s.joint
 image file : dog.jpg
 img_h, img_w : 640 640
 Run-Joint Runtime version: 0.5.8
 --------------------------------------
-Tools version: 0.6.0.30
-100b6396
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.0.32
+8a011dfa
 run over: output len 3
 post process cost time:5.52 ms
 --------------------------------------
-Create handle took 399.57 ms (neu 18.00 ms, axe 0.00 ms, overhead 381.57 ms)
+Create handle took 396.61 ms (neu 18.13 ms, axe 0.00 ms, overhead 378.48 ms)
 --------------------------------------
-Repeat 10 times, avg time 26.52 ms, max_time 26.54 ms, min_time 26.51 ms
+Repeat 10 times, avg time 26.59 ms, max_time 27.18 ms, min_time 26.51 ms
 --------------------------------------
-detection num: 2
-16:  88%, [ 136,  215,  312,  556], dog
- 2:  66%, [ 470,   77,  692,  170], car
+detection num: 3
+16:  92%, [ 133,  219,  312,  543], dog
+ 2:  81%, [ 470,   77,  692,  170], car
+ 1:  60%, [ 169,  120,  565,  417], bicycle
+```
+
+- 物体检测：YOLOX-S
+```
+/tmp/qtang # ./ax_yoloxs -m yolox_s_cut.joint -i dog.jpg -r 10
+--------------------------------------
+model file : yolox_s_cut.joint
+image file : dog.jpg
+img_h, img_w : 640 640
+Run-Joint Runtime version: 0.5.8
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.0.32
+8a011dfa
+run over: output len 3
+--------------------------------------
+Create handle took 497.16 ms (neu 23.64 ms, axe 0.00 ms, overhead 473.52 ms)
+--------------------------------------
+Repeat 10 times, avg time 41.65 ms, max_time 42.37 ms, min_time 41.55 ms
+--------------------------------------
+detection num: 4
+ 1:  97%, [ 123,  119,  569,  417], bicycle
+16:  95%, [ 136,  222,  307,  540], dog
+ 7:  72%, [ 470,   75,  688,  171], truck
+58:  53%, [ 685,  111,  716,  154], potted plant
 ```
 
 ## 模型说明
