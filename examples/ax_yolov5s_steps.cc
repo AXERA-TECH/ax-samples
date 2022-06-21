@@ -38,8 +38,6 @@
 #include "joint.h"
 #include "joint_adv.h"
 
-#include <iostream>
-#include <fstream>
 const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
@@ -57,7 +55,7 @@ const float ANCHORS[18] = {10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116,
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.45f;
+const float PROB_THRESHOLD = 0.35f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
@@ -258,7 +256,7 @@ namespace ax
         std::vector<det::Object> proposals;
         std::vector<det::Object> objects;
 
-        float prob_threshold_unsigmoid = -1.0f * (float)log((1.0f / PROB_THRESHOLD) - 1.0f);
+        float prob_threshold_unsigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
             auto& output = io_info->pOutputs[i];
@@ -267,7 +265,7 @@ namespace ax
             auto ptr = (float*)info.pVirAddr;
 
             int32_t stride = (1 << i) * 8;
-            det::generate_proposals_255(stride, ptr, PROB_THRESHOLD, proposals, input_h, input_w, ANCHORS, prob_threshold_unsigmoid);
+            det::generate_proposals_255(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_unsigmoid);
         }
 
         det::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
@@ -341,7 +339,7 @@ int main(int argc, char* argv[])
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 
-        if (!input_size_flag) { show_error("size", input_size_string); }
+        show_error("size", input_size_string);
 
         return -1;
     }
@@ -363,7 +361,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1], true);
 
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
