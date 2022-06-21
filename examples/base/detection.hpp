@@ -186,7 +186,7 @@ namespace detection
 
                             if (temp >= prob_threshold and class_index != 0)
                             {
-                                fprintf(stderr, "class_score: %f %d \n", class_score, i);
+                                // fprintf(stderr, "class_score: %f %d \n", class_score, i);
 
                                 float pred_x = (((float)fea_w + 0.5f) / (300.0f / strides[head]) + ptr_boxes[0] * center_val * ptr_anchor_info[anchor_i * 2] / 300.0f);
                                 float pred_y = (((float)fea_h + 0.5f) / (300.0f / strides[head]) + ptr_boxes[1] * center_val * ptr_anchor_info[anchor_i * 2 + 1] / 300.0f);
