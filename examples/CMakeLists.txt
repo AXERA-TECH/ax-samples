@@ -73,3 +73,5 @@ axera_example (ax_classification_accuracy  ax_classification_accuracy.cc)
 axera_example (ax_yolov3_accuracy     ax_yolov3_accuracy.cc)
 
 axera_example (ax_yolov5s_620u   ax_yolov5s_620u_steps.cc)
+axera_example (ax_yolov5s_accuracy    ax_yolov5s_accuracy.cc)
+axera_example (ax_robot_obstacle ax_robot_obstacle_detect_steps.cc)

@@ -1,22 +1,22 @@
 /*
- * AXERA is pleased to support the open source community by making ax-samples available.
- * 
- * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
- * 
- * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * https://opensource.org/licenses/BSD-3-Clause
- * 
- * Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
+* AXERA is pleased to support the open source community by making ax-samples available.
+*
+* Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
+*
+* Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* https://opensource.org/licenses/BSD-3-Clause
+*
+* Unless required by applicable law or agreed to in writing, software distributed
+* under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+* CONDITIONS OF ANY KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations under the License.
+*/
 
 /*
- * Author: hebing
- */
+* Author: hebing
+*/
 
 #include <cstdio>
 #include <cstring>
@@ -38,24 +38,27 @@
 #include "joint.h"
 #include "joint_adv.h"
 
-const int DEFAULT_IMG_H = 640;
-const int DEFAULT_IMG_W = 640;
+const int DEFAULT_IMG_H = 300;
+const int DEFAULT_IMG_W = 300;
+
+const int map_size[6] = {19, 10, 5, 3, 2, 1};
+const float strides[6] = {16, 32, 64, 100, 150, 300};
+const int anchor_size[6] = {6, 6, 6, 6, 6, 6};
+
+const float anchors_info[6][12] = {60.0, 60.0, 79.37, 79.37, 84.85, 42.42, 42.42, 84.85, 103.92, 34.64, 34.64, 103.92,
+                                   105.0, 105.0, 125.49, 125.49, 148.49, 74.24, 74.24, 148.49, 181.86, 60.62, 60.62, 181.86,
+                                   150.0, 150.0, 171.02, 171.02, 212.13, 106.06, 106.06, 212.13, 259.80, 86.60, 86.60, 259.80,
+                                   195.0, 195.0, 185.75, 185.75, 229.10, 114.55, 114.55, 229.10, 280.59, 93.53, 93.53, 280.59,
+                                   240.0, 240.0, 261.53, 261.53, 300.0, 169.70, 169.70, 300.0, 300.0, 138.56, 138.56, 300.0,
+                                   285.0, 285.0, 300.0, 300.0, 300.0, 201.52, 201.52, 300.0, 300.0, 164.54, 164.54, 300.0};
 
 const char* CLASS_NAMES[] = {
-    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
-    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
-    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
-    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
-    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
-    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
-    "hair drier", "toothbrush"};
+    "background", "faeces", "fabric", "scale", "pedestal", "cable"};
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.3f;
-const float NMS_THRESHOLD = 0.65f;
+const float PROB_THRESHOLD = 0.45f;
+const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
     namespace det = detection;
@@ -252,18 +255,16 @@ namespace ax
         fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
 
         // 5. get bbox
-        std::vector<det::Object> proporsel;
+        std::vector<det::Object> proposals;
         std::vector<det::Object> objects;
 
-        for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
-        {
-            auto& info = joint_io_arr.pOutputs[i];
-            auto ptr = (float*)info.pVirAddr;
-            int32_t stride = (1 << i) * 8;
-            det::generate_proposals_yolox(stride, ptr, PROB_THRESHOLD, proporsel, input_w, input_h);
-        }
+        auto ptr_score = joint_io_arr.pOutputs[0].pVirAddr;
+        auto ptr_box = joint_io_arr.pOutputs[1].pVirAddr;
 
-        det::get_out_bbox(proporsel, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
+        det::generate_proposals_mobilenet_ssd((const float*)ptr_score, (const float*)ptr_box, 6, map_size, anchor_size, 5, 0.2, strides,
+                                              0.1, 0.2, &anchors_info[0][0], proposals);
+
+        det::get_out_bbox_no_letterbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
 
         // 6. show time costs
         fprintf(stdout, "--------------------------------------\n");
@@ -287,7 +288,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %d\n", objects.size());
 
-        det::draw_objects(mat, objects, CLASS_NAMES, "yolovx_s");
+        det::draw_objects(mat, objects, CLASS_NAMES, "mobilenet_ssd_out");
         clear_and_exit();
         return true;
     }
@@ -356,8 +357,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
+    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
 
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.

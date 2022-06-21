@@ -48,13 +48,17 @@ namespace common
     }
     // opencv mat(h, w)
     // resize cv::Size(dstw, dsth)
-    void get_input_data_no_letterbox(cv::Mat mat, std::vector<uint8_t>& image, int model_h, int model_w)
+    void get_input_data_no_letterbox(cv::Mat mat, std::vector<uint8_t>& image, int model_h, int model_w, bool bgr2rgb = false)
     {
         cv::Mat img_new(model_h, model_w, CV_8UC3, image.data());
         cv::resize(mat, img_new, cv::Size(model_w, model_h));
+        if (bgr2rgb)
+        {
+            cv::cvtColor(img_new, img_new, cv::COLOR_BGR2RGB);
+        }
     }
 
-    void get_input_data_letterbox(cv::Mat mat, std::vector<uint8_t>& image, int letterbox_rows, int letterbox_cols)
+    void get_input_data_letterbox(cv::Mat mat, std::vector<uint8_t>& image, int letterbox_rows, int letterbox_cols, bool bgr2rgb = false)
     {
         /* letterbox process to support different letterbox size */
         float scale_letterbox;
@@ -82,6 +86,10 @@ namespace common
 
         // Letterbox filling
         cv::copyMakeBorder(mat, img_new, top, bot, left, right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+        if (bgr2rgb)
+        {
+            cv::cvtColor(img_new, img_new, cv::COLOR_BGR2RGB);
+        }
     }
 
     bool read_file(const char* fn, std::vector<uchar>& data)
