@@ -74,4 +74,5 @@ MESSAGE (STATUS "")
 MESSAGE (STATUS "${PROJECT_NAME} other information:")
 # show building install path
 MESSAGE (STATUS "  Package install path:         ${CMAKE_INSTALL_PREFIX}")
+MESSAGE (STATUS "  Target platform:              ${AXERA_TARGET_CHIP}")
 MESSAGE (STATUS "")
