@@ -10,6 +10,7 @@
 
 已支持芯片
 
+- AX630A
 - [AX620A](docs/AX620A.md)
 - [AX620U](docs/AX620U.md)
 
@@ -23,9 +24,13 @@
 
 - [examples](examples/) 提供常见分类、检测、姿态等深度学习开源算法和传统 CV 操作用例，根据 issue 需求持续更新。
 
-### 模型仓库
+### 网盘资源
 
 - [百度网盘](https://pan.baidu.com/s/1zm2M-vqiss4Rmk-uSoGO7w) (*pwd: euy7*)
+- 包含以下内容
+    - ModelZoo
+    - 预编译程序
+    - 测试图片
 
 ### 速度评估
 

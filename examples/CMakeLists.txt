@@ -34,9 +34,12 @@ function (axera_example name)
 
     # libs
     target_link_libraries (${name} PRIVATE pthread dl stdc++fs)
-    target_link_libraries (${name} PRIVATE ax_interpreter_external ax_interpreter ax_sys axsyslog)
+    if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
+        target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys axsyslog)
+    else()  # ax630a support
+        target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys)
+    endif()
     target_link_libraries (${name} PRIVATE ax_ivps ax_npu_cv_kit)
-    target_link_libraries (${name} PRIVATE ax_run_joint)
 
     # folders
     target_link_directories(${name} PRIVATE ${BSP_MSP_DIR}/lib)
@@ -48,29 +51,40 @@ function (axera_example name)
     install (TARGETS ${name} DESTINATION bin)
 endfunction()
 
-set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv/lib/cmake/opencv4)
+if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
+    set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
+else()
+    set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+endif()
 find_package(OpenCV REQUIRED)
 
 # open when need debug on board
 # add_definitions("-g -O0")
 
-axera_example (ax_classification        ax_classification_steps.cc)
-axera_example (ax_classification_nv12   ax_classification_nv12_resize_steps.cc)
-axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
-axera_example (ax_yoloxs                ax_yoloxs_steps.cc)
-axera_example (ax_yolo_fastest          ax_yolo_fastest_steps.cc)
-axera_example (ax_yolo_fastest_body     ax_yolo_fastest_body_steps.cc)
-axera_example (ax_hrnet                 ax_hrnet_steps.cc)
-axera_example (ax_yolov3                ax_yolov3_steps.cc)
-axera_example (ax_yolov3_tiny           ax_yolov3_tiny_steps.cc)
-axera_example (ax_yolov4                ax_yolov4_steps.cc)
-axera_example (ax_yolov4_tiny           ax_yolov4_tiny_steps.cc)
-axera_example (ax_nanodet               ax_nanodet_steps.cc)
-axera_example (ax_paddle_yolov3         ax_paddle_yolov3_steps.cc)
+if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
+    axera_example (ax_classification        ax_classification_steps.cc)
+    axera_example (ax_classification_nv12   ax_classification_nv12_resize_steps.cc)
+    axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
+    axera_example (ax_yoloxs                ax_yoloxs_steps.cc)
+    axera_example (ax_yolo_fastest          ax_yolo_fastest_steps.cc)
+    axera_example (ax_yolo_fastest_body     ax_yolo_fastest_body_steps.cc)
+    axera_example (ax_hrnet                 ax_hrnet_steps.cc)
+    axera_example (ax_yolov3                ax_yolov3_steps.cc)
+    axera_example (ax_yolov3_tiny           ax_yolov3_tiny_steps.cc)
+    axera_example (ax_yolov4                ax_yolov4_steps.cc)
+    axera_example (ax_yolov4_tiny           ax_yolov4_tiny_steps.cc)
+    axera_example (ax_nanodet               ax_nanodet_steps.cc)
+    axera_example (ax_paddle_yolov3         ax_paddle_yolov3_steps.cc)
 
-axera_example (ax_cv_test                   ax_crop_resize_nv12.cc)
-axera_example (ax_classification_accuracy   ax_classification_accuracy.cc)
-axera_example (ax_yolov3_accuracy           ax_yolov3_accuracy.cc)
+    axera_example (ax_cv_test                   ax_crop_resize_nv12.cc)
+    axera_example (ax_classification_accuracy   ax_classification_accuracy.cc)
+    axera_example (ax_yolov3_accuracy           ax_yolov3_accuracy.cc)
 
-axera_example (ax_yolov5s_620u          ax_yolov5s_620u_steps.cc)
-axera_example (ax_robot_obstacle        ax_robot_obstacle_detect_steps.cc)
+    axera_example (ax_yolov5s_620u          ax_yolov5s_620u_steps.cc)
+    axera_example (ax_robot_obstacle        ax_robot_obstacle_detect_steps.cc)
+else() # ax630a support
+    axera_example (ax_classification        ax_classification_steps.cc)
+    axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
+    axera_example (ax_yolo_fastest          ax_yolo_fastest_steps.cc)
+    axera_example (ax_yolov3                ax_yolov3_steps.cc)
+endif()

@@ -47,11 +47,24 @@ namespace middleware
             fprintf(stdout, "[INFO]: Virtual npu was disabled!\n");
             *pMode = AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_DISABLE;
         }
+#ifdef AXERA_TARGET_CHIP_AX620 
         else if (npu_type == AX_NPU_MODEL_TYPE_1_1_1 || npu_type == AX_NPU_MODEL_TYPE_1_1_2)
         {
             fprintf(stdout, "[INFO]: Virtual npu mode is 1_1\n\n");
             *pMode = AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_1_1;
         }
+#else
+        else if (npu_type == AX_NPU_MODEL_TYPE_3_1_1 || npu_type == AX_NPU_MODEL_TYPE_3_1_2)
+        {
+            fprintf(stdout, "[INFO]: Virtual npu mode is 3_1\n\n");
+            *pMode = AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_3_1;
+        }
+        else if (npu_type == AX_NPU_MODEL_TYPE_2_2_1 || npu_type == AX_NPU_MODEL_TYPE_2_2_2)
+        {
+            fprintf(stdout, "[INFO]: Virtual npu mode is 2_2\n\n");
+            *pMode = AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_2_2;
+        }
+#endif        
         else
         {
             fprintf(stderr, "[ERR]: Unknown npu mode(%d).\n", (int)npu_type);
