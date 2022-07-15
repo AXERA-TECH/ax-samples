@@ -103,6 +103,59 @@ namespace common
         }
     }
 
+    void get_input_data_centercrop(cv::Mat mat, std::vector<uint8_t>& image, int model_h, int model_w, bool bgr2rgb = false)
+    {
+        /* letterbox process to support different letterbox size */
+
+        /* C2C BGR */
+        if (mat.channels() == 4)
+        {
+            cv::cvtColor(mat, mat, cv::COLOR_BGRA2BGR);
+        }
+
+        if (mat.channels() == 1)
+        {
+            cv::cvtColor(mat, mat, cv::COLOR_GRAY2BGR);
+        }
+
+        /* Center */
+        int h0 = 0;
+        int w0 = 0;
+        if (mat.rows < mat.cols)
+        {
+            h0 = 256;
+            w0 = int(mat.cols * (256.0 / mat.rows));
+        }
+        else
+        {
+            h0 = int(mat.rows * (256.0 / mat.cols));
+            w0 = 256;
+        }
+        int center_h = int(h0 / 2);
+        int center_w = int(w0 / 2);
+
+        cv::resize(mat, mat, cv::Size(w0, h0));
+
+        // cv::imwrite("center.jpg", mat);
+
+        /* Crop */ 
+        cv::Rect crop_box(center_w - int(model_w / 2), center_h - int(model_h / 2), model_w, model_h);
+        cv::Mat img_new(model_h, model_w, CV_8UC3, image.data());
+
+        cv::Mat mat_crop = mat(crop_box).clone();
+
+        // cv::imwrite("mat_crop.jpg", mat_crop);
+        mat_crop.copyTo(img_new);
+
+        // cv::imwrite("img_new.jpg", img_new);
+
+        /* SwapRB*/
+        if (bgr2rgb)
+        {
+            cv::cvtColor(img_new, img_new, cv::COLOR_BGR2RGB);
+        }
+    }
+
     bool read_file(const char* fn, std::vector<uchar>& data)
     {
         FILE* fp = fopen(fn, "r");

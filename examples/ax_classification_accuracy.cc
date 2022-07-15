@@ -32,6 +32,7 @@
 #include <sys/mman.h>
 
 #include "base/topk.hpp"
+#include "base/common.hpp"
 
 #include "middleware/io.hpp"
 
@@ -223,7 +224,7 @@ namespace ax
         }
 
         auto input_sizes = mw::io_get_input_size(io_info);
-        fprintf(stderr, "[INFO] get input_size %d,%d", input_sizes[0], input_sizes[1]);
+        fprintf(stderr, "[INFO] get input_size %d, %d\n", input_sizes[0], input_sizes[1]);
         auto image_size = 3 * input_sizes[0] * input_sizes[1];
         auto pBuf = mw::prepare_io_no_copy(image_size, joint_io_arr, io_info);
 
@@ -241,12 +242,13 @@ namespace ax
         std::vector<float> time_costs;
         std::string val_file_1000_line_temp;
         std::vector<uint8_t> image(image_size);
-        int top_1 = 0, top_5 = 0;
+        int top_1 = 0, top_5 = 0, total = 0;
         cv::Mat mat_input;
         cv::Mat img_new(input_sizes[0], input_sizes[1], CV_8UC3, image.data());
         std::vector<cls::score> result(1001);
         int cur_index = 0;
 
+        // 5. loop the val dataset
         while (getline(val_file_1000, val_file_1000_line_temp))
         {
             // 1.0 decode file path
@@ -254,50 +256,51 @@ namespace ax
             std::string file_name, gt_index;
             getline(val_1000_line_ss, file_name, ' ');
             getline(val_1000_line_ss, gt_index, ' ');
-            std::string image_file_path = image_dir + file_name;
+            std::string image_file_path = image_dir + '/' + file_name;
 
             // 1.1 prepare image precess
-            std::vector<char> image_data;
-            utl::read_file(image_file_path, image_data);
-            cv::_InputArray pic_arr(image_data.data(), (int)image_data.size());
-            mat_input = cv::imdecode(pic_arr, 1);
-            //mat_input = cv::imread(image_file_path);
+            mat_input = cv::imread(image_file_path);
             if (mat_input.empty())
             {
                 fprintf(stderr, "Read image failed.\n");
                 clear_and_exit();
             }
-            cv::resize(mat_input, img_new, cv::Size(input_sizes[0], input_sizes[1]));
-            cv::cvtColor(img_new, img_new, cv::COLOR_BGR2RGB);
+
+            // 1.2 prepare resize, center crop & swapRB(default is OFF)
+            common::get_input_data_centercrop(mat_input, image, input_sizes[0], input_sizes[1], false);
+
             mat_input.release();
-            image_data.clear();
 
             mw::copy_to_device(image.data(), image.size(), pBuf);
             joint_io_arr.pIoSetting = &joint_io_setting;
 
+            // 1.3 run joint, inference the model
             timer tick;
             ret = AX_JOINT_RunSync(joint_handle, joint_ctx, &joint_io_arr);
             time_costs.push_back(tick.cost());
+
             if (AX_ERR_NPU_JOINT_SUCCESS != ret)
             {
                 fprintf(stderr, "Inference failed(%d).\n", ret);
                 return clear_and_exit();
             }
 
+            // 1.4 get the result
             auto& output = io_info->pOutputs[0];
             auto& info = joint_io_arr.pOutputs[0];
 
             auto ptr = (float*)info.pVirAddr;
             auto actual_data_size = output.nSize / output.pShape[0] / sizeof(float);
 
+            // 1.5 calculate the top1 & top5
             for (uint32_t id = 0; id < actual_data_size; id++)
             {
                 result[id].id = id;
                 result[id].score = ptr[id];
             }
-            softmax(result, 1001, 1);
+
             cls::sort_score(result);
-            auto gt_index_1 = std::stoi(gt_index) + 1;
+            auto gt_index_1 = std::stoi(gt_index);
             if (result[0].id == gt_index_1)
             {
                 top_1++;
@@ -311,14 +314,24 @@ namespace ax
                 }
             }
 
-            cur_index++;
-            fprintf(stderr, "%d \n", cur_index);
+            // cur_index++;
+            // fprintf(stderr, "%d \n", cur_index);
             //            fprintf(stderr, "[标签]: %d \n", gt_index_1);
             //            fprintf(stderr, "top1 [分类号]:%d : [置信度]:%f\n", result[0].id, result[0].score);
             //            fprintf(stderr, "top2 [分类号]:%d : [置信度]:%f\n", result[1].id, result[1].score);
             //            fprintf(stderr, "top3 [分类号]:%d : [置信度]:%f\n", result[2].id, result[2].score);
             //            fprintf(stderr, "top4 [分类号]:%d : [置信度]:%f\n", result[3].id, result[3].score);
             //            fprintf(stderr, "top5 [分类号]:%d : [置信度]:%f\n", result[4].id, result[4].score);
+
+            total++;
+            float acc_top1 = ((float )top_1 / (float )total);
+            float acc_top5 = ((float )top_5 / (float )total);
+
+            if (total % 100 == 0)
+            {
+                fprintf(stdout, "gt_id %5d, total %5d, top1 %5d(%4.2f %%), top5 %5d(%4.2f %%) \t", gt_index_1, total, top_1, acc_top1*100, top_5, acc_top5*100);   
+                fprintf(stdout, "[INFO] predict:%s top5:[%3d,%3d,%3d,%3d,%3d] gt:[%3s] \n", file_name.c_str(), result[0].id, result[1].id, result[2].id, result[3].id, result[4].id, gt_index.c_str());
+            }
 
             ret = AX_JOINT_ADV_GetComponents(joint_ctx, &joint_comps, &joint_comp_size);
             if (AX_ERR_NPU_JOINT_SUCCESS != ret)
@@ -365,8 +378,6 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
 
-        fprintf(stdout, "top_1:%d top5:%d acc_top1:%.4f acc_top5:%.5f \n", top_1, top_5, top_1 / (float)time_costs.size(), top_5 / (float)time_costs.size());
-
         clear_and_exit();
         return true;
     }
@@ -376,7 +387,7 @@ int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
-    cmd.add<std::string>("images", 'i', "image file", true, "");
+    cmd.add<std::string>("images", 'i', "image file dir", true, "");
     cmd.add<std::string>("val", 'v', "val file", true, "");
 
     cmd.parse_check(argc, argv);
