@@ -33,10 +33,12 @@ function (axera_example name)
     target_include_directories (${name} PRIVATE ${BSP_MSP_DIR}/include)
 
     # libs
-    target_link_libraries (${name} PRIVATE pthread dl stdc++fs)
     if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
+        target_link_libraries (${name} PRIVATE pthread dl) # ax620a use this
+        # target_link_libraries (${name} PRIVATE pthread dl stdc++fs) # ax620u use this
         target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys axsyslog)
     else()  # ax630a support
+        target_link_libraries (${name} PRIVATE pthread dl stdc++fs)
         target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys)
     endif()
     target_link_libraries (${name} PRIVATE ax_ivps ax_npu_cv_kit)
