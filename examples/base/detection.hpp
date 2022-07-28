@@ -279,6 +279,69 @@ namespace detection
         }
     }
 
+    static void generate_proposals_yolov7(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                          int letterbox_cols, int letterbox_rows, const float* anchors)
+    {
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+        int cls_num = 80;
+
+        auto feat_ptr = feat;
+
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                for (int a_index = 0; a_index < 3; ++a_index)
+                {
+                    float box_objectness = feat_ptr[4];
+                    if (box_objectness < prob_threshold)
+                    {
+                        feat_ptr += 85;
+                        continue;
+                    }
+
+                    //process cls score
+                    int class_index = 0;
+                    float class_score = -FLT_MAX;
+                    for (int s = 0; s <= cls_num - 1; s++)
+                    {
+                        float score = feat_ptr[s + 5];
+                        if (score > class_score)
+                        {
+                            class_index = s;
+                            class_score = score;
+                        }
+                    }
+
+                    float box_prob = box_objectness * class_score;
+
+                    if (box_prob > prob_threshold)
+                    {
+                        float x_center = (feat_ptr[0] * 2 - 0.5f + (float)w) * (float)stride;
+                        float y_center = (feat_ptr[1] * 2 - 0.5f + (float)h) * (float)stride;
+                        float box_w = (feat_ptr[2] * 2) * (feat_ptr[2] * 2) * anchors[a_index * 2];
+                        float box_h = (feat_ptr[3] * 2) * (feat_ptr[3] * 2) * anchors[a_index * 2 + 1];
+                        float x0 = x_center - box_w * 0.5f;
+                        float y0 = y_center - box_h * 0.5f;
+
+                        Object obj;
+                        obj.rect.x = x0;
+                        obj.rect.y = y0;
+                        obj.rect.width = box_w;
+                        obj.rect.height = box_h;
+                        obj.label = class_index;
+                        obj.prob = box_prob;
+
+                        objects.push_back(obj);
+                    }
+
+                    feat_ptr += 85;
+                }
+            }
+        }
+    }
+
     static void generate_proposals_255(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
                                        int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
     {

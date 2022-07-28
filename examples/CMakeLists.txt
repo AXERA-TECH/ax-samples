@@ -84,6 +84,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
 
     axera_example (ax_yolov5s_620u          ax_yolov5s_620u_steps.cc)
     axera_example (ax_robot_obstacle        ax_robot_obstacle_detect_steps.cc)
+    axera_example (ax_yolov7                ax_yolov7_steps.cc)
 else() # ax630a support
     axera_example (ax_classification        ax_classification_steps.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
