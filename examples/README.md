@@ -14,6 +14,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - YOLOv4
   - YOLOv4-Tiny
   - YOLOv5s
+  - YOLOv7-Tiny
   - YOLOX-S
   - YOLO-Fastest-XL
   - NanoDet
