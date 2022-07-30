@@ -28,9 +28,9 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: prepare 3rdparty
         run: |
-          mkdir 3rdparty & cd 3rdparty
+          mkdir -p ./3rdparty
           wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip
-          unzip opencv-arm-linux-gnueabihf-gcc-7.5.0.zip
+          unzip opencv-arm-linux-gnueabihf-gcc-7.5.0.zip -d ./3rdparty
 
       - name: configure
         run: |
