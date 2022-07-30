@@ -36,7 +36,7 @@ function (axera_example name)
     if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
         target_link_libraries (${name} PRIVATE pthread dl) # ax620a use this
         # target_link_libraries (${name} PRIVATE pthread dl stdc++fs) # ax620u use this
-        target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys axsyslog)
+        target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys axsyslog stdc++fs)
     else()  # ax630a support
         target_link_libraries (${name} PRIVATE pthread dl stdc++fs)
         target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys)

@@ -3,6 +3,7 @@
 # AX-Samples
 
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://raw.githubusercontent.com/AXERA-TECH/ax-samples/main/LICENSE)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AXERA-TECH/ax-samples/build)](https://github.com/AXERA-TECH/ax-samples/actions)
 
 ## 简介
 
