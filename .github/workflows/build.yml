@@ -36,4 +36,4 @@ jobs:
         run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=/home/tangqi/github/runner/actions-runner/lib/ ..
 
       - name: build
-        run: cmake --build build -j 2
+        run: cmake --build build -j 16
