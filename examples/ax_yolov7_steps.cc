@@ -38,8 +38,8 @@
 #include "joint.h"
 #include "joint_adv.h"
 
-const int DEFAULT_IMG_H = 640;
-const int DEFAULT_IMG_W = 640;
+const int DEFAULT_IMG_H = 416;
+const int DEFAULT_IMG_W = 416;
 
 const char* CLASS_NAMES[] = {
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
@@ -59,7 +59,7 @@ const float ANCHORS[][6] = {{12, 16, 19, 36, 40, 28},
 const int DEFAULT_LOOP_COUNT = 1;
 
 const float NMS_THRESH = 0.45f;
-const float BBOX_CONF_THRESH = 0.2f;
+const float BBOX_CONF_THRESH = 0.45f;
 namespace ax
 {
     namespace det = detection;
