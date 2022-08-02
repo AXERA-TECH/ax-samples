@@ -36,7 +36,8 @@ namespace yolo
         YOLOV4_TINY = 3,
         YOLO_FASTEST = 4,
         YOLO_FASTEST_XL = 5,
-        YOLO_FASTEST_BODY = 6
+        YOLO_FASTEST_BODY = 6,
+        YOLOV4_TINY_3L = 7
     };
 
     struct BBoxRect
@@ -52,7 +53,7 @@ namespace yolo
 
     static inline float sigmoid(float x)
     {
-        return (float)(1.f / (1.f + exp(-x)));
+        return (float)(1.f / (1.f + std::exp(-x)));
     }
     static inline float intersection_area(const BBoxRect& a, const BBoxRect& b)
     {
@@ -117,9 +118,9 @@ namespace yolo
             const BBoxRect& a = bboxes[i];
 
             int keep = 1;
-            for (int j = 0; j < (int)picked.size(); j++)
+            for (unsigned int j : picked)
             {
-                const BBoxRect& b = bboxes[picked[j]];
+                const BBoxRect& b = bboxes[j];
 
                 // intersection over union
                 float inter_area = intersection_area(a, b);
@@ -174,14 +175,14 @@ namespace yolo
     class YoloDetectionOutput
     {
     public:
-        int init(int version, float nms_threshold = 0.45f, float confidence_threshold = 0.48f);
+        int init(int version, float nms_threshold = 0.45f, float confidence_threshold = 0.48f, int class_num = 80);
         int forward(const std::vector<TMat>& bottom_blobs, std::vector<TMat>& top_blobs);
         int forward_nhwc(const std::vector<TMat>& bottom_blobs, std::vector<TMat>& top_blobs);
 
     private:
         int m_num_box;
         int m_num_class;
-        float m_anchors_scale[32];
+        int m_anchors_scale[32];
         float m_biases[32];
         int m_mask[32];
         float m_confidence_threshold;
@@ -189,18 +190,11 @@ namespace yolo
         float m_nms_threshold;
     };
 
-    int YoloDetectionOutput::init(int version, float nms_threshold, float confidence_threshold)
+    int YoloDetectionOutput::init(int version, float nms_threshold, float confidence_threshold, int class_num)
     {
         memset(this, 0, sizeof(*this));
         m_num_box = 3;
-        if (version == YOLO_FASTEST_BODY)
-        {
-            m_num_class = 1;
-        }
-        else
-        {
-            m_num_class = 80;
-        }
+        m_num_class = class_num;
         fprintf(stderr, "YoloDetectionOutput init param[%d]\n", version);
 
         if (version == YOLOV3)
@@ -293,10 +287,31 @@ namespace yolo
             m_mask[4] = 1;
             m_mask[5] = 2;
         }
+        else if (version == YOLOV4_TINY_3L)
+        {
+            m_anchors_scale[0] = 32;
+            m_anchors_scale[1] = 16;
+            m_anchors_scale[2] = 8;
+
+            float bias[] = {8, 15, 13, 34, 18, 75, 28, 49, 30, 123, 58, 106, 46, 203, 80, 265, 155, 317};
+            memcpy(m_biases, bias, sizeof(bias));
+
+            m_mask[0] = 6;
+            m_mask[1] = 7;
+            m_mask[2] = 8;
+
+            m_mask[3] = 3;
+            m_mask[4] = 4;
+            m_mask[5] = 5;
+
+            m_mask[6] = 0;
+            m_mask[7] = 1;
+            m_mask[8] = 2;
+        }
 
         m_confidence_threshold = confidence_threshold;
         m_nms_threshold = nms_threshold;
-        m_confidence_threshold_unsigmoid = -1.0f * (float)log((1.0f / m_confidence_threshold) - 1.0f);
+        m_confidence_threshold_unsigmoid = -1.0f * (float)std::log((1.0f / m_confidence_threshold) - 1.0f);
 
         return 0;
     }
@@ -305,10 +320,8 @@ namespace yolo
     {
         // gather all box
         std::vector<BBoxRect> all_bbox_rects;
-        for (size_t b = 0; b < m_num_box; b++)
+        for (size_t b = 0; b < bottom_blobs.size(); b++)
         {
-            std::vector<std::vector<BBoxRect> > all_box_bbox_rects;
-            all_box_bbox_rects.resize(m_num_box);
             const TMat& bottom_top_blobs = bottom_blobs[b];
 
             int w = bottom_top_blobs.w;
@@ -346,15 +359,15 @@ namespace yolo
                         }
 
                         //sigmoid(box_score) * sigmoid(class_score)
-                        float confidence_1 = 1.f / ((1.f + exp(-feature_ptr[4])) * (1.f + exp(-class_score)));
+                        float confidence_1 = 1.0f / ((1.f + std::exp(-feature_ptr[4])) * (1.f + std::exp(-class_score)));
                         if (confidence_1 >= m_confidence_threshold)
                         {
                             // region box
                             // fprintf(stderr, "%f %f %d \n", class_score, feature_ptr[4], class_index);
-                            float bbox_cx = (j + sigmoid(feature_ptr[0])) / w;
-                            float bbox_cy = (i + sigmoid(feature_ptr[1])) / h;
-                            auto bbox_w = (float)(exp(feature_ptr[2]) * bias_w / net_w);
-                            auto bbox_h = (float)(exp(feature_ptr[3]) * bias_h / net_h);
+                            float bbox_cx = ((float)j + sigmoid(feature_ptr[0])) / (float)w;
+                            float bbox_cy = ((float)i + sigmoid(feature_ptr[1])) / (float)h;
+                            auto bbox_w = (float)(std::exp(feature_ptr[2]) * bias_w / (float)net_w);
+                            auto bbox_h = (float)(std::exp(feature_ptr[3]) * bias_h / (float)net_h);
 
                             float bbox_xmin = bbox_cx - bbox_w * 0.5f;
                             float bbox_ymin = bbox_cy - bbox_h * 0.5f;
@@ -364,17 +377,10 @@ namespace yolo
                             float area = bbox_w * bbox_h;
 
                             BBoxRect c = {confidence_1, bbox_xmin, bbox_ymin, bbox_xmax, bbox_ymax, area, class_index};
-                            all_box_bbox_rects[box].push_back(c);
+                            all_bbox_rects.push_back(c);
                         }
 
                         feature_ptr += (m_num_class + 5);
-                    }
-
-                    for (int ii = 0; ii < m_num_box; ii++)
-                    {
-                        const std::vector<BBoxRect>& box_bbox_rects = all_box_bbox_rects[ii];
-
-                        all_bbox_rects.insert(all_bbox_rects.end(), box_bbox_rects.begin(), box_bbox_rects.end());
                     }
                 }
             }
@@ -485,15 +491,15 @@ namespace yolo
                         }
 
                         //sigmoid(box_score) * sigmoid(class_score)
-                        float confidence = 1.f / ((1.f + exp(-box_score_ptr[0]) * (1.f + exp(-class_score))));
+                        float confidence = (float)1.f / ((1.f + std::exp(-box_score_ptr[0]) * (1.f + std::exp(-class_score))));
                         if (confidence >= m_confidence_threshold)
                         {
                             // fprintf(stderr, "%f %d \n", class_score, class_index);
                             // region box
-                            float bbox_cx = (j + sigmoid(xptr[0])) / w;
-                            float bbox_cy = (i + sigmoid(yptr[0])) / h;
-                            float bbox_w = (float)(exp(wptr[0]) * bias_w / net_w);
-                            float bbox_h = (float)(exp(hptr[0]) * bias_h / net_h);
+                            float bbox_cx = ((float)j + sigmoid(xptr[0])) / (float)w;
+                            float bbox_cy = ((float)i + sigmoid(yptr[0])) / (float)h;
+                            auto bbox_w = (float)(std::exp(wptr[0]) * bias_w / (float)net_w);
+                            auto bbox_h = (float)(std::exp(hptr[0]) * bias_h / (float)net_h);
 
                             float bbox_xmin = bbox_cx - bbox_w * 0.5f;
                             float bbox_ymin = bbox_cy - bbox_h * 0.5f;
@@ -534,9 +540,8 @@ namespace yolo
         // select
         std::vector<BBoxRect> bbox_rects;
 
-        for (size_t i = 0; i < picked.size(); i++)
+        for (unsigned int z : picked)
         {
-            size_t z = picked[i];
             bbox_rects.push_back(all_bbox_rects[z]);
         }
 

@@ -1,22 +1,22 @@
 /*
- * AXERA is pleased to support the open source community by making ax-samples available.
- * 
- * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
- * 
- * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * https://opensource.org/licenses/BSD-3-Clause
- * 
- * Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
+* AXERA is pleased to support the open source community by making ax-samples available.
+*
+* Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
+*
+* Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* https://opensource.org/licenses/BSD-3-Clause
+*
+* Unless required by applicable law or agreed to in writing, software distributed
+* under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+* CONDITIONS OF ANY KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations under the License.
+*/
 
 /*
- * Author: hebing
- */
+* Author: hebing
+*/
 
 #include <cstdio>
 #include <cstring>
@@ -39,13 +39,21 @@
 #include "joint.h"
 #include "joint_adv.h"
 
-const int DEFAULT_IMG_H = 320;
-const int DEFAULT_IMG_W = 320;
+const int DEFAULT_IMG_H = 608;
+const int DEFAULT_IMG_W = 608;
 
-const char* CLASS_NAMES[] = {"body"};
+const char* CLASS_NAMES[] = {
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
+    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
+    "hair drier", "toothbrush"};
 
 const int DEFAULT_LOOP_COUNT = 1;
-
 namespace ax
 {
     namespace det = detection;
@@ -244,7 +252,7 @@ namespace ax
         // 5. get bbox
         yolo::YoloDetectionOutput yolo{};
         std::vector<yolo::TMat> yolo_inputs, yolo_outputs;
-        yolo.init(yolo::YOLO_FASTEST_BODY, 0.45, 0.48, 1);
+        yolo.init(yolo::YOLOV4_TINY_3L, 0.45, 0.48, 1);
         yolo_inputs.resize(io_info->nOutputSize);
         yolo_outputs.resize(1);
 
@@ -277,14 +285,17 @@ namespace ax
         {
             float* data_row = yolo_outputs[0].row((int)i);
             det::Object object;
-            object.rect.x = data_row[2] * (float)mat.cols;
-            object.rect.y = data_row[3] * (float)mat.rows;
-            object.rect.width = (data_row[4] - data_row[2]) * (float)mat.cols;
-            object.rect.height = (data_row[5] - data_row[3]) * (float)mat.rows;
+            object.rect.x = data_row[2] * DEFAULT_IMG_W;
+            object.rect.y = data_row[3] * DEFAULT_IMG_H;
+            object.rect.width = (data_row[4] - data_row[2]) * DEFAULT_IMG_W;
+            object.rect.height = (data_row[5] - data_row[3]) * DEFAULT_IMG_H;
             object.label = (int)data_row[0];
             object.prob = data_row[1];
             objects.push_back(object);
         }
+
+        std::vector<det::Object> objects_reverse_letterbox;
+        det::reverse_letterbox(objects, objects_reverse_letterbox, DEFAULT_IMG_H, DEFAULT_IMG_W, mat.rows, mat.cols);
 
         // 6. show time costs
         fprintf(stdout, "--------------------------------------\n");
@@ -308,7 +319,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %d\n", objects.size());
 
-        det::draw_objects(mat, objects, CLASS_NAMES, "yolo_fastest");
+        det::draw_objects(mat, objects_reverse_letterbox, CLASS_NAMES, "yolov4_tiny_out");
         clear_and_exit();
         return true;
     }
@@ -377,7 +388,8 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1]);
+
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
