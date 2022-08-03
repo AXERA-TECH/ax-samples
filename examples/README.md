@@ -5,6 +5,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 - 物体分类
   - MobileNetv1
   - MobileNetv2
+  - MobileOne-s0
   - ResNet18
   - ResNet50
 - 物体检测
@@ -13,6 +14,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - YOLOv3-Tiny
   - YOLOv4
   - YOLOv4-Tiny
+  - YOLOv4-Tiny-3l
   - YOLOv5s
   - YOLOv7-Tiny
   - YOLOX-S
