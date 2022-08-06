@@ -252,7 +252,7 @@ namespace ax
         // 5. get bbox
         yolo::YoloDetectionOutput yolo{};
         std::vector<yolo::TMat> yolo_inputs, yolo_outputs;
-        yolo.init(yolo::YOLOV4_TINY_3L, 0.45, 0.48, 1);
+        yolo.init(yolo::YOLOV4_TINY_3L, 0.35, 0.48, 80);
         yolo_inputs.resize(io_info->nOutputSize);
         yolo_outputs.resize(1);
 
@@ -319,7 +319,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %d\n", objects.size());
 
-        det::draw_objects(mat, objects_reverse_letterbox, CLASS_NAMES, "yolov4_tiny_out");
+        det::draw_objects(mat, objects_reverse_letterbox, CLASS_NAMES, "yolov4_tiny_3l_out");
         clear_and_exit();
         return true;
     }

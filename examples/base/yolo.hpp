@@ -293,7 +293,9 @@ namespace yolo
             m_anchors_scale[1] = 16;
             m_anchors_scale[2] = 8;
 
-            float bias[] = {8, 15, 13, 34, 18, 75, 28, 49, 30, 123, 58, 106, 46, 203, 80, 265, 155, 317};
+            //float bias_official[] = {12, 16, 19, 36, 40, 28,   36, 75, 76, 55, 72, 146,   142, 110, 192, 243, 459, 401};
+            float bias[] = {10, 14, 23, 27, 37, 58, 36, 75, 76, 55, 72, 146, 81, 82, 135, 169, 344, 319};
+
             memcpy(m_biases, bias, sizeof(bias));
 
             m_mask[0] = 6;
@@ -343,10 +345,6 @@ namespace yolo
                             continue;
                         }
 
-                        int biases_index = (int)(m_mask[box + mask_offset]);
-                        const float bias_w = m_biases[biases_index * 2];
-                        const float bias_h = m_biases[biases_index * 2 + 1];
-
                         int class_index = 0;
                         float class_score = -FLT_MAX;
                         for (int k = 5; k < m_num_class + 5; ++k)
@@ -362,6 +360,10 @@ namespace yolo
                         float confidence_1 = 1.0f / ((1.f + std::exp(-feature_ptr[4])) * (1.f + std::exp(-class_score)));
                         if (confidence_1 >= m_confidence_threshold)
                         {
+                            int biases_index = (int)(m_mask[box + mask_offset]);
+                            const float bias_w = m_biases[biases_index * 2];
+                            const float bias_h = m_biases[biases_index * 2 + 1];
+
                             // region box
                             // fprintf(stderr, "%f %f %d \n", class_score, feature_ptr[4], class_index);
                             float bbox_cx = ((float)j + sigmoid(feature_ptr[0])) / (float)w;
