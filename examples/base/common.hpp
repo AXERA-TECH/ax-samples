@@ -36,7 +36,7 @@ namespace common
         {
             return AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_DISABLE;
         }
-#ifdef AXERA_TARGET_CHIP_AX620        
+#ifdef AXERA_TARGET_CHIP_AX620
         else if (model_type == AX_NPU_MODEL_TYPE_1_1_1 || model_type == AX_NPU_MODEL_TYPE_1_1_2)
         {
             return AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_1_1;
@@ -59,7 +59,7 @@ namespace common
     }
     // opencv mat(h, w)
     // resize cv::Size(dstw, dsth)
-    void get_input_data_no_letterbox(cv::Mat mat, std::vector<uint8_t>& image, int model_h, int model_w, bool bgr2rgb = false)
+    void get_input_data_no_letterbox(const cv::Mat& mat, std::vector<uint8_t>& image, int model_h, int model_w, bool bgr2rgb = false)
     {
         cv::Mat img_new(model_h, model_w, CV_8UC3, image.data());
         cv::resize(mat, img_new, cv::Size(model_w, model_h));
@@ -77,14 +77,14 @@ namespace common
         int resize_cols;
         if ((letterbox_rows * 1.0 / mat.rows) < (letterbox_cols * 1.0 / mat.cols))
         {
-            scale_letterbox = letterbox_rows * 1.0 / mat.rows;
+            scale_letterbox = (float)letterbox_rows * 1.0f / (float)mat.rows;
         }
         else
         {
-            scale_letterbox = letterbox_cols * 1.0 / mat.cols;
+            scale_letterbox = (float)letterbox_cols * 1.0f / (float)mat.cols;
         }
-        resize_cols = int(scale_letterbox * mat.cols);
-        resize_rows = int(scale_letterbox * mat.rows);
+        resize_cols = int(scale_letterbox * (float)mat.cols);
+        resize_rows = int(scale_letterbox * (float)mat.rows);
 
         cv::Mat img_new(letterbox_rows, letterbox_cols, CV_8UC3, image.data());
 
@@ -119,8 +119,8 @@ namespace common
         }
 
         /* Center */
-        int h0 = 0;
-        int w0 = 0;
+        int h0;
+        int w0;
         if (mat.rows < mat.cols)
         {
             h0 = 256;
@@ -138,7 +138,7 @@ namespace common
 
         // cv::imwrite("center.jpg", mat);
 
-        /* Crop */ 
+        /* Crop */
         cv::Rect crop_box(center_w - int(model_w / 2), center_h - int(model_h / 2), model_w, model_h);
         cv::Mat img_new(model_h, model_w, CV_8UC3, image.data());
 
@@ -173,18 +173,6 @@ namespace common
             }
             fclose(fp);
             return read_size == (size_t)len;
-        }
-        return false;
-    }
-
-    bool save_file(const char* fn, const void* data, size_t size)
-    {
-        FILE* fp = fopen(fn, "wb+");
-        if (fp != nullptr)
-        {
-            auto save_size = fwrite(data, size, 1, fp);
-            fclose(fp);
-            return save_size == 1;
         }
         return false;
     }
