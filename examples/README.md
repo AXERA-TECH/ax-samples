@@ -26,6 +26,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - Robot-Obstacle-Detect
 - 人体关键点
   - HRNet
+- 人体分割
+  - PP-HumanSeg
 - 传统 CV 操作
   - CropResize
 - Pipeline 示例
