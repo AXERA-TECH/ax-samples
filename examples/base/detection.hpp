@@ -40,6 +40,7 @@ namespace detection
         cv::Rect_<float> rect;
         int label;
         float prob;
+        cv::Point2f landmark[5];
     } Object;
 
     static inline float sigmoid(float x)
@@ -147,6 +148,92 @@ namespace detection
                     gs.stride = stride;
                     grid_strides.push_back(gs);
                 }
+            }
+        }
+    }
+
+    static void generate_proposals_scrfd(int feat_stride, const float* score_blob,
+                                         const float* bbox_blob, const float* kps_blob,
+                                         float prob_threshold, std::vector<detection::Object>& faceobjects, int letterbox_cols, int letterbox_rows)
+    {
+        static float anchors[] = {-8.f, -8.f, 8.f, 8.f, -16.f, -16.f, 16.f, 16.f, -32.f, -32.f, 32.f, 32.f, -64.f, -64.f, 64.f, 64.f, -128.f, -128.f, 128.f, 128.f, -256.f, -256.f, 256.f, 256.f};
+        int feat_w = letterbox_cols / feat_stride;
+        int feat_h = letterbox_rows / feat_stride;
+        int feat_size = feat_w * feat_h;
+        int anchor_group = 1;
+        if (feat_stride == 8)
+            anchor_group = 1;
+        if (feat_stride == 16)
+            anchor_group = 2;
+        if (feat_stride == 32)
+            anchor_group = 3;
+
+        // generate face proposal from bbox deltas and shifted anchors
+        const int num_anchors = 2;
+
+        for (int q = 0; q < num_anchors; q++)
+        {
+            // shifted anchor
+            float anchor_y = anchors[(anchor_group - 1) * 8 + q * 4 + 1];
+
+            float anchor_w = anchors[(anchor_group - 1) * 8 + q * 4 + 2] - anchors[(anchor_group - 1) * 8 + q * 4 + 0];
+            float anchor_h = anchors[(anchor_group - 1) * 8 + q * 4 + 3] - anchors[(anchor_group - 1) * 8 + q * 4 + 1];
+
+            for (int i = 0; i < feat_h; i++)
+            {
+                float anchor_x = anchors[(anchor_group - 1) * 8 + q * 4 + 0];
+
+                for (int j = 0; j < feat_w; j++)
+                {
+                    int index = i * feat_w + j;
+
+                    float prob = score_blob[q * feat_size + index];
+
+                    if (prob >= prob_threshold)
+                    {
+                        // insightface/detection/scrfd/mmdet/models/dense_heads/scrfd_head.py _get_bboxes_single()
+                        float dx = bbox_blob[(q * 4 + 0) * feat_size + index] * feat_stride;
+                        float dy = bbox_blob[(q * 4 + 1) * feat_size + index] * feat_stride;
+                        float dw = bbox_blob[(q * 4 + 2) * feat_size + index] * feat_stride;
+                        float dh = bbox_blob[(q * 4 + 3) * feat_size + index] * feat_stride;
+                        // insightface/detection/scrfd/mmdet/core/bbox/transforms.py distance2bbox()
+                        float cx = anchor_x + anchor_w * 0.5f;
+                        float cy = anchor_y + anchor_h * 0.5f;
+
+                        float x0 = cx - dx;
+                        float y0 = cy - dy;
+                        float x1 = cx + dw;
+                        float y1 = cy + dh;
+
+                        Object obj;
+                        obj.label = 0;
+                        obj.rect.x = x0;
+                        obj.rect.y = y0;
+                        obj.rect.width = x1 - x0 + 1;
+                        obj.rect.height = y1 - y0 + 1;
+                        obj.prob = prob;
+
+                        if (kps_blob != 0)
+                        {
+                            obj.landmark[0].x = cx + kps_blob[index] * feat_stride;
+                            obj.landmark[0].y = cy + kps_blob[1 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[1].x = cx + kps_blob[2 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[1].y = cy + kps_blob[3 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[2].x = cx + kps_blob[4 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[2].y = cy + kps_blob[5 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[3].x = cx + kps_blob[6 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[3].y = cy + kps_blob[7 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[4].x = cx + kps_blob[8 * feat_h * feat_w + index] * feat_stride;
+                            obj.landmark[4].y = cy + kps_blob[9 * feat_h * feat_w + index] * feat_stride;
+                        }
+
+                        faceobjects.push_back(obj);
+                    }
+
+                    anchor_x += feat_stride;
+                }
+
+                anchor_y += feat_stride;
             }
         }
     }
