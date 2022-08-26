@@ -187,7 +187,7 @@ namespace detection
                 {
                     int index = i * feat_w + j;
 
-                    float prob = score_blob[q * feat_size + index];
+                    float prob = sigmoid(score_blob[q * feat_size + index]);
 
                     if (prob >= prob_threshold)
                     {
