@@ -31,6 +31,9 @@ function (axera_example name)
     # headers
     target_include_directories (${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     target_include_directories (${name} PRIVATE ${BSP_MSP_DIR}/include)
+    if (${AXERA_TARGET_PROCESSOR} MATCHES "ARM" AND AXERA_TARGET_PROCESSOR_32Bit)
+        target_include_directories (${name} PRIVATE /opt/include)
+    endif()
 
     # libs
     if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
@@ -44,7 +47,11 @@ function (axera_example name)
     target_link_libraries (${name} PRIVATE ax_ivps ax_npu_cv_kit)
 
     # folders
-    target_link_directories(${name} PRIVATE ${BSP_MSP_DIR}/lib)
+    target_link_directories (${name} PRIVATE ${BSP_MSP_DIR}/lib)
+    if (${AXERA_TARGET_PROCESSOR} MATCHES "ARM" AND AXERA_TARGET_PROCESSOR_32Bit)
+        target_link_libraries (${name} PRIVATE dl)
+        target_link_directories (${name} PRIVATE /opt/lib)
+    endif()
 
     # opencv
     target_include_directories (${name} PRIVATE ${OpenCV_INCLUDE_DIRS})
