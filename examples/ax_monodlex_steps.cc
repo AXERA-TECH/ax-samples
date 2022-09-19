@@ -43,7 +43,7 @@ const int DEFAULT_IMG_W = 1280;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-#define MAX_DETECTION 50
+#define THRESHOLD     0.25
 
 float kitti_P2[3][4] = {
     {721.5377, 0, 609.5593, 44.85728},
@@ -160,7 +160,7 @@ namespace ax
             {
                 for (int i = 0; i < c; ++i)
                 {
-                    if (hm_max_data[j * c + i] == hm_data[j * c + i])
+                    if ((hm_max_data[j * c + i] > THRESHOLD) && (std::abs(hm_max_data[j * c + i] - hm_data[j * c + i])) <= 0.0001)
                     {
                         hm_process_object object{};
                         object.pos = j;
@@ -189,13 +189,12 @@ namespace ax
                                  const float* size_2d,
                                  const float* offset_2d)
         {
-            for (int i = 0; i < MAX_DETECTION; ++i)
+            for (const auto& hm_process_object : hm_process_objects)
             {
                 reg_process_object object{};
 
                 // nhwc
-
-                int pos = hm_process_objects[i].pos;
+                int pos = hm_process_object.pos;
 
                 object.val[0] = depth_data[pos * 2];
                 object.val[1] = depth_data[pos * 2 + 1]; //sigma now do not use
@@ -223,7 +222,7 @@ namespace ax
                           const cv::Mat& input_mat, uint32_t input_h, uint32_t input_w)
         {
             Calibrate calibrate;
-            for (int i = 0; i < MAX_DETECTION; ++i)
+            for (int i = 0; i < hm_process_objects.size(); ++i)
             {
                 hm_process_object hm_object = hm_process_objects[i];
                 if (hm_object.score < 0.25)
@@ -424,7 +423,7 @@ namespace ax
         std::memset(&joint_io_arr, 0, sizeof(joint_io_arr));
         std::memset(&joint_io_setting, 0, sizeof(joint_io_setting));
 
-        ret = mw::prepare_io(data.data(), data.size(), joint_io_arr, io_info);
+        ret = mw::prepare_io_out_cache(data.data(), data.size(), joint_io_arr, io_info);
         if (AX_ERR_NPU_JOINT_SUCCESS != ret)
         {
             fprintf(stderr, "Fill input failed.\n");
@@ -549,7 +548,7 @@ namespace ax
         auto data_heatmap_mp = (float*)info6.pVirAddr;
 
         using namespace mono_process;
-
+        timer post_process_timer;
         // 5.1 process hm message get object score and position
         auto meta = io_info->pOutputs[7];
         std::vector<hm_process_object> hm_process_objects;
@@ -567,6 +566,8 @@ namespace ax
         // 5.4. get object 8 corner points
         std::vector<box_3d_object> box_3d_objects;
         box_3d_process(post_process_objects, box_3d_objects);
+        fprintf(stdout, "--------------------------------------\n");
+        fprintf(stdout, "post_process cost %f ms \n", post_process_timer.cost());
 
         // 5.5. draw result
         draw_box_3d_object(mat, box_3d_objects);
