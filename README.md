@@ -31,7 +31,7 @@
 
 ### 网盘资源
 
-- 通过[百度网盘](https://pan.baidu.com/s/16NG2ffxM4jRwryR3xpnYpw?pwd=jomf)获取，提供 **ModelZoo**, **预编译程序**, **测试图片** 等内容。
+- 通过[百度网盘](https://pan.baidu.com/s/1ZHW2P6Y3lPf2odmj3fo8hA?pwd=sow9)获取，提供 **ModelZoo**, **预编译程序**, **测试图片** 等内容。
 
 ### 速度评估
 
