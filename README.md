@@ -15,6 +15,10 @@
 - [AX620A](docs/AX620A.md)
 - [AX620U](docs/AX620U.md)
 
+社区开发板
+
+- [AX-Pi](https://item.taobao.com/item.htm?_u=m226ocm5e25&id=682169792430)
+
 ## 快速上手
 
 ### 编译
