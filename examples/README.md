@@ -32,9 +32,9 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 - 人体关键点
   - HRNet
 - 人体分割
-  - PP-HumanSeg
+  - [PP-HumanSeg](#MobileSeg)
 - 语义分割
-  - PP-MobileSeg
+  - [PP-Seg](#PP-HumanSeg)
 - 传统 CV 操作
   - CropResize
 - Pipeline 示例
@@ -213,7 +213,7 @@ Create handle took 303.45 ms (neu 26.27 ms, axe 0.00 ms, overhead 277.19 ms)
 --------------------------------------
 Repeat 10 times, avg time 74.90 ms, max_time 76.26 ms, min_time 74.66 ms
 ```
-![paddle_mobileseg](../docs/body_seg_bg_res.jpg)
+![paddle_mobileseg](../docs/seg_res.jpg)
 
 ### PP-HumanSeg
 PP-HumanSeg 源自国内产业级深度学习开源框架飞桨的高性能图像分割开发套件 [PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)，通过速度与精度权衡，我们选择  [PP-HumanSegV1-Mobile](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.6/contrib/PP-HumanSeg/) 进行功能展示。
@@ -246,4 +246,4 @@ Create handle took 97.94 ms (neu 3.85 ms, axe 0.00 ms, overhead 94.09 ms)
 --------------------------------------
 Repeat 10 times, avg time 2.58 ms, max_time 2.82 ms, min_time 2.53 ms
 ```
-![PP-HumanSeg](../docs/seg_res.jpg)
+![PP-HumanSeg](../docs/body_seg_bg_res.jpg)
