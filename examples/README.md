@@ -8,8 +8,9 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - MobileOne-s0
   - ResNet18
   - ResNet50
+  - Others......
 - 物体检测
-  - [YOLOv3(Paddle)](#yolov3paddle)
+  - [PP-YOLOv3](#yolov3paddle)
   - YOLOv3
   - YOLOv3-Tiny
   - YOLOv4
@@ -22,12 +23,18 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - NanoDet
 - 人型检测
   - YOLO-Fastest-Body
+- 人脸检测
+  - scrfd
 - 障碍物检测 (扫地机场景)
   - Robot-Obstacle-Detect
+- 3D单目车辆检测
+  - Monodlex
 - 人体关键点
   - HRNet
 - 人体分割
   - PP-HumanSeg
+- 语义分割
+  - PP-MobileSeg
 - 传统 CV 操作
   - CropResize
 - Pipeline 示例
