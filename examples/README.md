@@ -49,7 +49,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 登录 AX620A 开发板，在 `root` 路径下创建 `samples` 文件夹。
 
 - 将 [快速编译](../docs/compile.md) 中编译生成的可执行示例拷贝到 `/root/samples/` 路径下；
-- 将 **[ModelZoo](https://pan.baidu.com/s/1zm2M-vqiss4Rmk-uSoGO7w)** (*pwd: euy7*) 中相应的 **joint** 模型 `mobilenetv2.joint` 、 `yolov5s.joint` 拷贝到  `/root/samples/` 路径下；
+- 将 **[ModelZoo](https://pan.baidu.com/s/1ZHW2P6Y3lPf2odmj3fo8hA?pwd=sow9)** 中相应的 **joint** 模型 `mobilenetv2.joint` 、 `yolov5s.joint` 拷贝到  `/root/samples/` 路径下；
 - 将测试图片拷贝到 `/root/samples` 路径下。
 
 ```
@@ -86,39 +86,64 @@ Tools version: 0.6.0.32
 --------------------------------------
 Create handle took 201.32 ms (neu 6.36 ms, axe 0.00 ms, overhead 194.96 ms)
 --------------------------------------
-Repeat 10 times, avg time 4.20 ms, max_time 4.67 ms, min_time 4.14 ms
+Repeat 10 times, avg time 3.43 ms, max_time 3.75 ms, min_time 3.37 ms
 ```
 
 - 物体检测：YOLOv5s
 
 ```
-/root/samples # ./ax_yolov5s -m yolov5s.joint -i dog.jpg -r 10
+root@AXERA:~/samples# ./ax_yolov5s -m yolov5s.joint -i ssd_dog.jpg -r 10
 --------------------------------------
-model file : yolov5s.joint
-image file : dog.jpg
+model file : models/yolov5s.joint
+image file : images/ssd_dog.jpg
 img_h, img_w : 640 640
-Run-Joint Runtime version: 0.5.8
+Run-Joint Runtime version: 0.5.10
 --------------------------------------
 [INFO]: Virtual npu mode is 1_1
 
-Tools version: 0.6.0.32
-8a011dfa
+Tools version: d696ee2f
 run over: output len 3
-post process cost time:5.52 ms
 --------------------------------------
-Create handle took 396.61 ms (neu 18.13 ms, axe 0.00 ms, overhead 378.48 ms)
+Create handle took 488.94 ms (neu 22.83 ms, axe 0.00 ms, overhead 466.11 ms)
 --------------------------------------
-Repeat 10 times, avg time 26.59 ms, max_time 27.18 ms, min_time 26.51 ms
+Repeat 10 times, avg time 22.54 ms, max_time 22.91 ms, min_time 22.47 ms
 --------------------------------------
 detection num: 3
-16:  92%, [ 133,  219,  312,  543], dog
- 2:  81%, [ 470,   77,  692,  170], car
- 1:  60%, [ 169,  120,  565,  417], bicycle
+16:  92%, [ 133,  221,  312,  541], dog
+ 2:  77%, [ 468,   76,  692,  171], car
+ 1:  65%, [ 167,  120,  564,  417], bicycle
 ```
+![YOLOv5s](../docs/yolov5s.jpg)
+
+- 物体检测：YOLOv7-Tiny
+```
+root@AXERA:~/samples# ./ax_yolov7 -m yolov7-tiny.joint -i ssd_dog.jpg -r 10
+--------------------------------------
+model file : yolov7-tiny-cut-sim-sigmoid-dfs.joint
+image file : images/ssd_dog.jpg
+img_h, img_w : 416 416
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.4
+59588c54
+run over: output len 3
+--------------------------------------
+Create handle took 376.32 ms (neu 15.51 ms, axe 0.00 ms, overhead 360.81 ms)
+--------------------------------------
+Repeat 10 times, avg time 9.68 ms, max_time 10.01 ms, min_time 9.63 ms
+--------------------------------------
+detection num: 3
+16:  88%, [ 133,  221,  316,  543], dog
+ 1:  86%, [ 139,  130,  571,  422], bicycle
+ 2:  63%, [ 468,   76,  691,  169], car
+```
+![YOLOv7-Tiny](../docs/yolov7-tiny.jpg)
 
 - 物体检测：YOLOX-S
 ```
-/tmp/qtang # ./ax_yoloxs -m yolox_s_cut.joint -i dog.jpg -r 10
+/tmp/samples # ./ax_yoloxs -m yolox_s_cut.joint -i dog.jpg -r 10
 --------------------------------------
 model file : yolox_s_cut.joint
 image file : dog.jpg
@@ -142,6 +167,73 @@ detection num: 4
 58:  53%, [ 685,  111,  716,  154], potted plant
 ```
 
+- 人脸检测：Scrfd
+```
+root@AXERA:~/samples# ./ax_scrfd -m scrfd_500m_bnkps_shape640x640.joint -i selfie.jpg -r 10
+--------------------------------------
+model file : models/scrfd_500m_bnkps_shape640x640.joint
+image file : images/selfie.jpg
+img_h, img_w : 640 640
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.0.34
+9c2b134d
+run over: output len 9
+--------------------------------------
+Create handle took 68.89 ms (neu 4.43 ms, axe 0.00 ms, overhead 64.46 ms)
+--------------------------------------
+Repeat 10 times, avg time 5.76 ms, max_time 6.09 ms, min_time 5.71 ms
+--------------------------------------
+detection num: 111
+```
+![Scrfd](../docs/scrfd.jpg)
+
+- 3D单目车辆检测：Monodlex
+```
+root@AXERA:~/samples# ./ax_monodlex -m monodlex_sigmoid_max.joint -i cityscape.png -r 10
+--------------------------------------
+model file : models/monodlex_sigmoid_max.joint
+image file : images/cityscape.png
+img_h, img_w : 384 1280
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: Unknown
+run over: output len 8
+--------------------------------------
+Create handle took 628.84 ms (neu 29.80 ms, axe 0.00 ms, overhead 599.03 ms)
+--------------------------------------
+Repeat 10 times, avg time 111.77 ms, max_time 112.34 ms, min_time 111.66 ms
+--------------------------------------
+detection num: 7
+```
+![Monodlex](../docs/monodlex.png)
+
+- 人体关键点：HRNet
+```
+root@AXERA:~/samples# ./ax_hrnet -m hrnet_256x192.joint -i pose-1.jpeg -r 10
+--------------------------------------
+model file : models/hrnet_256x192.joint
+image file : images/pose-1.jpeg
+img_h, img_w : 256 192
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.0.30
+100b6396
+run over: output len 1
+--------------------------------------
+Create handle took 1385.15 ms (neu 25.64 ms, axe 0.00 ms, overhead 1359.51 ms)
+--------------------------------------
+Repeat 10 times, avg time 14.11 ms, max_time 14.64 ms, min_time 14.04 ms
+--------------------------------------
+```
+![HRNet](../docs/hrnet.png)
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
@@ -159,7 +251,7 @@ YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检�
 #### Sample
 
 ```
-root@AXERA:~/qtang# ./ax_paddle_yolov3 -m yolov3_paddle.joint -i dog.jpg -r 10
+root@AXERA:~/samples# ./ax_paddle_yolov3 -m yolov3_paddle.joint -i dog.jpg -r 10
 --------------------------------------
 model file : yolov3_paddle.joint
 image file : dog.jpg
@@ -198,7 +290,7 @@ MobileSeg 源自国内产业级深度学习开源框架飞桨的高性能图像�
 #### Sample
 
 ```
-root@AXERA:~/qtang# ./ax_paddle_mobileseg -m model_mv2seg_sim_cut_infer_argmax.joint -i mv2seg.png -r 10
+root@AXERA:~/samples# ./ax_paddle_mobileseg -m model_mv2seg_sim_cut_infer_argmax.joint -i mv2seg.png -r 10
 --------------------------------------
 model file : model_mv2seg_sim_cut_infer_argmax.joint
 image file : mv2seg.png
@@ -231,7 +323,7 @@ PP-HumanSeg 源自国内产业级深度学习开源框架飞桨的高性能图�
 #### Sample
 
 ```
-root@AXERA:~/qtang# ./ax_paddle_mobilehumseg -m pp_human_seg_mobile_sim.joint -i pose-1.jpeg -r 10
+root@AXERA:~/samples# ./ax_paddle_mobilehumseg -m pp_human_seg_mobile_sim.joint -i pose-1.jpeg -r 10
 --------------------------------------
 model file : pp_human_seg_mobile_sim.joint
 image file : pose-1.jpeg
