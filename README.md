@@ -11,13 +11,13 @@
 
 已支持芯片
 
-- AX630A
+- [AX630A](docs/AX630A.md)
 - [AX620A](docs/AX620A.md)
 - [AX620U](docs/AX620U.md)
 
-社区开发板
+已支持开发板
 
-- [AX-Pi](https://item.taobao.com/item.htm?_u=m226ocm5e25&id=682169792430)
+- [AXera-Pi](https://item.taobao.com/item.htm?_u=m226ocm5e25&id=682169792430)(AX620A)
 
 ## 快速上手
 
