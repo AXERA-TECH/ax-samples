@@ -1,32 +1,30 @@
 /*
- * AXERA is pleased to support the open source community by making ax-samples available.
- * 
- * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
- * 
- * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * https://opensource.org/licenses/BSD-3-Clause
- * 
- * Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
+* AXERA is pleased to support the open source community by making ax-samples available.
+*
+* Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
+*
+* Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* https://opensource.org/licenses/BSD-3-Clause
+*
+* Unless required by applicable law or agreed to in writing, software distributed
+* under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+* CONDITIONS OF ANY KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations under the License.
+*/
 
 /*
- * Author: hebing
- */
+* Author: hebing
+*/
 
 #include <cstdio>
 #include <cstring>
-#include <memory>
 #include <numeric>
 
 #include <opencv2/opencv.hpp>
 
 #include "base/topk.hpp"
-#include "base/common.hpp"
 
 #include "middleware/io.hpp"
 
@@ -35,16 +33,13 @@
 #include "utilities/file.hpp"
 #include "utilities/timer.hpp"
 
-#include "cv/cv.hpp"
-#include "cv/utils.hpp"
-
 #include "ax_interpreter_external_api.h"
 #include "ax_sys_api.h"
 #include "joint.h"
 #include "joint_adv.h"
 
-const int MODEL_BGR_INPUT_H = 224;
-const int MODEL_BGR_INPUT_W = 224;
+const int DEFAULT_IMG_H = 32;
+const int DEFAULT_IMG_W = 256;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
@@ -54,96 +49,55 @@ namespace ax
     namespace mw = middleware;
     namespace utl = utilities;
 
-    class ax_crop_resize_nv12
+    std::string read_txt(const std::string& filename, int line)
     {
-    public:
-        ax_crop_resize_nv12() = default;
-        ~ax_crop_resize_nv12();
-        int init(int input_h, int input_w, int model_h, int model_w, int model_type);
-        int run_crop_resize_nv12(std::vector<char>& input_data, std::vector<uint8_t>& output_data);
-
-    private:
-        AX_NPU_CV_Image* m_input_image;
-        AX_NPU_CV_Image* m_output_image;
-        AX_NPU_CV_Box* m_box;
-
-        int m_model_type = AX_NPU_MODEL_TYPE_1_1_1;
-    };
-
-    int
-    ax_crop_resize_nv12::init(int input_h, int input_w, int model_h, int model_w, int model_type)
-    {
-        axcv::ax_image input;
-        input.w = input_w;
-        input.h = input_h;
-        input.stride_w = input.w;
-        input.color_space = AX_NPU_CV_FDT_NV12;
-        m_input_image = axcv::alloc_cv_image(input);
-        if (!m_input_image)
+        std::ifstream fin;
+        fin.open(filename, std::ios::in);
+        std::string strVec[5530];
+        int i = 0;
+        while (!fin.eof())
         {
-            fprintf(stderr, "[ERR] alloc_cv_image input falil \n");
-            return -1;
+            std::string inbuf;
+            getline(fin, inbuf, '\n');
+            strVec[i] = inbuf;
+            i = i + 1;
         }
-
-        axcv::ax_box box;
-        box.h = input_h;
-        box.w = input_w;
-        box.x = 0;
-        box.y = 0;
-        m_box = axcv::filter_box(input, box);
-        if (!m_box)
-        {
-            fprintf(stderr, "[ERR] box not legal \n");
-            return -1;
-        }
-
-        axcv::ax_image output;
-        output.w = model_w;
-        output.h = model_h;
-        output.stride_w = output.w;
-        output.color_space = AX_NPU_CV_FDT_NV12;
-        m_output_image = axcv::alloc_cv_image(output);
-        if (!m_output_image)
-        {
-            fprintf(stderr, "[ERR] alloc_cv_image output falil \n");
-            return -1;
-        }
-
-        m_model_type = model_type;
-
-        return 0;
+        return strVec[line - 1];
     }
 
-    int ax_crop_resize_nv12::run_crop_resize_nv12(std::vector<char>& input_data, std::vector<uint8_t>& output_data)
+    void process_crnn_result(const float* ocr_data, const char* label_file, int shape0, int shape1)
     {
-        /**
-         *  when copy_to_device or memcpy slow
-         *  try:
-         *      1. set model_input and crop_resize.dst_image as same block address: ref ax_classification_nv12_resize_opt.cc
-         *      2. use npu_cv_crop implement dma copy
-         *      3. use ivps_cmm_copy but require 32k align
-         */
-
-        int ret = axcv::npu_crop_resize(m_input_image, input_data.data(), m_output_image, m_box, (AX_NPU_SDK_EX_MODEL_TYPE_T)m_model_type);
-        if (ret != AX_NPU_DEV_STATUS_SUCCESS)
+        fprintf(stdout, "--------------------------------------\n");
+        int last_idx = 0;
+        // read key.txt
+        std::string str1;
+        for (int i = 0; i < shape0; i++)
         {
-            fprintf(stderr, "[ERR] npu_crop_resize err code:%x \n", ret);
-            return ret;
+            const float* idx = ocr_data + i * shape1;
+            int max_index = 0;
+            float max_value = -FLT_MAX;
+            for (int j = 0; j < shape1; j++)
+            {
+                float loc = idx[j];
+                if (loc > max_value)
+                {
+                    max_value = loc;
+                    max_index = j;
+                }
+            }
+            if (max_index != 0 && !(max_index > 0 && last_idx == max_index))
+            {
+                str1 = read_txt(label_file, max_index);
+                fprintf(stdout, "%s", str1.c_str());
+                str1 = ' ';
+            }
+            last_idx = max_index;
         }
-
-        memcpy(output_data.data(), m_output_image->pVir, cv::get_image_data_size(m_output_image));
-        return 0;
+        fprintf(stdout, "\n");
+        fprintf(stdout, "--------------------------------------\n");
     }
 
-    ax_crop_resize_nv12::~ax_crop_resize_nv12()
-    {
-        axcv::free_cv_image(m_input_image);
-        axcv::free_cv_image(m_output_image);
-        delete m_box;
-    }
-
-    bool
-    run_classification(const std::string& model, const std::vector<uint8_t>& data, const int& repeat)
+    bool run_classification(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, const std::string keys_file)
     {
         // 1. create a runtime handle and load the model
         AX_JOINT_HANDLE joint_handle;
@@ -270,6 +224,7 @@ namespace ax
 
         uint32_t duration_neu_init_us = 0;
         uint32_t duration_axe_init_us = 0;
+        uint32_t duration_onnx_init_us = 0;
         for (uint32_t j = 0; j < joint_comp_size; ++j)
         {
             auto& comp = joint_comps[j];
@@ -285,6 +240,9 @@ namespace ax
                 duration_axe_init_us += comp.tProfile.nInitUs;
                 break;
             }
+            case AX_JOINT_COMPONENT_TYPE_T::AX_JOINT_COMPONENT_TYPE_ONNX:
+                duration_onnx_init_us += comp.tProfile.nInitUs;
+                break;
             default:
                 fprintf(stderr, "Unknown component type %d.\n", (int)comp.eType);
             }
@@ -293,6 +251,7 @@ namespace ax
         // 4. run & benchmark
         uint32_t duration_neu_core_us = 0, duration_neu_total_us = 0;
         uint32_t duration_axe_core_us = 0, duration_axe_total_us = 0;
+        uint32_t duration_onnx_core_us = 0, duration_onnx_total_us = 0;
 
         std::vector<float> time_costs(repeat, 0.f);
         for (int i = 0; i < repeat; ++i)
@@ -328,27 +287,26 @@ namespace ax
                     duration_axe_core_us += comp.tProfile.nCoreUs;
                     duration_axe_total_us += comp.tProfile.nTotalUs;
                 }
+
+                if (comp.eType == AX_JOINT_COMPONENT_TYPE_T::AX_JOINT_COMPONENT_TYPE_ONNX)
+                {
+                    duration_onnx_init_us += comp.tProfile.nCoreUs;
+                    duration_onnx_total_us += comp.tProfile.nTotalUs;
+                }
             }
         }
 
-        // 5. get top K
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
             auto& output = io_info->pOutputs[i];
             auto& info = joint_io_arr.pOutputs[i];
 
             auto ptr = (float*)info.pVirAddr;
-            auto actual_data_size = output.nSize / output.pShape[0] / sizeof(float);
 
-            std::vector<cls::score> result(actual_data_size);
-            for (uint32_t id = 0; id < actual_data_size; id++)
-            {
-                result[id].id = id;
-                result[id].score = ptr[id];
-            }
+            auto length = output.pShape[1];
+            auto char_size = output.pShape[2];
 
-            cls::sort_score(result);
-            cls::print_score(result, 5);
+            process_crnn_result(ptr, keys_file.c_str(), length, char_size);
         }
 
         // 6. show time costs
@@ -364,52 +322,68 @@ namespace ax
 
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
         auto min_max_time = std::minmax_element(time_costs.begin(), time_costs.end());
+
         fprintf(stdout,
-                "Repeat %d times, avg time %.2f ms, max_time %.2f ms, min_time %.2f ms\n",
+                "Repeat %d times, avg time %.2f ms, max_time %.2f ms, min_time %.2f ms\n \t\t(neu: avg_time %.2f ms  axe: avg_time %.2f ms  onnx:avg_time %.2f ms) \n",
                 repeat,
                 total_time / (float)repeat,
                 *min_max_time.second,
-                *min_max_time.first);
+                *min_max_time.first,
+                (float)duration_neu_total_us / (float)repeat / 1000,
+                (float)duration_axe_total_us / (float)repeat / 1000,
+                (float)duration_onnx_total_us / (float)repeat / 1000);
 
         clear_and_exit();
+
         return true;
     }
 } // namespace ax
 
-// ./ax_classification_nv12 -m mobilenetv2-7.joint -i 800x480car.nv12 -h 480 -w 800
-// ./ax_classification_nv12 -m mobilenetv2-7.joint -i 480x360cat.yuv -h 360 -w 480
 int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
-    cmd.add<std::string>("input", 'i', "input file", true, "");
-    cmd.add<AX_U32>("input_h", 'h', "input_h", true, 0);
-    cmd.add<AX_U32>("input_w", 'w', "input_w", true, 0);
+    cmd.add<std::string>("image", 'i', "image file", true, "");
+    cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(DEFAULT_IMG_H) + "," + std::to_string(DEFAULT_IMG_W));
+    cmd.add<std::string>("key", 'k', "key file", true, "keys.txt");
 
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
-    cmd.add<int>("mode_type", 'n', "model_type", false, AX_NPU_MODEL_TYPE_1_1_1);
     cmd.parse_check(argc, argv);
 
     // 0. get app args, can be removed from user's app
     auto model_file = cmd.get<std::string>("model");
-    auto input_file = cmd.get<std::string>("input");
+    auto image_file = cmd.get<std::string>("image");
+    auto keys_file = cmd.get<std::string>("key");
 
     auto model_file_flag = utilities::file_exist(model_file);
-    auto image_file_flag = utilities::file_exist(input_file);
+    auto image_file_flag = utilities::file_exist(image_file);
+    auto keys_file_flag = utilities::file_exist(keys_file);
 
-    auto input_h = cmd.get<AX_U32>("input_h");
-    auto input_w = cmd.get<AX_U32>("input_w");
-
-    auto model_type = (AX_NPU_SDK_EX_MODEL_TYPE_T)cmd.get<int>("mode_type");
-
-    if (!model_file_flag | !image_file_flag)
+    if (!model_file_flag | !image_file_flag | !keys_file_flag)
     {
         auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
         if (!model_file_flag) { show_error("model", model_file); }
-        if (!image_file_flag) { show_error("image", input_file); }
+        if (!image_file_flag) { show_error("image", image_file); }
+        if (!keys_file_flag) { show_error("keys", keys_file); }
+        return -1;
+    }
+
+    auto input_size_string = cmd.get<std::string>("size");
+
+    std::array<int, 2> input_size = {DEFAULT_IMG_H, DEFAULT_IMG_W};
+
+    auto input_size_flag = utilities::parse_string(input_size_string, input_size);
+
+    if (!input_size_flag)
+    {
+        auto show_error = [](const std::string& kind, const std::string& value) {
+            fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
+        };
+
+        show_error("size", input_size_string);
 
         return -1;
     }
@@ -420,10 +394,22 @@ int main(int argc, char* argv[])
     fprintf(stdout, "--------------------------------------\n");
 
     fprintf(stdout, "model file : %s\n", model_file.c_str());
-    fprintf(stdout, "input file : %s\n", input_file.c_str());
-    fprintf(stdout, "img_h, img_w : %d %d\n", input_h, input_w);
+    fprintf(stdout, "image file : %s\n", image_file.c_str());
+    fprintf(stdout, "img_h, img_w : %d %d\n", input_size[0], input_size[1]);
 
-    // 2. init ax system, if NOT INITED in other apps.
+    // 2. read image & resize & transpose
+    std::vector<uint8_t> image(input_size[0] * input_size[1] * 3);
+    cv::Mat mat = cv::imread(image_file);
+    if (mat.empty())
+    {
+        fprintf(stderr, "Read image failed.\n");
+        return -1;
+    }
+    cv::Mat img_new(input_size[0], input_size[1], CV_8UC3, image.data());
+    cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
+    cv::resize(mat, img_new, cv::Size(input_size[1], input_size[0]));
+
+    // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
     //   this init ONLY will be used in demo apps to avoid using a none inited
     //     device.
@@ -437,47 +423,19 @@ int main(int argc, char* argv[])
         return ret;
     }
 
-    AX_NPU_SDK_EX_ATTR_T hard_mode = {common::get_hard_mode_by_model_type(model_type)};
-    ret = AX_NPU_SDK_EX_Init_with_attr(&hard_mode);
-    if (ret != AX_NPU_DEV_STATUS_SUCCESS)
-    {
-        fprintf(stderr, "[ERR] AX_NPU_SDK_EX_Init_with_attr err code:%x", ret);
-        return ret;
-    }
-
-    // 3. read nv12 image
-    std::vector<char> input;
-    utilities::read_file(input_file, input);
-
-    // 4. crop_resize
-    //    use sys_npu_api so sys_init before process nv12
-    std::vector<uint8_t> model_input(MODEL_BGR_INPUT_W * MODEL_BGR_INPUT_H * 3 / 2);
-    {
-        auto crop_resize_helper = std::make_unique<ax::ax_crop_resize_nv12>();
-        crop_resize_helper->init((int)input_h, (int)input_w, MODEL_BGR_INPUT_H, MODEL_BGR_INPUT_W, model_type);
-        timer crop_resize_timer;
-        for (size_t i = 0; i < 10; i++)
-        {
-            crop_resize_helper->run_crop_resize_nv12(input, model_input);
-        }
-        float crop_resize_cost = crop_resize_timer.cost();
-        fprintf(stdout, "run crop_resize time cost avg: %f :ms \n", crop_resize_cost / 10);
-    }
-
-    // 5. show the version (optional)
+    // 4. show the version (optional)
     fprintf(stdout, "Run-Joint Runtime version: %s\n", AX_JOINT_GetVersion());
     fprintf(stdout, "--------------------------------------\n");
 
-    // 6. run the processing
-    auto flag = ax::run_classification(model_file, model_input, repeat);
+    // 5. run the processing
+    auto flag = ax::run_classification(model_file, image, repeat, keys_file);
     if (!flag)
     {
         fprintf(stderr, "Run classification failed.\n");
     }
 
-    // 7. last de-init
+    // 6. last de-init
     //   as step 1, if the device inited by another app, DO NOT de-init the
     //     device at this app.
-    AX_NPU_SDK_EX_Deinit();
     AX_SYS_Deinit();
 }

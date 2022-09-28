@@ -211,6 +211,7 @@ namespace middleware
         return pBuf;
     }
 
+#ifdef AXERA_TARGET_CHIP_AX620
     AX_S32 prepare_io_npu_cv_image(AX_NPU_CV_Image* cv_image, AX_JOINT_IO_T& io, const AX_JOINT_IO_INFO_T* io_info, const uint32_t& batch = 1)
     {
         std::memset(&io, 0, sizeof(io));
@@ -263,6 +264,7 @@ namespace middleware
         }
         return AX_ERR_NPU_JOINT_SUCCESS;
     }
+#endif
 
     AX_S32 prepare_io_out_cache(const void* buf, const size_t& size, AX_JOINT_IO_T& io, const AX_JOINT_IO_INFO_T* io_info, const uint32_t& batch = 1)
     {
