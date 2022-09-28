@@ -28,7 +28,6 @@
 #include "ax_sys_api.h"
 #include "joint.h"
 #include "joint_adv.h"
-#include "npu_cv_kit/npu_common.h"
 
 namespace middleware
 {
