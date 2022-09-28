@@ -77,13 +77,12 @@ namespace axcv
 
     AX_NPU_CV_Image* alloc_cv_image(const ax_image& input)
     {
-        int ret = 0;
         auto dst_image = new AX_NPU_CV_Image;
         dst_image->nWidth = input.w;
         dst_image->nHeight = input.h;
         dst_image->tStride.nW = input.stride_w;
         dst_image->eDtype = input.color_space;
-        ret = AX_SYS_MemAlloc((AX_U64*)&dst_image->pPhy, (void**)&dst_image->pVir, cv::get_image_data_size(dst_image), 128, (AX_S8*)"NPU-CV");
+        auto ret = AX_SYS_MemAlloc((AX_U64*)&dst_image->pPhy, (void**)&dst_image->pVir, cv::get_image_data_size(dst_image), 128, (AX_S8*)"NPU-CV");
         if (ret != AX_ERR_NPU_JOINT_SUCCESS)
         {
             fprintf(stderr, "[ERR] error alloc image sys mem %x \n", ret);
@@ -111,8 +110,8 @@ namespace axcv
         color.nYUVColorValue[0] = 0;
         color.nYUVColorValue[1] = 128;
         AX_NPU_SDK_EX_MODEL_TYPE_T virtual_npu_mode_type = model_type;
-        AX_NPU_CV_ImageResizeAlignParam horizontal = (AX_NPU_CV_ImageResizeAlignParam)0;
-        AX_NPU_CV_ImageResizeAlignParam vertical = (AX_NPU_CV_ImageResizeAlignParam)0;
+        auto horizontal = (AX_NPU_CV_ImageResizeAlignParam)0;
+        auto vertical = (AX_NPU_CV_ImageResizeAlignParam)0;
 
         int ret = AX_NPU_CV_CropResizeImage(virtual_npu_mode_type, input_image, 1, &output_image, &box, horizontal, vertical, color);
         if (ret != AX_NPU_DEV_STATUS_SUCCESS)

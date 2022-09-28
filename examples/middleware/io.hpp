@@ -28,6 +28,7 @@
 #include "ax_sys_api.h"
 #include "joint.h"
 #include "joint_adv.h"
+#include "npu_cv_kit/npu_common.h"
 
 namespace middleware
 {
@@ -209,6 +210,61 @@ namespace middleware
         }
         return pBuf;
     }
+
+#ifdef AXERA_TARGET_CHIP_AX620
+    AX_S32 prepare_io_npu_cv_image(AX_NPU_CV_Image* cv_image, AX_JOINT_IO_T& io, const AX_JOINT_IO_INFO_T* io_info, const uint32_t& batch = 1)
+    {
+        std::memset(&io, 0, sizeof(io));
+
+        io.nInputSize = io_info->nInputSize;
+        if (1 != io.nInputSize)
+        {
+            fprintf(stderr, "[ERR]: Only single input was accepted(got %u).\n", io.nInputSize);
+            return -1;
+        }
+        io.pInputs = new AX_JOINT_IO_BUFFER_T[io.nInputSize];
+
+        // fill input
+        {
+            const AX_JOINT_IOMETA_T* pMeta = io_info->pInputs;
+            AX_JOINT_IO_BUFFER_T* pBuf = io.pInputs;
+
+            if (pMeta->nShapeSize <= 0)
+            {
+                fprintf(stderr, "[ERR]: Dimension(%u) of shape is not allowed.\n", (uint32_t)pMeta->nShapeSize);
+                return -1;
+            }
+
+            auto actual_data_size = pMeta->nSize / pMeta->pShape[0] * batch;
+            if (cv_image->nSize != actual_data_size)
+            {
+                fprintf(stderr,
+                        "[ERR]: The cv_image size is not equal to model input(%s) size(%u vs %u).\n",
+                        io_info->pInputs[0].pName,
+                        (uint32_t)cv_image->nSize,
+                        actual_data_size);
+                return -1;
+            }
+
+            pBuf->pVirAddr = cv_image->pVir;
+            pBuf->phyAddr = cv_image->pPhy;
+            pBuf->nSize = cv_image->nSize;
+        }
+
+        // deal with output
+        {
+            io.nOutputSize = io_info->nOutputSize;
+            io.pOutputs = new AX_JOINT_IO_BUFFER_T[io.nOutputSize];
+            for (size_t i = 0; i < io.nOutputSize; ++i)
+            {
+                const AX_JOINT_IOMETA_T* pMeta = io_info->pOutputs + i;
+                AX_JOINT_IO_BUFFER_T* pBuf = io.pOutputs + i;
+                alloc_joint_buffer(pMeta, pBuf);
+            }
+        }
+        return AX_ERR_NPU_JOINT_SUCCESS;
+    }
+#endif
 
     AX_S32 prepare_io_out_cache(const void* buf, const size_t& size, AX_JOINT_IO_T& io, const AX_JOINT_IO_INFO_T* io_info, const uint32_t& batch = 1)
     {
