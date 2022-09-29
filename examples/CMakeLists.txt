@@ -73,6 +73,7 @@ find_package(OpenCV REQUIRED)
 if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_classification        ax_classification_steps.cc)
     axera_example (ax_classification_nv12   ax_classification_nv12_resize_steps.cc)
+    axera_example (ax_classification_nv12_opt   ax_classification_nv12_resize_opt.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
     axera_example (ax_yoloxs                ax_yoloxs_steps.cc)
     axera_example (ax_yolo_fastest          ax_yolo_fastest_steps.cc)
@@ -87,7 +88,6 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_paddle_yolov3         ax_paddle_yolov3_steps.cc)
     axera_example (ax_scrfd                 ax_scrfd_steps.cc)
 
-    axera_example (ax_cv_test                   ax_crop_resize_nv12.cc)
     axera_example (ax_classification_accuracy   ax_classification_accuracy.cc)
     axera_example (ax_yolov3_accuracy           ax_yolov3_accuracy.cc)
 
@@ -98,6 +98,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_paddle_mobilehumseg   ax_paddle_mobilehumseg_steps.cc)
     axera_example (ax_monodlex              ax_monodlex_steps.cc)
     axera_example (ax_paddle_mobileseg      ax_paddle_mobileseg.cc)
+    axera_example (ax_crnn                  ax_crnn_steps.cc)
 else() # ax630a support
     axera_example (ax_classification        ax_classification_steps.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
