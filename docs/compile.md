@@ -140,9 +140,7 @@ install
 
 #### 安装交叉编译工具链
 
-- aarch64 Linux 交叉编译工具链建议使用同 BSP 一致的版本：
-
-- [下载地址](http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/aarch64-linux-gnu/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz)
+- aarch64 Linux 交叉编译工具链[获取地址](http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/aarch64-linux-gnu/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz)
 
 #### BSP 准备
 
