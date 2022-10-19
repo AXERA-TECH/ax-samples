@@ -16,6 +16,8 @@
 
 /*
  * Author: ZHEQIUSHUI
+ *
+ * original pretrained: https://github.com/deepcam-cn/yolov5-face
  */
 
 #include <cstdio>
