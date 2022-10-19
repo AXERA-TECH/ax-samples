@@ -25,6 +25,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - YOLO-Fastest-Body
 - 人脸检测
   - scrfd
+  - yolov5-face([original model](https://github.com/deepcam-cn/yolov5-face))
 - 障碍物检测 (扫地机场景)
   - Robot-Obstacle-Detect
 - 3D单目车辆检测
