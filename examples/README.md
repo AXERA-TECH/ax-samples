@@ -190,6 +190,30 @@ detection num: 111
 ```
 ![Scrfd](../docs/scrfd.jpg)
 
+- 人脸检测：Yolov5-face
+```
+root@AXERA:~/samples# ./ax_yolov5s_face -m yolov5s-face.joint -i selfie.jpg -r 10
+--------------------------------------
+model file : yolov5s-face_sub.joint
+image file : selfie.jpg
+img_h, img_w : 640 640
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.20
+07305a6
+run over: output len 3
+--------------------------------------
+Create handle took 498.81 ms (neu 25.10 ms, axe 0.00 ms, overhead 473.71 ms)
+--------------------------------------
+Repeat 10 times, avg time 21.89 ms, max_time 22.31 ms, min_time 21.83 ms
+--------------------------------------
+detection num: 310
+```
+![yolov5s-face](../docs/yolov5s_face.jpg)
+
 - 3D单目车辆检测：Monodlex
 ```
 root@AXERA:~/samples# ./ax_monodlex -m monodlex_sigmoid_max.joint -i cityscape.png -r 10
