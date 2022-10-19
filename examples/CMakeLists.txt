@@ -75,6 +75,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_classification_nv12   ax_classification_nv12_resize_steps.cc)
     axera_example (ax_classification_nv12_opt   ax_classification_nv12_resize_opt.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
+    axera_example (ax_yolov5s_face          ax_yolov5s_face_steps.cc)
     axera_example (ax_yoloxs                ax_yoloxs_steps.cc)
     axera_example (ax_yolo_fastest          ax_yolo_fastest_steps.cc)
     axera_example (ax_yolo_fastest_body     ax_yolo_fastest_body_steps.cc)
