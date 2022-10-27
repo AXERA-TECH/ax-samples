@@ -17,7 +17,7 @@
 
 已支持开发板
 
-- [AXera-Pi](https://item.taobao.com/item.htm?_u=m226ocm5e25&id=682169792430)(AX620A)
+- [AXera-Pi](https://wiki.sipeed.com/m3axpi)(AX620A)
 
 ## 快速上手
 
