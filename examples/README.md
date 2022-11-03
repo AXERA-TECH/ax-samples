@@ -28,6 +28,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - yolov5-face([original model](https://github.com/deepcam-cn/yolov5-face))
 - 障碍物检测 (扫地机场景)
   - Robot-Obstacle-Detect
+- 无人机视角物体检测
+  - YOLOv5s_visdrone
 - 3D单目车辆检测
   - Monodlex
 - 人体关键点
@@ -115,6 +117,50 @@ detection num: 3
  1:  65%, [ 167,  120,  564,  417], bicycle
 ```
 ![YOLOv5s](../docs/yolov5s.jpg)
+
+- 无人机视角物体检测：YOLOv5s_visdrone
+
+```
+root@AXERA:~/samples# ./ax_yolov5s_visdrone -m yolov5s_visdrone.joint -i visdrone.jpg -r 10
+--------------------------------------
+model file : yolov5s_visdrone.joint
+image file : visdrone.jpg
+img_h, img_w : 640 640
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.14
+4111370
+run over: output len 3
+--------------------------------------
+Create handle took 464.04 ms (neu 20.21 ms, axe 0.00 ms, overhead 443.83 ms)
+--------------------------------------
+Repeat 10 times, avg time 20.44 ms, max_time 20.83 ms, min_time 20.36 ms
+--------------------------------------
+detection num: 19
+3:  89%, [ 949,  593, 1011,  683], car
+3:  87%, [ 873,  570,  922,  663], car
+3:  85%, [ 876,  702,  943,  813], car
+3:  65%, [ 767,  293,  808,  329], car
+3:  64%, [ 610,  362,  707,  415], car
+3:  59%, [ 782,  244,  823,  286], car
+9:  59%, [ 448,  556,  501,  591], motor
+9:  52%, [ 364,  758,  414,  787], motor
+9:  44%, [ 457,  522,  499,  553], motor
+3:  43%, [ 783,  189,  811,  220], car
+9:  43%, [ 678,  508,  734,  541], motor
+1:  41%, [ 867,  318,  877,  343], people
+1:  40%, [ 868,  406,  881,  439], people
+9:  40%, [ 485,  456,  533,  482], motor
+3:  38%, [ 758,  324,  824,  367], car
+9:  37%, [ 735,  506,  774,  532], motor
+1:  37%, [ 799,  513,  816,  550], people
+1:  36%, [ 972,  793,  997,  843], people
+9:  35%, [ 662,  466,  698,  495], motor
+```
+![YOLOv5s-visdrone](../docs/yolov5s_visdrone.jpg)
 
 - 物体检测：YOLOv7-Tiny
 ```
