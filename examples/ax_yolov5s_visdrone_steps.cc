@@ -15,7 +15,7 @@
  */
 
 /*
- * Author: ls.wang
+ * Author: Xiaolaoshu
  */
 
 #include <cstdio>
