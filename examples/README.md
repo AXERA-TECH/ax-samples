@@ -28,6 +28,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - yolov5-face([original model](https://github.com/deepcam-cn/yolov5-face))
 - 障碍物检测 (扫地机场景)
   - Robot-Obstacle-Detect
+- 无人机视角物体检测
+  - YOLOv5s_visdrone
 - 3D单目车辆检测
   - Monodlex
 - 人体关键点
@@ -116,7 +118,7 @@ detection num: 3
 ```
 ![YOLOv5s](../docs/yolov5s.jpg)
 
-- 物体检测：YOLOv5s_visdrone
+- 无人机视角物体检测：YOLOv5s_visdrone
 
 ```
 root@AXERA:~/samples# ./ax_yolov5s_visdrone -m yolov5s_visdrone.joint -i visdrone.jpg -r 10
