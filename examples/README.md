@@ -305,6 +305,28 @@ Repeat 10 times, avg time 14.11 ms, max_time 14.64 ms, min_time 14.04 ms
 ```
 ![HRNet](../docs/hrnet.png)
 
+- 人脸分割：FaceParsing
+```
+root@AXERA:~/samples# ./ax_face_parsing -m ./face_parsing.joint -i ./face_parsing.jpg -r 10
+--------------------------------------
+model file : ./face_parsing.joint
+image file : ./face_parsing.jpg
+img_h, img_w : 512 512
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.14
+4111370
+--------------------------------------
+Create handle took 683.64 ms (neu 20.54 ms, axe 0.00 ms, overhead 663.10 ms)
+--------------------------------------
+Repeat 10 times, avg time 49.38 ms, max_time 50.02 ms, min_time 49.29 ms
+--------------------------------------
+```
+![FaceParsing](../docs/face_parsing_res.jpg)
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
