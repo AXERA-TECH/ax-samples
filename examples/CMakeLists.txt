@@ -101,6 +101,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_monodlex              ax_monodlex_steps.cc)
     axera_example (ax_paddle_mobileseg      ax_paddle_mobileseg.cc)
     axera_example (ax_crnn                  ax_crnn_steps.cc)
+    axera_example (ax_face_parsing          ax_face_parsing_steps.cc)
 else() # ax630a support
     axera_example (ax_classification        ax_classification_steps.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
