@@ -327,6 +327,29 @@ Repeat 10 times, avg time 49.38 ms, max_time 50.02 ms, min_time 49.29 ms
 ```
 ![FaceParsing](../docs/face_parsing_res.jpg)
 
+- 手部关键点：HandPose
+```
+root@AXERA:~/samples# ./ax_handpose -m ./handpose.joint -i ./hand.jpg -r 10
+--------------------------------------
+model file : ./handpose.joint
+image file : ./hand.jpg
+img_h, img_w : 224 224
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.14
+4111370
+run over: output len 2
+--------------------------------------
+Create handle took 298.99 ms (neu 15.22 ms, axe 0.00 ms, overhead 283.78 ms)
+--------------------------------------
+Repeat 10 times, avg time 10.00 ms, max_time 10.33 ms, min_time 9.95 ms
+--------------------------------------
+```
+![HandPose](../docs/handpose.png)
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
