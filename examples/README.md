@@ -26,6 +26,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 - 人脸检测
   - scrfd
   - yolov5-face([original model](https://github.com/deepcam-cn/yolov5-face))
+- 人脸分割
+  - face_parsing
 - 障碍物检测 (扫地机场景)
   - Robot-Obstacle-Detect
 - 无人机视角物体检测
@@ -34,6 +36,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - Monodlex
 - 人体关键点
   - HRNet
+  - HandPose
 - 人体分割
   - [PP-HumanSeg](#MobileSeg)
 - 语义分割
@@ -67,8 +70,7 @@ total 40644
 ```
 
 ### 运行示例
-- 物体分类：MobileNetv2 
-
+#### 物体分类：MobileNetv2 
 ```
 /root/samples # ./ax_classification -m mobilenetv2.joint -i cat.jpg -r 10
 --------------------------------------
@@ -92,8 +94,7 @@ Create handle took 201.32 ms (neu 6.36 ms, axe 0.00 ms, overhead 194.96 ms)
 Repeat 10 times, avg time 3.43 ms, max_time 3.75 ms, min_time 3.37 ms
 ```
 
-- 物体检测：YOLOv5s
-
+#### 物体检测：YOLOv5s
 ```
 root@AXERA:~/samples# ./ax_yolov5s -m yolov5s.joint -i ssd_dog.jpg -r 10
 --------------------------------------
@@ -118,8 +119,7 @@ detection num: 3
 ```
 ![YOLOv5s](../docs/yolov5s.jpg)
 
-- 无人机视角物体检测：YOLOv5s_visdrone
-
+#### 无人机视角物体检测：YOLOv5s_visdrone
 ```
 root@AXERA:~/samples# ./ax_yolov5s_visdrone -m yolov5s_visdrone.joint -i visdrone.jpg -r 10
 --------------------------------------
@@ -162,7 +162,7 @@ detection num: 19
 ```
 ![YOLOv5s-visdrone](../docs/yolov5s_visdrone.jpg)
 
-- 物体检测：YOLOv7-Tiny
+#### 物体检测：YOLOv7-Tiny
 ```
 root@AXERA:~/samples# ./ax_yolov7 -m yolov7-tiny.joint -i ssd_dog.jpg -r 10
 --------------------------------------
@@ -188,7 +188,7 @@ detection num: 3
 ```
 ![YOLOv7-Tiny](../docs/yolov7-tiny.jpg)
 
-- 物体检测：YOLOX-S
+#### 物体检测：YOLOX-S
 ```
 /tmp/samples # ./ax_yoloxs -m yolox_s_cut.joint -i dog.jpg -r 10
 --------------------------------------
@@ -214,7 +214,7 @@ detection num: 4
 58:  53%, [ 685,  111,  716,  154], potted plant
 ```
 
-- 人脸检测：Scrfd
+#### 人脸检测：Scrfd
 ```
 root@AXERA:~/samples# ./ax_scrfd -m scrfd_500m_bnkps_shape640x640.joint -i selfie.jpg -r 10
 --------------------------------------
@@ -237,7 +237,7 @@ detection num: 111
 ```
 ![Scrfd](../docs/scrfd.jpg)
 
-- 人脸检测：Yolov5-face
+#### 人脸检测：Yolov5-face
 ```
 root@AXERA:~/samples# ./ax_yolov5s_face -m yolov5s-face.joint -i selfie.jpg -r 10
 --------------------------------------
@@ -261,7 +261,7 @@ detection num: 310
 ```
 ![yolov5s-face](../docs/yolov5s_face.jpg)
 
-- 3D单目车辆检测：Monodlex
+#### 3D单目车辆检测：Monodlex
 ```
 root@AXERA:~/samples# ./ax_monodlex -m monodlex_sigmoid_max.joint -i cityscape.png -r 10
 --------------------------------------
@@ -283,7 +283,7 @@ detection num: 7
 ```
 ![Monodlex](../docs/monodlex.png)
 
-- 人体关键点：HRNet
+#### 人体关键点：HRNet
 ```
 root@AXERA:~/samples# ./ax_hrnet -m hrnet_256x192.joint -i pose-1.jpeg -r 10
 --------------------------------------
@@ -305,7 +305,7 @@ Repeat 10 times, avg time 14.11 ms, max_time 14.64 ms, min_time 14.04 ms
 ```
 ![HRNet](../docs/hrnet.png)
 
-- 人脸分割：FaceParsing
+#### 人脸分割：FaceParsing
 ```
 root@AXERA:~/samples# ./ax_face_parsing -m ./face_parsing.joint -i ./face_parsing.jpg -r 10
 --------------------------------------
@@ -327,7 +327,7 @@ Repeat 10 times, avg time 49.38 ms, max_time 50.02 ms, min_time 49.29 ms
 ```
 ![FaceParsing](../docs/face_parsing_res.jpg)
 
-- 手部关键点：HandPose
+#### 手部关键点：HandPose
 ```
 root@AXERA:~/samples# ./ax_handpose -m ./handpose.joint -i ./hand.jpg -r 10
 --------------------------------------
