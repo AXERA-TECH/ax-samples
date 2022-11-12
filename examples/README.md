@@ -16,20 +16,20 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - YOLOv4
   - YOLOv4-Tiny
   - YOLOv4-Tiny-3l
-  - YOLOv5s
-  - YOLOv7-Tiny
-  - YOLOX-S
+  - [YOLOv5s](#YOLOv5s)
+  - [YOLOv7-Tiny](#YOLOv7-Tiny)
+  - [YOLOX-S](#YOLOX-S)
   - YOLO-Fastest-XL
   - NanoDet
 - 人型检测
   - YOLO-Fastest-Body
 - 人脸检测
-  - scrfd
-  - yolov5-face([original model](https://github.com/deepcam-cn/yolov5-face))
+  - [scrfd](#Scrfd)
+  - [YOLOv5-Face](#YOLOv5-Face)([original model](https://github.com/deepcam-cn/yolov5-face))
 - 人脸分割
-  - [face_parsing](#FaceParsing)
+  - [Face_Parsing](#FaceParsing)
 - 障碍物检测 (扫地机场景)
-  - Robot-Obstacle-Detect
+  - [Robot-Obstacle-Detect](#)
 - 无人机视角物体检测
   - [YOLOv5s_visdrone](#YOLOv5s_visdrone)
 - 3D单目车辆检测
@@ -237,7 +237,7 @@ detection num: 111
 ```
 ![Scrfd](../docs/scrfd.jpg)
 
-#### Yolov5-face
+#### YOLOv5-Face
 ```
 root@AXERA:~/samples# ./ax_yolov5s_face -m yolov5s-face.joint -i selfie.jpg -r 10
 --------------------------------------
