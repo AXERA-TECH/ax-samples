@@ -27,20 +27,20 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - scrfd
   - yolov5-face([original model](https://github.com/deepcam-cn/yolov5-face))
 - 人脸分割
-  - face_parsing
+  - [face_parsing](#人脸分割：FaceParsing)
 - 障碍物检测 (扫地机场景)
   - Robot-Obstacle-Detect
 - 无人机视角物体检测
-  - YOLOv5s_visdrone
+  - [YOLOv5s_visdrone](#无人机视角物体检测：YOLOv5s_visdrone)
 - 3D单目车辆检测
-  - Monodlex
+  - [Monodlex](#3D单目车辆检测：Monodlex)
 - 人体关键点
-  - HRNet
-  - HandPose
+  - [HRNet](#人体关键点：HRNet)
+  - [HandPose](#手部关键点：HandPose)
 - 人体分割
-  - [PP-HumanSeg](#MobileSeg)
+  - [PP-HumanSeg](#PP-HumanSeg)
 - 语义分割
-  - [PP-Seg](#PP-HumanSeg)
+  - [PP-Seg](#MobileSeg)
 - 传统 CV 操作
   - CropResize
 - Pipeline 示例
