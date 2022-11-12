@@ -27,9 +27,9 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [scrfd](#Scrfd)
   - [YOLOv5-Face](#YOLOv5-Face)([original model](https://github.com/deepcam-cn/yolov5-face))
 - 人脸分割
-  - [Face_Parsing](#FaceParsing)
+  - Face_Parsing
 - 障碍物检测 (扫地机场景)
-  - [Robot-Obstacle-Detect](#)
+  - Robot-Obstacle-Detect
 - 无人机视角物体检测
   - [YOLOv5s_visdrone](#YOLOv5s_visdrone)
 - 3D单目车辆检测
