@@ -350,6 +350,32 @@ Repeat 10 times, avg time 10.00 ms, max_time 10.33 ms, min_time 9.95 ms
 ```
 ![HandPose](../docs/handpose.png)
 
+#### YOLOv5-Seg
+```
+root@AXERA:~/samples# ./ax_yolov5s_seg -m ./yolov5s-seg.joint -i ./seg.jpg -r 10
+--------------------------------------
+model file : ./yolov5s-seg.joint
+image file : ./seg.jpg
+img_h, img_w : 640 640
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.14
+4111370
+run over: output len 4
+--------------------------------------
+Create handle took 546.25 ms (neu 29.94 ms, axe 0.00 ms, overhead 516.31 ms)
+--------------------------------------
+Repeat 10 times, avg time 33.32 ms, max_time 33.71 ms, min_time 33.19 ms
+--------------------------------------
+detection num: 2
+17:  93%, [ 119,  113,  485,  403], horse
+ 0:  82%, [ 229,   17,  333,  278], person
+```
+![yolov5s-seg](../docs/yolov5s_seg.jpg)
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。

@@ -41,6 +41,9 @@ namespace detection
         int label;
         float prob;
         cv::Point2f landmark[5];
+        /* for yolov5-seg */
+        cv::Mat mask;
+        std::vector<float> mask_feat;
     } Object;
 
     static inline float sigmoid(float x)
@@ -591,7 +594,89 @@ namespace detection
             }
         }
     }
+    
+    static void generate_proposals_yolov5_seg(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 80, int mask_proto_dim = 32)
+    {
+        int anchor_num = 3;
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+        int anchor_group;
+        if (stride == 8)
+            anchor_group = 1;
+        if (stride == 16)
+            anchor_group = 2;
+        if (stride == 32)
+            anchor_group = 3;
 
+        auto feature_ptr = feat;
+
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                for (int a = 0; a <= anchor_num - 1; a++)
+                {
+                    if (feature_ptr[4] < prob_threshold_unsigmoid)
+                    {
+                        feature_ptr += (cls_num + 5 + mask_proto_dim);
+                        continue;
+                    }
+
+                    //process cls score
+                    int class_index = 0;
+                    float class_score = -FLT_MAX;
+                    for (int s = 0; s <= cls_num - 1; s++)
+                    {
+                        float score = feature_ptr[s + 5];
+                        if (score > class_score)
+                        {
+                            class_index = s;
+                            class_score = score;
+                        }
+                    }
+                    //process box score
+                    float box_score = feature_ptr[4];
+                    float final_score = sigmoid(box_score) * sigmoid(class_score);
+
+                    if (final_score >= prob_threshold)
+                    {
+                        float dx = sigmoid(feature_ptr[0]);
+                        float dy = sigmoid(feature_ptr[1]);
+                        float dw = sigmoid(feature_ptr[2]);
+                        float dh = sigmoid(feature_ptr[3]);
+                        float pred_cx = (dx * 2.0f - 0.5f + w) * stride;
+                        float pred_cy = (dy * 2.0f - 0.5f + h) * stride;
+                        float anchor_w = anchors[(anchor_group - 1) * 6 + a * 2 + 0];
+                        float anchor_h = anchors[(anchor_group - 1) * 6 + a * 2 + 1];
+                        float pred_w = dw * dw * 4.0f * anchor_w;
+                        float pred_h = dh * dh * 4.0f * anchor_h;
+                        float x0 = pred_cx - pred_w * 0.5f;
+                        float y0 = pred_cy - pred_h * 0.5f;
+                        float x1 = pred_cx + pred_w * 0.5f;
+                        float y1 = pred_cy + pred_h * 0.5f;
+
+                        Object obj;
+                        obj.rect.x = x0;
+                        obj.rect.y = y0;
+                        obj.rect.width = x1 - x0;
+                        obj.rect.height = y1 - y0;
+                        obj.label = class_index;
+                        obj.prob = final_score;
+                        obj.mask_feat.resize(mask_proto_dim);
+                        for(int k = 0; k < mask_proto_dim; k++)
+                        {
+                            obj.mask_feat[k] = feature_ptr[cls_num + 5 + k];
+                        }
+                        objects.push_back(obj);
+                    }
+
+                    feature_ptr += (cls_num + 5 + mask_proto_dim);
+                }
+            }
+        }
+    }
+    
     static void generate_proposals_yolov5_visdrone(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
                                        int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 10)
     {
@@ -777,7 +862,51 @@ namespace detection
 
         cv::imwrite(std::string(output_name) + ".jpg", image);
     }
+    
+    static void draw_objects_mask(const cv::Mat& bgr, const std::vector<Object>& objects, const char** class_names, const std::vector<std::vector<uint8_t> >& colors, const char* output_name)
+    {
+        cv::Mat image = bgr.clone();
+        cv::Mat mask = bgr.clone();
+        int color_index = 0;
+        for (size_t i = 0; i < objects.size(); i++)
+        {
+            const Object& obj = objects[i];
+            
+            const auto&  color = colors[color_index % 80];
+            color_index++;
+            
+            fprintf(stdout, "%2d: %3.0f%%, [%4.0f, %4.0f, %4.0f, %4.0f], %s\n", obj.label, obj.prob * 100, obj.rect.x,
+                    obj.rect.y, obj.rect.x + obj.rect.width, obj.rect.y + obj.rect.height, class_names[obj.label]);
+            
+            mask(cv::Rect((int)obj.rect.x,(int)obj.rect.y,(int)objects[i].rect.width, (int)objects[i].rect.height)).setTo(color, objects[i].mask);
+            
+            cv::rectangle(image, obj.rect, cv::Scalar(255, 0, 0));
 
+            char text[256];
+            sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
+
+            int baseLine = 0;
+            cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+
+            int x = obj.rect.x;
+            int y = obj.rect.y - label_size.height - baseLine;
+            if (y < 0)
+                y = 0;
+            if (x + label_size.width > image.cols)
+                x = image.cols - label_size.width;
+
+            cv::rectangle(image, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
+                          cv::Scalar(255, 255, 255), -1);
+
+            cv::putText(image, text, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                        cv::Scalar(0, 0, 0));
+        }
+        float blended_alpha = 0.5;
+        image = (1 - blended_alpha) * mask + blended_alpha * image;
+        
+        cv::imwrite(std::string(output_name) + ".jpg", image);
+    }
+    
     void reverse_letterbox(std::vector<Object>& proposal, std::vector<Object>& objects, int letterbox_rows, int letterbox_cols, int src_rows, int src_cols)
     {
         float scale_letterbox;
@@ -925,6 +1054,100 @@ namespace detection
             objects[i].rect.y = y0;
             objects[i].rect.width = x1 - x0;
             objects[i].rect.height = y1 - y0;
+        }
+    }
+    
+    void get_out_bbox_mask(std::vector<Object>& proposals, std::vector<Object>& objects, const float* mask_proto, int mask_proto_dim, int mask_stride, const float nms_threshold, int letterbox_rows, int letterbox_cols, int src_rows, int src_cols)
+    {
+        qsort_descent_inplace(proposals);
+        std::vector<int> picked;
+        nms_sorted_bboxes(proposals, picked, nms_threshold);
+
+        /* yolov5 draw the result */
+        float scale_letterbox;
+        int resize_rows;
+        int resize_cols;
+        if ((letterbox_rows * 1.0 / src_rows) < (letterbox_cols * 1.0 / src_cols))
+        {
+            scale_letterbox = letterbox_rows * 1.0 / src_rows;
+        }
+        else
+        {
+            scale_letterbox = letterbox_cols * 1.0 / src_cols;
+        }
+        resize_cols = int(scale_letterbox * src_cols);
+        resize_rows = int(scale_letterbox * src_rows);
+
+        int tmp_h = (letterbox_rows - resize_rows) / 2;
+        int tmp_w = (letterbox_cols - resize_cols) / 2;
+
+        float ratio_x = (float)src_rows / resize_rows;
+        float ratio_y = (float)src_cols / resize_cols;
+        
+        int mask_proto_h = int(letterbox_rows / mask_stride);
+        int mask_proto_w = int(letterbox_cols / mask_stride);
+        
+        int count = picked.size();
+        objects.resize(count);
+        
+        for (int i = 0; i < count; i++)
+        {
+            objects[i] = proposals[picked[i]];
+            float x0 = (objects[i].rect.x);
+            float y0 = (objects[i].rect.y);
+            float x1 = (objects[i].rect.x + objects[i].rect.width);
+            float y1 = (objects[i].rect.y + objects[i].rect.height);
+            /* naive RoiAlign by opencv */
+            int hstart = std::floor(objects[i].rect.y / mask_stride);
+            int hend = std::ceil(objects[i].rect.y / mask_stride + objects[i].rect.height / mask_stride);
+            int wstart = std::floor(objects[i].rect.x / mask_stride);
+            int wend = std::ceil(objects[i].rect.x / mask_stride + objects[i].rect.width / mask_stride);
+            
+            hstart = std::min(std::max(hstart, 0), mask_proto_h);
+            wstart = std::min(std::max(wstart, 0), mask_proto_w);
+            hend = std::min(std::max(hend, 0), mask_proto_h);
+            wend = std::min(std::max(wend, 0), mask_proto_w);
+            
+            int mask_w = wend - wstart;
+            int mask_h = hend - hstart;
+            
+            cv::Mat mask = cv::Mat(mask_h, mask_w, CV_32FC1);
+            if(mask_w > 0 && mask_h > 0)
+            {
+                std::vector<cv::Range> roi_ranges;
+                roi_ranges.push_back(cv::Range(0, 1));
+                roi_ranges.push_back(cv::Range::all());
+                roi_ranges.push_back(cv::Range(hstart, hend));
+                roi_ranges.push_back(cv::Range(wstart, wend));
+                
+                cv::Mat mask_protos = cv::Mat(mask_proto_dim, mask_proto_h * mask_proto_w, CV_32FC1, (float*)mask_proto);
+                int sz[] = { 1, mask_proto_dim, mask_proto_h, mask_proto_w };
+                cv::Mat mask_protos_reshape = mask_protos.reshape(1, 4, sz);
+                cv::Mat protos = mask_protos_reshape(roi_ranges).clone().reshape(0, { mask_proto_dim, mask_w * mask_h });
+                cv::Mat mask_proposals = cv::Mat(1, mask_proto_dim, CV_32FC1, (float*)objects[i].mask_feat.data());
+                cv::Mat masks_feature = (mask_proposals * protos);
+                /* sigmoid */
+                cv::exp( -masks_feature.reshape(1, { mask_h, mask_w }), mask);
+                mask = 1.0 / (1.0 + mask);
+            }
+            
+            x0 = (x0 - tmp_w) * ratio_x;
+            y0 = (y0 - tmp_h) * ratio_y;
+            x1 = (x1 - tmp_w) * ratio_x;
+            y1 = (y1 - tmp_h) * ratio_y;
+
+            x0 = std::max(std::min(x0, (float)(src_cols - 1)), 0.f);
+            y0 = std::max(std::min(y0, (float)(src_rows - 1)), 0.f);
+            x1 = std::max(std::min(x1, (float)(src_cols - 1)), 0.f);
+            y1 = std::max(std::min(y1, (float)(src_rows - 1)), 0.f);
+
+            objects[i].rect.x = x0;
+            objects[i].rect.y = y0;
+            objects[i].rect.width = x1 - x0;
+            objects[i].rect.height = y1 - y0;
+            cv::resize(mask, mask, cv::Size((int)objects[i].rect.width, (int)objects[i].rect.height));
+            objects[i].mask = mask > 0.5;
+            
         }
     }
 
