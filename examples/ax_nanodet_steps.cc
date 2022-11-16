@@ -57,7 +57,7 @@ const char* CLASS_NAMES[] = {
     "hair drier", "toothbrush"};
 
 const int DEFAULT_LOOP_COUNT = 1;
-
+const int CLS_NUM = 80;
 const float PROB_THRESHOLD = 0.33f;
 const float NMS_THRESHOLD = 0.4f;
 namespace ax
@@ -91,11 +91,10 @@ namespace ax
     // @param:  prob_threshold[in]
     // @param:  objects[out] output detected objects
     static void generate_proposals(const float* pred_80_32_nhwc, int stride,
-                                   const int& model_h, const int& model_w, float prob_threshold, std::vector<det::Object>& objects)
+                                   const int& model_h, const int& model_w, float prob_threshold, std::vector<det::Object>& objects, int num_class = 80)
     {
         const int num_grid_x = model_w / stride;
         const int num_grid_y = model_h / stride;
-        const int num_class = 80; // coco dataset
         // Discrete distribution parameter, see the following resources for more details:
         // [nanodet-m.yml](https://github.com/RangiLyu/nanodet/blob/main/config/nanodet-m.yml)
         // [GFL](https://arxiv.org/pdf/2006.04388.pdf)
@@ -362,7 +361,7 @@ namespace ax
         {
             auto buff_out = joint_io_arr.pOutputs[i];
             auto ptr = (float*)buff_out.pVirAddr;
-            ax::generate_proposals(ptr, DEFAULT_STRIDES[i], DEFAULT_IMG_H, DEFAULT_IMG_W, PROB_THRESHOLD, objects);
+            ax::generate_proposals(ptr, DEFAULT_STRIDES[i], DEFAULT_IMG_H, DEFAULT_IMG_W, PROB_THRESHOLD, objects, CLS_NUM);
             proposals.insert(proposals.end(), objects.begin(), objects.end());
         }
 

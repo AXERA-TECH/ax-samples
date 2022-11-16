@@ -307,11 +307,10 @@ namespace detection
     }
 
     static void generate_proposals_yolox(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                         int letterbox_cols, int letterbox_rows)
+                                         int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
-        int cls_num = 80;
 
         auto feat_ptr = feat;
 
@@ -367,11 +366,10 @@ namespace detection
     }
 
     static void generate_proposals_yolov7(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                          int letterbox_cols, int letterbox_rows, const float* anchors)
+                                          int letterbox_cols, int letterbox_rows, const float* anchors, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
-        int cls_num = 80;
 
         auto feat_ptr = feat;
 
@@ -517,13 +515,12 @@ namespace detection
         }
     }
 
-    static void generate_proposals_255(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
+    static void generate_proposals_yolov5(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 80)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
-        int cls_num = 80;
         int anchor_group;
         if (stride == 8)
             anchor_group = 1;
@@ -596,12 +593,11 @@ namespace detection
     }
 
     static void generate_proposals_yolov5_visdrone(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
+                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 10)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
-        int cls_num = 10;
         int anchor_group;
         if (stride == 8)
             anchor_group = 1;
@@ -674,12 +670,11 @@ namespace detection
     }
 
     static void generate_proposals(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                   int letterbox_cols, int letterbox_rows, const float* anchors)
+                                   int letterbox_cols, int letterbox_rows, const float* anchors,int cls_num = 80)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
-        int cls_num = 80;
         int anchor_group;
         if (stride == 8)
             anchor_group = 1;
