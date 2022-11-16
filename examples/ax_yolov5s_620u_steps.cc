@@ -57,7 +57,7 @@ const char* CLASS_NAMES[] = {
 const float ANCHORS[18] = {10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116, 90, 156, 198, 373, 326};
 
 const int DEFAULT_LOOP_COUNT = 1;
-
+const int CLS_NUM = 80;
 const float PROB_THRESHOLD = 0.45f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
@@ -281,7 +281,7 @@ namespace ax
             auto ptr = (float*)info.pVirAddr;
 
             int32_t stride = (1 << i) * 8;
-            det::generate_proposals_255(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_unsigmoid);
+            det::generate_proposals_yolov5(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_unsigmoid, CLS_NUM);
         }
 
         det::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);

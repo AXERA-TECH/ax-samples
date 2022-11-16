@@ -46,7 +46,7 @@ const char* CLASS_NAMES[] = {
 const float ANCHORS[18] = {3, 4, 4, 9, 8, 6, 7, 14, 15, 9, 15, 19, 31, 17, 25, 37, 55, 42};
 
 const int DEFAULT_LOOP_COUNT = 1;
-
+const int CLS_NUM = 10;
 const float PROB_THRESHOLD = 0.35f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
@@ -257,7 +257,7 @@ namespace ax
             auto ptr = (float*)info.pVirAddr;
 
             int32_t stride = (1 << i) * 8;
-            det::generate_proposals_yolov5_visdrone(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_unsigmoid);
+            det::generate_proposals_yolov5_visdrone(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_unsigmoid, CLS_NUM);
         }
 
         det::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);

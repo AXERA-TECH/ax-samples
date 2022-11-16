@@ -57,7 +57,7 @@ const float ANCHORS[][6] = {{12, 16, 19, 36, 40, 28},
                             {142, 110, 192, 243, 459, 401}};
 
 const int DEFAULT_LOOP_COUNT = 1;
-
+const int CLS_NUM = 80;
 const float NMS_THRESH = 0.45f;
 const float BBOX_CONF_THRESH = 0.45f;
 namespace ax
@@ -267,7 +267,7 @@ namespace ax
             auto ptr = (float*)info.pVirAddr;
 
             int32_t stride = (1 << i) * 8;
-            det::generate_proposals_yolov7(stride, ptr, BBOX_CONF_THRESH, proposals, input_w, input_h, ANCHORS[i]);
+            det::generate_proposals_yolov7(stride, ptr, BBOX_CONF_THRESH, proposals, input_w, input_h, ANCHORS[i], CLS_NUM);
         }
 
         det::get_out_bbox(proposals, objects, NMS_THRESH, input_h, input_w, mat.rows, mat.cols);
