@@ -17,7 +17,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - YOLOv4-Tiny
   - YOLOv4-Tiny-3l
   - [YOLOv5s](#YOLOv5s)
-  - [YOLOv5-Lite](#YOLOv5-Lite)
+  - [YOLOv5-Lite](#YOLOv5-Lite)([original model](https://github.com/ppogg/YOLOv5-Lite))
   - [YOLOv7-Tiny](#YOLOv7-Tiny)
   - [YOLOX-S](#YOLOX-S)
   - YOLO-Fastest-XL
