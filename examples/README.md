@@ -17,6 +17,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - YOLOv4-Tiny
   - YOLOv4-Tiny-3l
   - [YOLOv5s](#YOLOv5s)
+  - [YOLOv5-Lite](#YOLOv5-Lite)
   - [YOLOv7-Tiny](#YOLOv7-Tiny)
   - [YOLOX-S](#YOLOX-S)
   - YOLO-Fastest-XL
@@ -119,6 +120,48 @@ detection num: 3
  1:  65%, [ 167,  120,  564,  417], bicycle
 ```
 ![YOLOv5s](../docs/yolov5s.jpg)
+
+#### YOLOv5-Lite
+```
+root@AXERA:~/samples# ./ax_yolov5_lite -i cengiz-sari-X4spr8Kuwxc-unsplash.jpg -m ./models/v5Lite-g-sim-640.joint
+--------------------------------------
+model file : ./models/v5Lite-g-sim-640.joint
+image file : cengiz-sari-X4spr8Kuwxc-unsplash.jpg
+img_h, img_w : 640 640
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.20
+07305a6
+run over: output len 3
+--------------------------------------
+Create handle took 492.77 ms (neu 34.07 ms, axe 0.00 ms, overhead 458.70 ms)
+--------------------------------------
+Repeat 10 times, avg time 22.56 ms, max_time 22.97 ms, min_time 22.48 ms
+--------------------------------------
+detection num: 18
+ 0:  94%, [1866, 1142, 2485, 2806], person
+ 0:  92%, [2417, 1240, 2971, 2807], person
+ 0:  89%, [1356, 1234, 1762, 2432], person
+ 2:  88%, [2827, 1334, 3797, 2230], car
+ 2:  85%, [3385, 1416, 4031, 2852], car
+ 0:  84%, [ 895, 1276, 1281, 2424], person
+ 0:  78%, [ 747, 1278,  926, 1729], person
+ 0:  77%, [  25, 1254,  213, 1809], person
+ 0:  73%, [ 419, 1325,  585, 1780], person
+ 0:  71%, [ 247, 1316,  423, 1801], person
+28:  64%, [ 729, 1812,  998, 2319], suitcase
+ 0:  61%, [ 610, 1421,  744, 1729], person
+ 2:  53%, [3808, 1353, 4031, 1502], car
+ 2:  50%, [2782, 1353, 2954, 1519], car
+ 0:  42%, [1167, 1204, 1325, 1572], person
+ 0:  39%, [1318, 1261, 1459, 1632], person
+12:  38%, [1861, 1370, 1949, 1530], parking meter
+ 0:  35%, [ 171, 1305,  284, 1788], person
+```
+![YOLOv5-Lite](../docs/yolov5_lite_out.jpg)
 
 #### YOLOv5s_visdrone
 ```
