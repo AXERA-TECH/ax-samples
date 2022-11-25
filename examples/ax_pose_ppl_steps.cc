@@ -54,8 +54,6 @@
 #include <iostream>
 #include <fstream>
 
-
-
 const int DEFAULT_IMG_H = 512;
 const int DEFAULT_IMG_W = 288;
 const int HRNET_H = 256;
@@ -92,8 +90,7 @@ namespace ax
         int m_model_type = AX_NPU_MODEL_TYPE_1_1_1;
     };
 
-    int
-    ax_crop_resize_nv12::init(int input_h, int input_w, int model_h, int model_w, int model_type)
+    int ax_crop_resize_nv12::init(int input_h, int input_w, int model_h, int model_w, int model_type)
     {
         axcv::ax_image input;
         input.w = input_w;
@@ -143,11 +140,12 @@ namespace ax
         {
             fprintf(stderr, "[ERR] npu_crop_resize err code:%x \n", ret);
             return ret;
-        } else {
+        }
+        else
+        {
             memcpy(output_data.data(), m_output_image->pVir, cv::get_image_data_size(m_output_image));
             return 1;
         }
-        
     }
 
     ax_crop_resize_nv12::~ax_crop_resize_nv12()
@@ -167,7 +165,6 @@ namespace ax
 
         for (int anchor_idx = 0; anchor_idx < num_anchors; anchor_idx++)
         {
-
             float box_objectness = feat_ptr[4 * wxc + anchor_idx];
             float box_cls_score = feat_ptr[5 * wxc + anchor_idx];
             float box_prob = box_objectness * box_cls_score;
@@ -175,8 +172,8 @@ namespace ax
             {
                 det::Object obj;
                 // printf("%d,%d\n",num_anchors,anchor_idx);
-                const int grid0 = grid_strides[anchor_idx].grid0; // 0
-                const int grid1 = grid_strides[anchor_idx].grid1; // 0
+                const int grid0 = grid_strides[anchor_idx].grid0;   // 0
+                const int grid1 = grid_strides[anchor_idx].grid1;   // 0
                 const int stride = grid_strides[anchor_idx].stride; // 8
                 // yolox/models/yolo_head.py decode logic
                 //  outputs[..., :2] = (outputs[..., :2] + grids) * strides
@@ -430,9 +427,9 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        fprintf(stdout, "relu_tiny25 p det detection num: %d\n", object_bbox.size());       
+        fprintf(stdout, "relu_tiny25 p det detection num: %d\n", object_bbox.size());
 
-        // 
+        //
         det::draw_objects(mat, object_bbox, CLASS_NAMES, "relu_tiny25");
         clear_and_exit();
         return true;
@@ -454,7 +451,7 @@ namespace ax
             fprintf(stderr, "Read Run-Joint model(%s) file failed.\n", model.c_str());
             return false;
         }
-        
+
         // 1.2 parse model from buffer
         //   if the device do not have enough memory to create a buffer at step 3.1,
         //     consider using linux API 'mmap' to map the model file to a pointer,
@@ -482,7 +479,7 @@ namespace ax
             AX_JOINT_Adv_Deinit();
             return false;
         };
-        
+
         // 1.4 the real init processing
         uint32_t duration_hdl_init_us = 0;
         {
@@ -495,7 +492,7 @@ namespace ax
                 return deinit_joint();
             }
         }
-        
+
         // 1.5 get the version of toolkit (optional)
         const AX_CHAR* version = AX_JOINT_GetModelToolsVersion(joint_handle);
         fprintf(stdout, "pose Tools version: %s\n", version);
@@ -515,7 +512,7 @@ namespace ax
             fprintf(stderr, "pose Create Run-Joint context failed.\n");
             return deinit_joint();
         }
-        
+
         // 2. fill input & prepare to inference
         AX_JOINT_IO_T joint_io_arr;
         AX_JOINT_IO_SETTING_T joint_io_setting;
@@ -551,7 +548,7 @@ namespace ax
 
             return false;
         };
-        
+
         // 3. get the init profile info.
         AX_JOINT_COMPONENT_T* joint_comps;
         uint32_t joint_comp_size;
@@ -584,7 +581,7 @@ namespace ax
                 fprintf(stderr, "pose Unknown component type %d.\n", (int)comp.eType);
             }
         }
-        
+
         // 4. run & benchmark
         uint32_t duration_neu_core_us = 0, duration_neu_total_us = 0;
         uint32_t duration_axe_core_us = 0, duration_axe_total_us = 0;
@@ -679,7 +676,7 @@ int main(int argc, char* argv[])
     cmd.add<std::string>("image", 'i', "image *.jpg file", true, "");
     cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(DEFAULT_IMG_H) + "," + std::to_string(DEFAULT_IMG_W));
     // cmd.add<std::string>("yuv", 'y', "yuv file", true, "");
-    
+
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
     cmd.add<float>("conf", 'c', "conf prob threshold", false, PROB_THRESHOLD);
     cmd.parse_check(argc, argv);
@@ -759,7 +756,7 @@ int main(int argc, char* argv[])
     std::fstream fs(yuv_file.c_str(), std::ios::in | std::ios::binary);
     if (!fs.is_open())
     {
-        fprintf(stderr, "Read nv12 image [%s] failed.\n",yuv_file.c_str());
+        fprintf(stderr, "Read nv12 image [%s] failed.\n", yuv_file.c_str());
         return false;
     }
 
@@ -797,7 +794,7 @@ int main(int argc, char* argv[])
         float crop_resize_cost = crop_resize_timer.cost();
         fprintf(stdout, "run crop_resize time cost avg: %f :ms \n", crop_resize_cost / 10);
     }
-    
+
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
     //   this init ONLY will be used in demo apps to avoid using a none inited
@@ -826,7 +823,7 @@ int main(int argc, char* argv[])
     // *****
     // *****
     // ***** ========================================================================
-    
+
     std::array<int, 2> pose_input_size = {HRNET_H, HRNET_W};
     std::vector<uint8_t> pose_image(pose_input_size[0] * pose_input_size[1] * 3, 0);
     cv::Mat pose_mat(pose_input_size[0], pose_input_size[1], CV_8UC3, pose_image.data());
@@ -837,7 +834,7 @@ int main(int argc, char* argv[])
         float pose_pre_time_costs = 0.f;
         timer tick;
 
-        int offset_x = 0,offset_y = 0;
+        int offset_x = 0, offset_y = 0;
         int offset_top = 0, offset_left = 0;
         int resize_w = 0;
         int resize_h = 0;
@@ -851,15 +848,20 @@ int main(int argc, char* argv[])
         float ratio = (float)pose_input_size[0] / (float)padded_bbox_h;
         std::cout << "px " << padded_bbox_x << "py " << padded_bbox_y << "pw " << padded_bbox_w << "ph " << padded_bbox_h << std::endl;
         // 判断expand区域是否越界
-        if (padded_bbox_x < 0 || padded_bbox_y < 0 || (padded_bbox_x + padded_bbox_w) > src_w || (padded_bbox_y + padded_bbox_h) > src_h) {
+        if (padded_bbox_x < 0 || padded_bbox_y < 0 || (padded_bbox_x + padded_bbox_w) > src_w || (padded_bbox_y + padded_bbox_h) > src_h)
+        {
             // crop bbox area
             int crop_bbox_x = std::max(0, padded_bbox_x);
             int crop_bbox_y = std::max(0, padded_bbox_y);
             int crop_bbox_w = 0, crop_bbox_h = 0;
-            if (padded_bbox_y >= 0) crop_bbox_h = (padded_bbox_h + padded_bbox_y) > src_h ? (src_h - padded_bbox_y) : padded_bbox_h;
-            else crop_bbox_h = (padded_bbox_h + padded_bbox_y) > src_h ? src_h : (padded_bbox_h + padded_bbox_y);
-            if (padded_bbox_x >= 0) crop_bbox_w = (padded_bbox_w + padded_bbox_x) > src_w ? (src_w - padded_bbox_x) : padded_bbox_w;
-            else crop_bbox_w = (padded_bbox_w + padded_bbox_x) > src_w ? src_w : (padded_bbox_w + padded_bbox_x);
+            if (padded_bbox_y >= 0)
+                crop_bbox_h = (padded_bbox_h + padded_bbox_y) > src_h ? (src_h - padded_bbox_y) : padded_bbox_h;
+            else
+                crop_bbox_h = (padded_bbox_h + padded_bbox_y) > src_h ? src_h : (padded_bbox_h + padded_bbox_y);
+            if (padded_bbox_x >= 0)
+                crop_bbox_w = (padded_bbox_w + padded_bbox_x) > src_w ? (src_w - padded_bbox_x) : padded_bbox_w;
+            else
+                crop_bbox_w = (padded_bbox_w + padded_bbox_x) > src_w ? src_w : (padded_bbox_w + padded_bbox_x);
             resize_w = crop_bbox_w * ratio;
             resize_h = crop_bbox_h * ratio;
 
@@ -878,17 +880,21 @@ int main(int argc, char* argv[])
             padded_bbox_y = crop_bbox_y;
             padded_bbox_w = crop_bbox_w;
             padded_bbox_h = crop_bbox_h;
-            std::cout <<"need black"<< " px " << padded_bbox_x << " py " << padded_bbox_y << " pw " << padded_bbox_w << " ph " << padded_bbox_h << std::endl;
-        } else {
+            std::cout << "need black"
+                      << " px " << padded_bbox_x << " py " << padded_bbox_y << " pw " << padded_bbox_w << " ph " << padded_bbox_h << std::endl;
+        }
+        else
+        {
             offset_x = padded_bbox_x;
             offset_y = padded_bbox_y;
 
             resize_h = pose_input_size[0];
             resize_w = pose_input_size[1];
 
-            std::cout <<"no black"<< " px " << padded_bbox_x << " py " << padded_bbox_y << " pw " << padded_bbox_w << " ph " << padded_bbox_h << std::endl;
+            std::cout << "no black"
+                      << " px " << padded_bbox_x << " py " << padded_bbox_y << " pw " << padded_bbox_w << " ph " << padded_bbox_h << std::endl;
         }
-        
+
         // // 2. alloc input image
         axcv::ax_image input;
         input.w = src_w;
@@ -902,13 +908,15 @@ int main(int argc, char* argv[])
             return false;
         }
 
-        
         AX_F32 fX = padded_bbox_x;
         AX_F32 fY = padded_bbox_y;
         AX_F32 fW = (padded_bbox_w % 2) == 1 ? (padded_bbox_w - 1) : padded_bbox_w;
         AX_F32 fH = (padded_bbox_h % 2) == 1 ? (padded_bbox_h - 1) : padded_bbox_h;
         AX_NPU_CV_Box tbox = {fX, fY, fW, fH};
-        std::cout <<"fx "<< fX << " "<<"fy "<< fY << " "<<"fw "<< fW << " "<<"fh "<< fH << " ";
+        std::cout << "fx " << fX << " "
+                  << "fy " << fY << " "
+                  << "fw " << fW << " "
+                  << "fh " << fH << " ";
 
         offset_left = (offset_left % 2) == 1 ? (offset_left - 1) : offset_left;
 
@@ -949,29 +957,28 @@ int main(int argc, char* argv[])
 
         cv::Mat output_nv12(output_image->nHeight * 3 / 2, output_image->nWidth, CV_8UC1, pose_input_yuv_data.data());
         int32_t yuv_size = output_image->nHeight * output_image->nWidth * 3 / 2;
-        FILE *yuvFd = fopen("./output_cv_nv12.yuv", "w+");
+        FILE* yuvFd = fopen("./output_cv_nv12.yuv", "w+");
         fwrite(output_nv12.ptr<uint8_t>(), 1, yuv_size, yuvFd);
         fclose(yuvFd);
 
-        
         pose_pre_time_costs = tick.cost();
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "pose pre_process time cost: %.2f ms\n", pose_pre_time_costs);
         fprintf(stdout, "--------------------------------------\n");
-        
+
         auto flag = ax::pose_run_detection(pose_model_file, pose_input_yuv_data, repeat, mat, pose_input_size[0], pose_input_size[1], obj,
-                                        offset_top, offset_left, offset_x, offset_y, ratio);
+                                           offset_top, offset_left, offset_x, offset_y, ratio);
     }
-	
+
     std::string path = image_file;
-	//1.获取不带路径的文件名
-	std::string::size_type iPos = path.find_last_of('/') + 1;
-	std::string filename = path.substr(iPos, path.length() - iPos);
-	//2.获取不带后缀的文件名
-	std::string name = filename.substr(0, filename.rfind("."));
+    //1.获取不带路径的文件名
+    std::string::size_type iPos = path.find_last_of('/') + 1;
+    std::string filename = path.substr(iPos, path.length() - iPos);
+    //2.获取不带后缀的文件名
+    std::string name = filename.substr(0, filename.rfind("."));
     // std::string save_file_name = "/opt/data/tion/pose_out/" + name + ".png";
     //3.获取路径
-    std::string ImgPath = path.substr(0,iPos);//获取文件路径
+    std::string ImgPath = path.substr(0, iPos); //获取文件路径
     std::string save_file_name = ImgPath + name + "_ret" + ".png";
     std::cout << save_file_name << std::endl;
     cv::imwrite(save_file_name, mat);
