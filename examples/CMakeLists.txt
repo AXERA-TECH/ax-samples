@@ -89,6 +89,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_nanodet               ax_nanodet_steps.cc)
     axera_example (ax_paddle_yolov3         ax_paddle_yolov3_steps.cc)
     axera_example (ax_scrfd                 ax_scrfd_steps.cc)
+    axera_example (ax_pose_ppl              ax_pose_ppl_steps.cc)
 
     axera_example (ax_classification_accuracy   ax_classification_accuracy.cc)
     axera_example (ax_yolov3_accuracy           ax_yolov3_accuracy.cc)

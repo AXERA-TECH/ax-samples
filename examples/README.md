@@ -36,6 +36,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [Monodlex](#Monodlex)
 - 人体关键点
   - [HRNet](#HRNet)
+  - [AX-POSE-PPL](#AX-POSE-PPL)
   - [HandPose](#HandPose)
 - 人体分割
   - [PP-HumanSeg](#PP-HumanSeg)
@@ -304,6 +305,72 @@ Repeat 10 times, avg time 14.11 ms, max_time 14.64 ms, min_time 14.04 ms
 --------------------------------------
 ```
 ![HRNet](../docs/hrnet.png)
+
+#### AX-POSE-PPL
+```
+root@AXERA:~/test# ./ax_pose_ppl -d ./models/ax_person_det.joint -p ./models/ax_pose.joint -i align_npu.jpg
+--------------------------------------
+relu_tiny25 p det model file : ./models/ax_person_det.joint
+relu_tiny25 p det image file : align_npu.jpg
+relu_tiny25 p det img_h, img_w : 512 288
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+run crop_resize time cost avg: 8.835800 :ms
+relu_tiny25 p det Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+relu_tiny25 p det Tools version: 0.6.0.30
+100b6396
+relu_tiny25 p det run over: output len 3
+--------------------------------------
+relu_tiny25 p det post_time_costs time cost: 1.86 ms
+--------------------------------------
+--------------------------------------
+relu_tiny25 p det create handle took 142.63 ms (neu 5.09 ms, axe 0.00 ms, overhead 137.54 ms)
+--------------------------------------
+relu_tiny25 p det Repeat 1 times, avg time 4.51 ms, max_time 4.51 ms, min_time 4.51 ms
+--------------------------------------
+relu_tiny25 p det detection num: 1
+ 0:  86%, [ 281,    0,  503,  425], person
+px 193py -53pw 398ph 531
+need black px 193 py 0 pw 398 ph 426
+fx 193 fy 0 fw 398 fh 426 --------------------------------------
+pose pre_process time cost: 24.59 ms
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+pose Tools version: 0.6.1.14
+4111370
+pose run over: output len 2
+x1: 368.271, y1: 77.7832
+x1: 373.457, y1: 72.5977
+x1: 363.086, y1: 72.5977
+x1: 386.939, y1: 75.709
+x1: 355.826, y1: 78.8203
+x1: 406.645, y1: 114.082
+x1: 363.086, y1: 122.379
+x1: 446.055, y1: 148.307
+x1: 343.381, y1: 159.715
+x1: 445.018, y1: 160.752
+x1: 308.119, y1: 177.346
+x1: 428.424, y1: 214.682
+x1: 400.422, y1: 214.682
+x1: 431.535, y1: 288.316
+x1: 372.42, y1: 277.945
+x1: 473.02, y1: 359.877
+x1: 404.57, y1: 343.283
+--------------------------------------
+pose post_time_costs time cost: 0.66 ms
+--------------------------------------
+--------------------------------------
+pose Create handle took 904.05 ms (neu 19.85 ms, axe 0.00 ms, overhead 884.20 ms)
+--------------------------------------
+pose Repeat 1 times, avg time 8.95 ms, max_time 8.95 ms, min_time 8.95 ms
+--------------------------------------
+ax_pose_ppl.png
+--------------------------------------
+```
+![HRNet](../docs/ax_pose_ppl.jpg)
 
 #### FaceParsing
 ```

@@ -123,4 +123,96 @@ namespace axcv
         return 0;
     }
 
+    int pose_npu_crop_resize(AX_NPU_CV_Image* input_image, AX_NPU_CV_Image* output_image, int input_h, int input_w, int target_w, int target_h, int offset_left, int offset_top, AX_NPU_CV_Box* box,
+                             AX_NPU_SDK_EX_MODEL_TYPE_T model_type, AX_NPU_CV_ImageResizeAlignParam horizontal,
+                             AX_NPU_CV_ImageResizeAlignParam vertical)
+    {
+        // int npu_crop_resize(AX_NPU_CV_Image* input_image, AX_NPU_CV_Image* output_image, int target_w, int target_h, int offset_left, int offset_top, AX_NPU_CV_Box* box,
+        //                 AX_NPU_SDK_EX_MODEL_TYPE_T model_type, AX_NPU_CV_ImageResizeAlignParam horizontal,
+        //                 AX_NPU_CV_ImageResizeAlignParam vertical) {
+        AX_NPU_CV_Color color;
+        color.nYUVColorValue[0] = 0;
+        color.nYUVColorValue[1] = 128;
+        AX_NPU_SDK_EX_MODEL_TYPE_T virtual_npu_mode_type = model_type;
+
+        AX_NPU_CV_Box* ppBox[1];
+        ppBox[0] = box;
+
+        auto ConvKitNV12Img = [](const AX_VIDEO_FRAME_S& tSrc, AX_BOOL bY) -> AX_NPU_CV_Image {
+            AX_NPU_CV_Image t = {0};
+            t.nWidth = bY ? (tSrc.u32Width) : (tSrc.u32Width / 2);
+            t.nHeight = bY ? (tSrc.u32Height) : (tSrc.u32Height / 2);
+            t.eDtype = bY ? AX_NPU_CV_FDT_GRAY : AX_NPU_CV_FDT_UV;
+            t.tStride.nW = (0 == tSrc.u32PicStride[0]) ? t.nWidth : tSrc.u32PicStride[0];
+            t.pPhy = tSrc.u64PhyAddr[0];
+            t.pPhy = bY ? t.pPhy : (t.pPhy + t.tStride.nW * tSrc.u32Height);
+            t.pVir = (AX_U8*)tSrc.u64VirAddr[0];
+            t.pVir = bY ? (AX_U8*)tSrc.u64VirAddr[0] : ((AX_U8*)(tSrc.u64VirAddr[0] + t.tStride.nW * tSrc.u32Height));
+            t.tStride.nW = bY ? t.tStride.nW : (t.tStride.nW / 2);
+            t.nSize = bY ? (t.tStride.nW * t.nHeight) : (t.tStride.nW * t.nHeight * 2);
+            return t;
+        };
+
+        auto ConvCvNV12Img = [](const AX_NPU_CV_Image* tSrc, int target_w, int target_h, int offset_left, int offset_top, AX_BOOL bY) -> AX_NPU_CV_Image {
+            AX_NPU_CV_Image t = {0};
+            int offset_x = offset_left;
+            int offset_y = offset_top;
+            if (offset_x < 0)
+            {
+                offset_x = 0;
+            }
+            if (offset_y < 0)
+            {
+                offset_y = 0;
+            }
+            offset_y = bY ? offset_y : (offset_y / 2);
+
+            t.nWidth = bY ? (target_w) : (target_w / 2);
+            t.nHeight = bY ? (target_h) : (target_h / 2);
+            t.eDtype = bY ? AX_NPU_CV_FDT_GRAY : AX_NPU_CV_FDT_UV;
+            t.tStride.nW = (0 == tSrc->tStride.nW) ? t.nWidth : tSrc->tStride.nW;
+            t.pPhy = tSrc->pPhy + t.tStride.nW * offset_y + offset_x;
+            t.pPhy = bY ? t.pPhy : (t.pPhy + t.tStride.nW * tSrc->nHeight);
+            t.pVir = (AX_U8*)(tSrc->pVir + t.tStride.nW * offset_y + offset_x);
+            t.pVir = bY ? (AX_U8*)t.pVir : ((AX_U8*)(t.pVir + t.tStride.nW * tSrc->nHeight));
+            t.tStride.nW = bY ? t.tStride.nW : (t.tStride.nW / 2);
+            t.nSize = bY ? (t.tStride.nW * t.nHeight) : (t.tStride.nW * t.nHeight * 2);
+            return t;
+        };
+
+        AX_NPU_CV_Image tImgSrcY = ConvCvNV12Img(input_image, input_w, input_h, 0, 0, AX_TRUE);
+        AX_NPU_CV_Image tImgSrcUV = ConvCvNV12Img(input_image, input_w, input_h, 0, 0, AX_FALSE);
+
+        AX_NPU_CV_Image tImgDestY = ConvCvNV12Img(output_image, target_w, target_h, offset_left, offset_top, AX_TRUE);
+        AX_NPU_CV_Image tImgDestUV = ConvCvNV12Img(output_image, target_w, target_h, offset_left, offset_top, AX_FALSE);
+
+        AX_NPU_CV_Image* ppDstY[1];
+        ppDstY[0] = &tImgDestY;
+        AX_NPU_CV_Image* ppDstU[1];
+        ppDstU[0] = &tImgDestUV;
+
+        AX_U32 nStride = (0 == output_image->tStride.nW) ? output_image->nWidth : output_image->tStride.nW;
+        memset((AX_VOID*)output_image->pVir, 0x00, nStride * output_image->nHeight);
+        memset((AX_VOID*)(output_image->pVir + nStride * output_image->nHeight), 0x80, nStride * output_image->nHeight / 2);
+
+        int ret = AX_NPU_CV_CropResizeImageForSplitYUV(virtual_npu_mode_type,
+                                                       &tImgSrcY,
+                                                       &tImgSrcUV,
+                                                       1,
+                                                       (AX_NPU_CV_Image**)&ppDstY,
+                                                       (AX_NPU_CV_Image**)&ppDstU,
+                                                       ppBox,
+                                                       horizontal,
+                                                       vertical,
+                                                       color);
+
+        if (ret != AX_NPU_DEV_STATUS_SUCCESS)
+        {
+            fprintf(stderr, "[ERR] AX_NPU_CV_CropResizeImage err code: %X\n", ret);
+            return ret;
+        }
+
+        return 0;
+    }
+
 } // namespace axcv
