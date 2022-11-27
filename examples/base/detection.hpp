@@ -35,7 +35,7 @@ namespace detection
         int stride;
     } GridAndStride;
 
-    typedef struct
+    typedef struct Object
     {
         cv::Rect_<float> rect;
         int label;
@@ -46,18 +46,31 @@ namespace detection
         std::vector<float> mask_feat;
     } Object;
 
+    /* for palm detection */
+    typedef struct PalmObject
+    {
+        cv::Rect_<float> rect;
+        float prob;
+        cv::Point2f vertices[4];
+        cv::Point2f landmarks[7];
+        cv::Mat affine_trans_mat;
+        cv::Mat affine_trans_mat_inv;
+    } PalmObject;
+
     static inline float sigmoid(float x)
     {
         return static_cast<float>(1.f / (1.f + exp(-x)));
     }
 
-    static inline float intersection_area(const Object& a, const Object& b)
+    template <typename T>
+    static inline float intersection_area(const T& a, const T& b)
     {
         cv::Rect_<float> inter = a.rect & b.rect;
         return inter.area();
     }
 
-    static void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, int right)
+    template <typename T>
+    static void qsort_descent_inplace(std::vector<T>& faceobjects, int left, int right)
     {
         int i = left;
         int j = right;
@@ -93,7 +106,8 @@ namespace detection
         }
     }
 
-    static void qsort_descent_inplace(std::vector<Object>& faceobjects)
+    template <typename T>
+    static void qsort_descent_inplace(std::vector<T>& faceobjects)
     {
         if (faceobjects.empty())
             return;
@@ -101,7 +115,8 @@ namespace detection
         qsort_descent_inplace(faceobjects, 0, faceobjects.size() - 1);
     }
 
-    static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vector<int>& picked, float nms_threshold)
+    template <typename T>
+    static void nms_sorted_bboxes(const std::vector<T>& faceobjects, std::vector<int>& picked, float nms_threshold)
     {
         picked.clear();
 
@@ -115,12 +130,12 @@ namespace detection
 
         for (int i = 0; i < n; i++)
         {
-            const Object& a = faceobjects[i];
+            const T& a = faceobjects[i];
 
             int keep = 1;
             for (int j = 0; j < (int)picked.size(); j++)
             {
-                const Object& b = faceobjects[picked[j]];
+                const T& b = faceobjects[picked[j]];
 
                 // intersection over union
                 float inter_area = intersection_area(a, b);
@@ -827,6 +842,69 @@ namespace detection
         }
     }
 
+    static void generate_proposals_palm(std::vector<PalmObject>& region_list, float score_thresh, int input_img_w, int input_img_h, float* scores_ptr, float* bboxes_ptr, int head_count, const int* strides, const int* anchor_size, const float* anchor_offset, const int* feature_map_size, float prob_threshold_unsigmoid) 
+    {
+        int idx = 0;
+        for(int i = 0; i < head_count; i++)
+        {
+            for (int y = 0; y < feature_map_size[i]; y++) 
+            {
+                for (int x = 0; x < feature_map_size[i]; x++) 
+                {
+                    for (int k = 0; k < anchor_size[i]; k++) 
+                    {
+                        if (scores_ptr[idx] < prob_threshold_unsigmoid)
+                        {
+                            idx++;
+                            continue;
+                        }
+
+                        const float x_center = (x + anchor_offset[i]) * 1.0f / feature_map_size[i];
+                        const float y_center = (y + anchor_offset[i]) * 1.0f / feature_map_size[i];
+                        float score = sigmoid(scores_ptr[idx]);
+
+                        if (score > score_thresh)
+                        {
+                            float* p = bboxes_ptr + (idx * 18);
+
+                            float cx = p[0] / input_img_w + x_center;
+                            float cy = p[1] / input_img_h + y_center;
+                            float w  = p[2] / input_img_w;
+                            float h  = p[3] / input_img_h;
+
+                            float x0 = cx - w * 0.5f;
+                            float y0 = cy - h * 0.5f;
+                            float x1 = cx + w * 0.5f;
+                            float y1 = cy + h * 0.5f;
+
+                            PalmObject region;
+                            region.prob        = score;
+                            region.rect.x      = x0;
+                            region.rect.y      = y0;
+                            region.rect.width  = x1 - x0;
+                            region.rect.height = y1 - y0;
+
+                            for (int j = 0; j < 7; j++)
+                            {
+                                float lx = p[4 + (2 * j) + 0];
+                                float ly = p[4 + (2 * j) + 1];
+                                lx += x_center * input_img_w;
+                                ly += y_center * input_img_h;
+                                lx /= (float)input_img_w;
+                                ly /= (float)input_img_h;
+                                
+                                region.landmarks[j].x = lx;
+                                region.landmarks[j].y = ly;
+                            }
+                            region_list.push_back(region);
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+    }
+
     static void draw_objects(const cv::Mat& bgr, const std::vector<Object>& objects, const char** class_names, const char* output_name)
     {
         cv::Mat image = bgr.clone();
@@ -906,7 +984,28 @@ namespace detection
         
         cv::imwrite(std::string(output_name) + ".jpg", image);
     }
-    
+
+    static void draw_objects_palm(const cv::Mat& bgr, const std::vector<PalmObject>& objects, const char* output_name)
+    {
+        cv::Mat image = bgr.clone();
+        for (size_t i = 0; i < objects.size(); i++)
+        {
+            const PalmObject& obj = objects[i];
+            //fprintf(stdout, "prob:%.2f, x0:%.2f, y0:%.2f, x1:%.2f, y1:%.2f, x2:%.2f, y2:%.2f, x3:%.2f, y3:%.2f\n", obj.prob, 
+            //        obj.vertices[0].x, obj.vertices[0].y, obj.vertices[1].x, obj.vertices[1].y, obj.vertices[2].x, 
+            //        obj.vertices[2].y, obj.vertices[3].x, obj.vertices[3].y);
+            cv::line(image, obj.vertices[0], obj.vertices[1], cv::Scalar(0, 0, 255), 2, 8, 0);
+            cv::line(image, obj.vertices[1], obj.vertices[2], cv::Scalar(0, 0, 255), 2, 8, 0);
+            cv::line(image, obj.vertices[2], obj.vertices[3], cv::Scalar(0, 0, 255), 2, 8, 0);
+            cv::line(image, obj.vertices[3], obj.vertices[0], cv::Scalar(0, 0, 255), 2, 8, 0);
+            for (auto ld : obj.landmarks)
+            {
+                cv::circle(image, ld, 2, cv::Scalar(0,255,0),-1, 8);
+            }
+        }
+        cv::imwrite(std::string(output_name) + ".jpg", image);
+    }
+
     void reverse_letterbox(std::vector<Object>& proposal, std::vector<Object>& objects, int letterbox_rows, int letterbox_cols, int src_rows, int src_cols)
     {
         float scale_letterbox;
@@ -1148,6 +1247,122 @@ namespace detection
             cv::resize(mask, mask, cv::Size((int)objects[i].rect.width, (int)objects[i].rect.height));
             objects[i].mask = mask > 0.5;
             
+        }
+    }
+
+    static void transform_rects_palm(PalmObject& object)
+    {
+        float x0 = object.landmarks[0].x;
+        float y0 = object.landmarks[0].y;
+        float x1 = object.landmarks[2].x;
+        float y1 = object.landmarks[2].y;
+        float rotation = M_PI * 0.5f - std::atan2(-(y1 - y0), x1 - x0);
+
+        float hand_cx;
+        float hand_cy;
+        float shift_x = 0.0f;
+        float shift_y = -0.5f;
+        if (rotation == 0)
+        {
+            hand_cx = object.rect.x + object.rect.width* 0.5f + (object.rect.width * shift_x);
+            hand_cy = object.rect.y + object.rect.height * 0.5f + (object.rect.height * shift_y);
+        }
+        else
+        {
+            float dx = (object.rect.width * shift_x) * std::cos(rotation) - 
+                        (object.rect.height * shift_y) * std::sin(rotation);
+            float dy = (object.rect.width * shift_x) * std::sin(rotation) + 
+                        (object.rect.height * shift_y) * std::cos(rotation);
+            hand_cx = object.rect.x + object.rect.width* 0.5f + dx;
+            hand_cy = object.rect.y + object.rect.height * 0.5f + dy;
+        }
+
+        float long_side = (std::max)(object.rect.width, object.rect.height);
+        float dx = long_side * 1.3f;
+        float dy = long_side * 1.3f;
+        
+        object.vertices[0].x = -dx;
+        object.vertices[0].y = -dy;
+        object.vertices[1].x = +dx;
+        object.vertices[1].y = -dy;
+        object.vertices[2].x = +dx;
+        object.vertices[2].y = +dy;
+        object.vertices[3].x = -dx;
+        object.vertices[3].y = +dy;
+
+        for (int i = 0; i < 4; i++)
+        {
+            float sx = object.vertices[i].x;
+            float sy = object.vertices[i].y;
+            object.vertices[i].x = sx * std::cos(rotation) - sy * std::sin(rotation);
+            object.vertices[i].y = sx * std::sin(rotation) + sy * std::cos(rotation);
+            object.vertices[i].x += hand_cx;
+            object.vertices[i].y += hand_cy;
+        }
+    }
+
+    static void get_out_bbox_palm(std::vector<PalmObject>& proposals, std::vector<PalmObject>& objects, const float nms_threshold, int letterbox_rows, int letterbox_cols, int src_rows, int src_cols)
+    {
+        qsort_descent_inplace(proposals);
+        std::vector<int> picked;
+        nms_sorted_bboxes(proposals, picked, nms_threshold);
+        
+        int count = picked.size();
+        objects.resize(count);
+        for (int i = 0; i < count; i++)
+        {
+            objects[i] = proposals[picked[i]];
+            transform_rects_palm(objects[i]);
+        }
+
+        float scale_letterbox;
+        int resize_rows;
+        int resize_cols;
+        if ((letterbox_rows * 1.0 / src_rows) < (letterbox_cols * 1.0 / src_cols))
+        {
+            scale_letterbox = letterbox_rows * 1.0 / src_rows;
+        }
+        else
+        {
+            scale_letterbox = letterbox_cols * 1.0 / src_cols;
+        }
+        resize_cols = int(scale_letterbox * src_cols);
+        resize_rows = int(scale_letterbox * src_rows);
+
+        int tmp_h = (letterbox_rows - resize_rows) / 2;
+        int tmp_w = (letterbox_cols - resize_cols) / 2;
+
+        float ratio_x = (float)src_cols / resize_cols;
+        float ratio_y = (float)src_rows / resize_rows;
+        
+        for (auto& object : objects)
+        {
+            for (auto& vertice : object.vertices)
+            {
+                vertice.x = (vertice.x * letterbox_cols - tmp_w) * ratio_x;
+                vertice.y = (vertice.y * letterbox_rows - tmp_h) * ratio_y;
+            }
+
+            for (auto& ld : object.landmarks)
+            {
+                ld.x = (ld.x * letterbox_cols - tmp_w) * ratio_x;
+                ld.y = (ld.y * letterbox_rows - tmp_h) * ratio_y;
+            }
+            // get warpaffine transform mat to landmark detect
+            cv::Point2f src_pts[4];
+            src_pts[0] = object.vertices[0];
+            src_pts[1] = object.vertices[1];
+            src_pts[2] = object.vertices[2];
+            src_pts[3] = object.vertices[3];
+
+            cv::Point2f dst_pts[4];
+            dst_pts[0] = cv::Point2f(0, 0);
+            dst_pts[1] = cv::Point2f(224, 0);
+            dst_pts[2] = cv::Point2f(224, 224);
+            dst_pts[3] = cv::Point2f(0, 224);
+
+            object.affine_trans_mat = cv::getAffineTransform(src_pts, dst_pts);
+            cv::invertAffineTransform(object.affine_trans_mat, object.affine_trans_mat_inv);
         }
     }
 
