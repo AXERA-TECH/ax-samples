@@ -344,7 +344,7 @@ int main(int argc, char* argv[])
     }
     int src_w = mat.cols;
     int src_h = mat.rows;
-    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1]);
+    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
 
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
