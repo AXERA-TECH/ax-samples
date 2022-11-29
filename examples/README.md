@@ -510,6 +510,42 @@ detection num: 2
 ```
 ![PalmDetection](../docs/palm_detection.jpg)
 
+#### YOLOPv2
+```
+root@AXERA:~/samples# ./ax_yolopv2 -m ./yolopv2.joint -i ./img-1199.jpg -r 10
+--------------------------------------
+model file : ./yolopv2.joint
+image file : ./img-1199.jpg
+img_h, img_w : 288 480
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.20
+07305a6
+run over: output len 5
+--------------------------------------
+Create handle took 2406.15 ms (neu 116.83 ms, axe 0.00 ms, overhead 2289.33 ms)
+--------------------------------------
+Repeat 10 times, avg time 100.69 ms, max_time 101.74 ms, min_time 100.50 ms
+--------------------------------------
+detection num: 12
+ 3:  92%, [ 471,  273,  565,  346]
+ 3:  91%, [ 618,  289,  692,  347]
+ 3:  88%, [  72,  292,  225,  344]
+ 3:  85%, [ 230,  289,  293,  327]
+ 3:  79%, [ 281,  296,  350,  323]
+ 3:  79%, [ 551,  285,  594,  320]
+ 3:  75%, [   0,  307,   34,  353]
+ 3:  74%, [ 585,  279,  615,  308]
+ 3:  60%, [ 720,  278,  744,  298]
+ 3:  53%, [ 447,  262,  492,  309]
+ 3:  42%, [ 675,  275,  700,  300]
+ 3:  39%, [ 620,  278,  661,  302]
+```
+![YOLOPv2](../docs/yolopv2.jpg)
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
