@@ -110,7 +110,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_palm_detection        ax_palm_detection_steps.cc)
     axera_example (ax_yolopv2               ax_yolopv2_steps.cc)
     axera_example (ax_yolov7s_face          ax_yolov7s_face_steps.cc)
-    
+    axera_example (ax_yolov7s_palm          ax_yolov7s_palm_steps.cc)
 else() # ax630a support
     axera_example (ax_classification        ax_classification_steps.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
