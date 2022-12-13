@@ -486,6 +486,30 @@ detection num: 2
 ```
 ![yolov5s-seg](../docs/yolov5s_seg.jpg)
 
+#### YOLOv5-License-plate
+```
+root@AXERA:~/samples# ./ax_yolov5s_license_plate -m ../models/license_plate_det.joint -i license_plate.png -g 640,384
+--------------------------------------
+model file : ../models/license_plate_det.joint
+image file : license_plate.png
+img_h, img_w : 640 384
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.26
+6b66666
+run over: output len 3
+--------------------------------------
+Create handle took 417.79 ms (neu 42.09 ms, axe 0.00 ms, overhead 375.70 ms)
+--------------------------------------
+Repeat 1 times, avg time 30.51 ms, max_time 30.51 ms, min_time 30.51 ms
+--------------------------------------
+detection num: 1
+```
+![yolov5s-license](../docs/yolov5s_license_plate_out.jpg)
+
 #### PalmDetection
 ```
 root@AXERA:~/samples# ./ax_palm_detection -m ./palm_detection.joint -i ./img-7.jpg -r 10
