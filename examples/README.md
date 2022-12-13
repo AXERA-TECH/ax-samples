@@ -570,6 +570,30 @@ detection num: 12
 ```
 ![YOLOPv2](../docs/yolopv2.jpg)
 
+#### YOLOv7-Face
+```
+root@AXERA:~/samples# ./ax_yolov7s_face -m ./yolov7s-face.joint -i ./selfie.jpg -r 10
+--------------------------------------
+model file : ./yolov7s-face.joint
+image file : ./selfie.jpg
+img_h, img_w : 640 640
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.20
+07305a6
+run over: output len 3
+--------------------------------------
+Create handle took 481.47 ms (neu 31.83 ms, axe 0.00 ms, overhead 449.64 ms)
+--------------------------------------
+Repeat 10 times, avg time 25.46 ms, max_time 25.83 ms, min_time 25.39 ms
+--------------------------------------
+detection num: 217
+```
+![yolov7s-face](../docs/yolov7s_face.jpg)
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
