@@ -371,6 +371,8 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Run hrnet failed.\n");
     }
 
+    cv::imwrite("./hrnet_res.jpg", mat);
+
     // 6. last de-init
     //   as step 1, if the device inited by another app, DO NOT de-init the
     //     device at this app.
