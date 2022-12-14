@@ -859,6 +859,202 @@ namespace detection
         }
     }
 
+    static void generate_proposals_yolov7_face(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                               int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
+    {
+        int anchor_num = 3;
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+        int cls_num = 1;
+        int anchor_group;
+        if (stride == 8)
+            anchor_group = 1;
+        if (stride == 16)
+            anchor_group = 2;
+        if (stride == 32)
+            anchor_group = 3;
+
+        auto feature_ptr = feat;
+
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                for (int a = 0; a <= anchor_num - 1; a++)
+                {
+                    if (feature_ptr[4] < prob_threshold_unsigmoid)
+                    {
+                        feature_ptr += (cls_num + 5 + 15);
+                        continue;
+                    }
+
+                    //process cls score
+                    int class_index = 0;
+                    float class_score = -FLT_MAX;
+                    for (int s = 0; s <= cls_num - 1; s++)
+                    {
+                        float score = feature_ptr[s + 5 + 15];
+                        if (score > class_score)
+                        {
+                            class_index = s;
+                            class_score = score;
+                        }
+                    }
+                    //process box score
+                    float box_score = feature_ptr[4];
+                    float final_score = sigmoid(box_score) * sigmoid(class_score);
+
+                    if (final_score >= prob_threshold)
+                    {
+                        float dx = sigmoid(feature_ptr[0]);
+                        float dy = sigmoid(feature_ptr[1]);
+                        float dw = sigmoid(feature_ptr[2]);
+                        float dh = sigmoid(feature_ptr[3]);
+                        float pred_cx = (dx * 2.0f - 0.5f + w) * stride;
+                        float pred_cy = (dy * 2.0f - 0.5f + h) * stride;
+                        float anchor_w = anchors[(anchor_group - 1) * 6 + a * 2 + 0];
+                        float anchor_h = anchors[(anchor_group - 1) * 6 + a * 2 + 1];
+                        float pred_w = dw * dw * 4.0f * anchor_w;
+                        float pred_h = dh * dh * 4.0f * anchor_h;
+                        float x0 = pred_cx - pred_w * 0.5f;
+                        float y0 = pred_cy - pred_h * 0.5f;
+                        float x1 = pred_cx + pred_w * 0.5f;
+                        float y1 = pred_cy + pred_h * 0.5f;
+
+                        Object obj;
+                        obj.rect.x = x0;
+                        obj.rect.y = y0;
+                        obj.rect.width = x1 - x0;
+                        obj.rect.height = y1 - y0;
+                        obj.label = class_index;
+                        obj.prob = final_score;
+
+                        const float* landmark_ptr = feature_ptr + 6;
+                        for (int l = 0; l < 5; l++)
+                        {
+                            float lx = (landmark_ptr[3 * l] * 2.0f - 0.5f+ w) * stride;
+                            float ly = (landmark_ptr[3 * l + 1] * 2.0f - 0.5f + h) * stride;
+                            //float score = sigmoid(landmark_ptr[3 * l + 2]);
+                            obj.landmark[l] = cv::Point2f(lx, ly);
+                        }
+
+                        objects.push_back(obj);
+                    }
+
+                    feature_ptr += (cls_num + 5 + 15);
+                }
+            }
+        }
+    }
+
+    static void generate_proposals_yolov7_palm(int stride, const float* feat, float prob_threshold, std::vector<PalmObject>& objects,
+                                               int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
+    {
+        int anchor_num = 3;
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+        int cls_num = 1;
+        int anchor_group;
+        if (stride == 8)
+            anchor_group = 1;
+        if (stride == 16)
+            anchor_group = 2;
+        if (stride == 32)
+            anchor_group = 3;
+
+        const int landmark_sort[7] = {0, 3, 4, 5, 6, 1, 2};
+        auto feature_ptr = feat;
+
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                for (int a = 0; a <= anchor_num - 1; a++)
+                {
+                    if (feature_ptr[4] < prob_threshold_unsigmoid)
+                    {
+                        feature_ptr += (cls_num + 5 + 21);
+                        continue;
+                    }
+
+                    //process cls score
+                    int class_index = 0;
+                    float class_score = -FLT_MAX;
+                    for (int s = 0; s <= cls_num - 1; s++)
+                    {
+                        float score = feature_ptr[s + 5 + 21];
+                        if (score > class_score)
+                        {
+                            class_index = s;
+                            class_score = score;
+                        }
+                    }
+                    //process box score
+                    float box_score = feature_ptr[4];
+                    float final_score = sigmoid(box_score) * sigmoid(class_score);
+
+                    if (final_score >= prob_threshold)
+                    {
+                        float dx = sigmoid(feature_ptr[0]);
+                        float dy = sigmoid(feature_ptr[1]);
+                        float dw = sigmoid(feature_ptr[2]);
+                        float dh = sigmoid(feature_ptr[3]);
+                        float pred_cx = (dx * 2.0f - 0.5f + w) * stride;
+                        float pred_cy = (dy * 2.0f - 0.5f + h) * stride;
+                        float anchor_w = anchors[(anchor_group - 1) * 6 + a * 2 + 0];
+                        float anchor_h = anchors[(anchor_group - 1) * 6 + a * 2 + 1];
+                        float pred_w = dw * dw * 4.0f * anchor_w;
+                        float pred_h = dh * dh * 4.0f * anchor_h;
+                        float x0 = pred_cx - pred_w * 0.5f;
+                        float y0 = pred_cy - pred_h * 0.5f;
+                        float x1 = pred_cx + pred_w * 0.5f;
+                        float y1 = pred_cy + pred_h * 0.5f;
+
+                        PalmObject obj;
+                        obj.rect.x = x0 / (float)letterbox_cols;
+                        obj.rect.y = y0 / (float)letterbox_rows;
+                        obj.rect.width = (x1 - x0) / (float)letterbox_cols;
+                        obj.rect.height = (y1 - y0) / (float)letterbox_rows;
+                        obj.prob = final_score;
+
+                        const float* landmark_ptr = feature_ptr + 6;
+                        std::vector<cv::Point2f> tmp(7);
+                        float min_x = FLT_MAX, min_y = FLT_MAX, max_x = 0, max_y = 0;
+                        for (int l = 0; l < 7; l++)
+                        {
+                            float lx = (landmark_ptr[3 * l] * 2.0f - 0.5f + w) * stride;
+                            float ly = (landmark_ptr[3 * l + 1] * 2.0f - 0.5f + h) * stride;
+                            lx /= (float)letterbox_cols;
+                            ly /= (float)letterbox_rows;
+                            
+                            tmp[l] = cv::Point2f(lx, ly);
+                            min_x = lx < min_x ? lx : min_x;
+                            min_y = ly < min_y ? ly : min_y;
+                            max_x = lx > max_x ? lx : max_x;
+                            max_y = ly > max_y ? ly : max_y;
+                        }
+                        float w = max_x - min_x;
+                        float h = max_y - min_y;
+                        float long_side = h > w ? h : w;
+                        long_side *= 1.1f;
+                        obj.rect.x = min_x + w * 0.5f - long_side * 0.5f;
+                        obj.rect.y = min_y + h * 0.5f - long_side * 0.5f;
+                        obj.rect.width = long_side;
+                        obj.rect.height = long_side;
+                        for (int l = 0; l < 7; l++)
+                        {
+                            obj.landmarks[l] = tmp[landmark_sort[l]];
+                        }
+
+                        objects.push_back(obj);
+                    }
+
+                    feature_ptr += (cls_num + 5 + 21);
+                }
+            }
+        }
+    }
+
     static void generate_proposals(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
                                    int letterbox_cols, int letterbox_rows, const float* anchors,int cls_num = 80)
     {
