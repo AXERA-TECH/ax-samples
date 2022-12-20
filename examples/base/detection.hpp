@@ -859,6 +859,59 @@ namespace detection
         }
     }
 
+    static void generate_proposals_yolov6(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                         int letterbox_cols, int letterbox_rows, int cls_num = 80)
+    {
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+
+        auto feat_ptr = feat;
+
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                //process cls score
+                int class_index = 0;
+                float class_score = -FLT_MAX;
+                for (int s = 0; s <= cls_num - 1; s++)
+                {
+                    float score = feat_ptr[s + 4];
+                    if (score > class_score)
+                    {
+                        class_index = s;
+                        class_score = score;
+                    }
+                }
+
+                float box_prob = class_score;
+
+                if (box_prob > prob_threshold)
+                {
+                    float x0 = (w + 0.5f - feat_ptr[0]) * stride;
+                    float y0 = (h + 0.5f - feat_ptr[1]) * stride;
+                    float x1 = (w + 0.5f + feat_ptr[2]) * stride;
+                    float y1 = (h + 0.5f + feat_ptr[3]) * stride;
+
+                    float w = x1 - x0;
+                    float h = y1 - y0;
+
+                    Object obj;
+                    obj.rect.x = x0;
+                    obj.rect.y = y0;
+                    obj.rect.width = w;
+                    obj.rect.height = h;
+                    obj.label = class_index;
+                    obj.prob = box_prob;
+
+                    objects.push_back(obj);
+                }
+
+                feat_ptr += 84;
+            }
+        }
+    }
+
     static void generate_proposals_yolov7_face(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
                                                int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
     {
