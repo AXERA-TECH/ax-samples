@@ -82,6 +82,26 @@ namespace pose
                                         {17, 18, 4},
                                         {18, 19, 4},
                                         {19, 20, 4}};
+    std::vector<skeleton> animal_pairs = {{19, 15, 0},
+                                          {18, 14, 0},
+                                          {17, 13, 0},
+                                          {16, 12, 0},
+                                          {15, 11, 0},
+                                          {14, 10, 0},
+                                          {13, 9, 0},
+                                          {12, 8, 0},
+                                          {11, 6, 0},
+                                          {10, 6, 0},
+                                          {9, 7, 0},
+                                          {8, 7, 0},
+                                          {6, 7, 0},
+                                          {7, 5, 0},
+                                          {5, 4, 0},
+                                          {0, 2, 0},
+                                          {1, 3, 0},
+                                          {0, 1, 0},
+                                          {0, 4, 0},
+                                          {1, 4, 0}};
 
     typedef struct ai_body_parts_s
     {
@@ -99,6 +119,14 @@ namespace pose
         int32_t img_heigh = 0;
         uint64_t timestamp = 0;
     } ai_hand_parts_s;
+
+    typedef struct ai_animal_parts_s
+    {
+        std::vector<ai_point_t> keypoints;
+        int32_t img_width = 0;
+        int32_t img_heigh = 0;
+        uint64_t timestamp = 0;
+    } ai_animal_parts_s;
 
     static inline void find_max_2d(float* buf, int width, int height, int* max_idx_width, int* max_idx_height, float* max_value, int c)
     {
@@ -138,6 +166,52 @@ namespace pose
         cv::Point pt1;
         cv::Point pt2;
         for (auto& element : pairs)
+        {
+            switch (element.left_right_neutral)
+            {
+            case 0:
+                color = cv::Scalar(255, 0, 0);
+                break;
+            case 1:
+                color = cv::Scalar(0, 0, 255);
+                break;
+            default:
+                color = cv::Scalar(0, 255, 0);
+            }
+
+            int x1 = (int)(pose.keypoints[element.connection[0]].x * img.cols);
+            int y1 = (int)(pose.keypoints[element.connection[0]].y * img.rows);
+            int x2 = (int)(pose.keypoints[element.connection[1]].x * img.cols);
+            int y2 = (int)(pose.keypoints[element.connection[1]].y * img.rows);
+
+            x1 = std::max(std::min(x1, (img.cols - 1)), 0);
+            y1 = std::max(std::min(y1, (img.rows - 1)), 0);
+            x2 = std::max(std::min(x2, (img.cols - 1)), 0);
+            y2 = std::max(std::min(y2, (img.rows - 1)), 0);
+
+            pt1 = cv::Point(x1, y1);
+            pt2 = cv::Point(x2, y2);
+            cv::line(img, pt1, pt2, color, 2);
+        }
+    }
+
+    static inline void draw_animal_result(cv::Mat img, ai_animal_parts_s& pose, int joints_num, int model_w, int model_h)
+    {
+        for (int i = 0; i < joints_num; i++)
+        {
+            int x = (int)(pose.keypoints[i].x * img.cols);
+            int y = (int)(pose.keypoints[i].y * img.rows);
+
+            x = std::max(std::min(x, (img.cols - 1)), 0);
+            y = std::max(std::min(y, (img.rows - 1)), 0);
+
+            cv::circle(img, cv::Point(x, y), 4, cv::Scalar(0, 255, 0), cv::FILLED);
+        }
+
+        cv::Scalar color;
+        cv::Point pt1;
+        cv::Point pt2;
+        for (auto& element : animal_pairs)
         {
             switch (element.left_right_neutral)
             {
@@ -288,6 +362,27 @@ namespace pose
     }
 
     static inline void post_process(float* data, ai_body_parts_s& pose, int joint_num, int img_h, int img_w)
+    {
+        int heatmap_width = img_w / 4;
+        int heatmap_height = img_h / 4;
+        int max_idx_width, max_idx_height;
+        float max_score;
+
+        ai_point_t kp;
+        for (int c = 0; c < joint_num; ++c)
+        {
+            find_max_2d(data, heatmap_width, heatmap_height, &max_idx_width, &max_idx_height, &max_score, c);
+            kp.x = (float)max_idx_width / (float)heatmap_width;
+            kp.y = (float)max_idx_height / (float)heatmap_height;
+            kp.score = max_score;
+            pose.keypoints.push_back(kp);
+
+            //            std::cout << "x: " << pose.keypoints[c].x << ", y: " << pose.keypoints[c].y << ", score: "
+            //                      << pose.keypoints[c].score << std::endl;
+        }
+    }
+
+    static inline void animal_post_process(float* data, ai_animal_parts_s& pose, int joint_num, int img_h, int img_w)
     {
         int heatmap_width = img_w / 4;
         int heatmap_height = img_h / 4;

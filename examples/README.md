@@ -349,6 +349,28 @@ Repeat 10 times, avg time 14.11 ms, max_time 14.64 ms, min_time 14.04 ms
 ```
 ![HRNet](../docs/hrnet.png)
 
+#### HRNet_animal
+```
+root@AXERA:~/samples# ./ax_hrnet -m hrnet_animal_256x256.joint -i ssd_horse.jpg -r 10
+--------------------------------------
+model file : models/hrnet_animal_256x256.joint
+image file : images/ssd_horse.jpg
+img_h, img_w : 256 256
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.20
+07305a6
+run over: output len 1
+--------------------------------------
+Create handle took 1420.85 ms (neu 28.09 ms, axe 0.00 ms, overhead 1392.76 ms)
+--------------------------------------
+Repeat 10 times, avg time 17.49 ms, max_time 18.06 ms, min_time 17.40 ms
+--------------------------------------
+```
+![HRNet](../docs/hrnet_animal.jpg)
+
 #### AX-POSE-PPL
 ```
 root@AXERA:~/test# ./ax_pose_ppl -d ./models/ax_person_det.joint -p ./models/ax_pose.joint -i align_npu.jpg
