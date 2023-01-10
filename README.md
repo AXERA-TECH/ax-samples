@@ -3,7 +3,7 @@
 # AX-Samples
 
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://raw.githubusercontent.com/AXERA-TECH/ax-samples/main/LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AXERA-TECH/ax-samples/build)](https://github.com/AXERA-TECH/ax-samples/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build.yml?branch=main)](https://github.com/AXERA-TECH/ax-samples/actions)
 
 ## 简介
 
@@ -35,7 +35,13 @@
 
 ### 速度评估
 
-- [Benchmark](benchmark/) 基础网络速度评估工具，欢迎大家更新。
+- [Benchmark](benchmark/) 常见开源模型推理耗时统计，基于 *AXera-Pi* 实测。
+
+## 联动项目
+
+- [ax-pipeline](https://github.com/AXERA-TECH/ax-pipeline) 该项目基于 AXera-Pi 展示 ISP、图像处理、NPU、编码、显示 等功能模块软件调用方法，方便社区开发者进行快速评估和二次开发自己的多媒体应用
+- [ax-models](https://github.com/AXERA-TECH/ax-models) examples 示例中部分预编译好的 NPU 模型
+- [NPU 工具链在线文档](https://pulsar-docs.readthedocs.io/zh_CN/latest/)
 
 ## 技术讨论
 
