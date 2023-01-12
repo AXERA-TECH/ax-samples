@@ -82,6 +82,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_yolo_fastest          ax_yolo_fastest_steps.cc)
     axera_example (ax_yolo_fastest_body     ax_yolo_fastest_body_steps.cc)
     axera_example (ax_hrnet                 ax_hrnet_steps.cc)
+    axera_example (ax_hrnet_animal          ax_hrnet_animal_steps.cc)
     axera_example (ax_yolov3                ax_yolov3_steps.cc)
     axera_example (ax_yolov3_tiny           ax_yolov3_tiny_steps.cc)
     axera_example (ax_yolov4                ax_yolov4_steps.cc)
