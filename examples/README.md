@@ -667,6 +667,64 @@ detection num: 3
 ```
 ![YOLOv6s](../docs/yolov6s.jpg)
 
+#### YOLOv8s
+```
+root@AXERA:~/samples# ./ax_yolov8s -m ./yolov8s.joint -i ./bus.jpg -r 10
+--------------------------------------
+model file : ./yolov8s.joint
+image file : ./bus.jpg
+img_h, img_w : 640 640
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.14
+4111370
+run over: output len 3
+--------------------------------------
+Create handle took 740.07 ms (neu 36.91 ms, axe 0.00 ms, overhead 703.16 ms)
+--------------------------------------
+Repeat 10 times, avg time 36.81 ms, max_time 37.31 ms, min_time 36.73 ms
+--------------------------------------
+detection num: 5
+ 5:  93%, [  25,  228,  796,  736], bus
+ 0:  92%, [  50,  400,  246,  901], person
+ 0:  88%, [ 666,  394,  809,  880], person
+ 0:  88%, [ 222,  405,  346,  859], person
+ 0:  65%, [   0,  551,   77,  874], person
+```
+![YOLOv8s](../docs/yolov8s.jpg)
+
+#### YOLOv8s-Seg
+```
+root@AXERA:~/samples# ./ax_yolov8s_seg -m ./yolov8s-seg.joint -i ./bus.jpg -r 10
+--------------------------------------
+model file : ./yolov8s-seg.joint
+image file : ./bus.jpg
+img_h, img_w : 640 640
+[AX_SYS_LOG] AX_SYS_Log2ConsoleThread_Start
+Run-Joint Runtime version: 0.5.10
+--------------------------------------
+[INFO]: Virtual npu mode is 1_1
+
+Tools version: 0.6.1.20
+07305a6
+run over: output len 4
+--------------------------------------
+Create handle took 823.03 ms (neu 44.60 ms, axe 0.00 ms, overhead 778.43 ms)
+--------------------------------------
+Repeat 10 times, avg time 47.63 ms, max_time 48.22 ms, min_time 47.52 ms
+--------------------------------------
+detection num: 5
+ 5:  90%, [  17,  231,  800,  740], bus
+ 0:  89%, [  50,  396,  247,  902], person
+ 0:  85%, [ 221,  405,  343,  859], person
+ 0:  85%, [ 670,  390,  809,  879], person
+ 0:  62%, [   0,  553,   78,  867], person
+```
+![YOLOv8s-seg](../docs/yolov8s_seg.jpg)
+
 ## 模型说明
 ### YOLOv3(Paddle)
 YOLOv3(Paddle) 源自国内产业级深度学习开源框架飞桨的目标检测开发套件 [PaddleDetection](https://github.com/PaddlePaddle/PaddleDetection)，通过速度与精度权衡，我们选择基于 416尺度的 [YOLOv3-Res34](https://github.com/PaddlePaddle/PaddleDetection/tree/develop/configs/yolov3/) 进行功能展示。
