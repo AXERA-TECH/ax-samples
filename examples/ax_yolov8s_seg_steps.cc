@@ -270,15 +270,19 @@ namespace ax
         std::vector<det::Object> proposals;
         std::vector<det::Object> objects;
 
-        for (uint32_t i = 0; i < io_info->nOutputSize - 1; ++i)
+        for (uint32_t i = 0; i < 3; ++i)
         {
-            auto& info = joint_io_arr.pOutputs[i];
-            auto ptr = (float*)info.pVirAddr;
+            auto& cls_info = joint_io_arr.pOutputs[i + 3];
+            auto cls_ptr = (float*)cls_info.pVirAddr;
+            auto& cls_idx_info = joint_io_arr.pOutputs[i + 6];
+            auto cls_idx_ptr = (float*)cls_idx_info.pVirAddr;
+            auto& dfl_info = joint_io_arr.pOutputs[i];
+            auto dfl_ptr = (float*)dfl_info.pVirAddr;
             int32_t stride = (1 << i) * 8;
-            det::generate_proposals_yolov8_seg(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, CLS_NUM);
+            det::generate_proposals_yolov8_seg(stride, dfl_ptr, cls_ptr, cls_idx_ptr, PROB_THRESHOLD, proposals, input_w, input_h, CLS_NUM);
         }
 
-        auto& info = joint_io_arr.pOutputs[3];
+        auto& info = joint_io_arr.pOutputs[9];
         auto ptr = (float*)info.pVirAddr;
         det::get_out_bbox_mask(proposals, objects, ptr, DEFAULT_MASK_PROTO_DIM, DEFAULT_MASK_SAMPLE_STRIDE, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
 
