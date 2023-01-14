@@ -1124,14 +1124,16 @@ namespace detection
         }
     }
 
-    static void generate_proposals_yolov8(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+    static void generate_proposals_yolov8(int stride, const float* dfl_feat, const float* cls_feat, const float* cls_idx, float prob_threshold, std::vector<Object>& objects,
                                          int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
         int reg_max = 16;
         
-        auto feat_ptr = feat;
+        auto dfl_ptr = dfl_feat;
+        auto cls_ptr = cls_feat;
+        auto cls_idx_ptr = cls_idx;
         
         std::vector<float> dis_after_sm(reg_max, 0.f);
         for (int h = 0; h <= feat_h - 1; h++)
@@ -1139,25 +1141,17 @@ namespace detection
             for (int w = 0; w <= feat_w - 1; w++)
             {
                 //process cls score
-                int class_index = 0;
-                float class_score = -FLT_MAX;
-                for (int s = 0; s <= cls_num - 1; s++)
-                {
-                    float score = feat_ptr[s + 4 * reg_max];
-                    if (score > class_score)
-                    {
-                        class_index = s;
-                        class_score = score;
-                    }
-                }
-
+                int class_index = static_cast<int>(cls_idx_ptr[h * feat_w + w]);
+                float class_score = cls_ptr[h * feat_w * cls_num + w * cls_num + class_index];
+                
                 float box_prob =  sigmoid(class_score);
+                
                 if (box_prob > prob_threshold)
                 {
                     float pred_ltrb[4];
                     for (int k = 0; k < 4; k++)
                     {
-                        float dis = softmax(feat_ptr + k * reg_max, dis_after_sm.data(), reg_max);
+                        float dis = softmax(dfl_ptr + k * reg_max, dis_after_sm.data(), reg_max);
                         pred_ltrb[k] = dis * stride;
                     }
 
@@ -1184,20 +1178,21 @@ namespace detection
 
                     objects.push_back(obj);
                 }
-
-                feat_ptr += (cls_num + 4 * reg_max);
+                dfl_ptr += (4 * reg_max);
             }
         }
     }
 
-    static void generate_proposals_yolov8_seg(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+    static void generate_proposals_yolov8_seg(int stride, const float* dfl_feat, const float* cls_feat, const float* cls_idx, float prob_threshold, std::vector<Object>& objects,
                                          int letterbox_cols, int letterbox_rows, int cls_num = 80, int mask_proto_dim = 32)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
         int reg_max = 16;
         
-        auto feat_ptr = feat;
+        auto dfl_ptr = dfl_feat;
+        auto cls_ptr = cls_feat;
+        auto cls_idx_ptr = cls_idx;
         
         std::vector<float> dis_after_sm(reg_max, 0.f);
         for (int h = 0; h <= feat_h - 1; h++)
@@ -1205,17 +1200,8 @@ namespace detection
             for (int w = 0; w <= feat_w - 1; w++)
             {
                 //process cls score
-                int class_index = 0;
-                float class_score = -FLT_MAX;
-                for (int s = 0; s <= cls_num - 1; s++)
-                {
-                    float score = feat_ptr[s + 4 * reg_max];
-                    if (score > class_score)
-                    {
-                        class_index = s;
-                        class_score = score;
-                    }
-                }
+                int class_index = static_cast<int>(cls_idx_ptr[h*feat_w+w]);
+                float class_score = cls_ptr[h*feat_w*cls_num+w*cls_num+class_index];
 
                 float box_prob =  sigmoid(class_score);
                 if (box_prob > prob_threshold)
@@ -1223,7 +1209,7 @@ namespace detection
                     float pred_ltrb[4];
                     for (int k = 0; k < 4; k++)
                     {
-                        float dis = softmax(feat_ptr + k * reg_max, dis_after_sm.data(), reg_max);
+                        float dis = softmax(dfl_ptr + k * reg_max, dis_after_sm.data(), reg_max);
                         pred_ltrb[k] = dis * stride;
                     }
 
@@ -1250,12 +1236,12 @@ namespace detection
                     obj.mask_feat.resize(mask_proto_dim);
                     for(int k = 0; k < mask_proto_dim; k++)
                     {
-                        obj.mask_feat[k] = feat_ptr[cls_num + 4 * reg_max + k];
+                        obj.mask_feat[k] = dfl_ptr[4 * reg_max + k];
                     }
                     objects.push_back(obj);
                 }
-
-                feat_ptr += (cls_num + 4 * reg_max + mask_proto_dim);
+                
+                dfl_ptr += (4 * reg_max + mask_proto_dim);
             }
         }
     }
