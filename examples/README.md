@@ -19,9 +19,13 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv5s](#YOLOv5s)
   - [YOLOv5-Lite](#YOLOv5-Lite)([original model](https://github.com/ppogg/YOLOv5-Lite))
   - [YOLOv7-Tiny](#YOLOv7-Tiny)
+  - [YOLOv8s](#YOLOv8s)
   - [YOLOX-S](#YOLOX-S)
   - YOLO-Fastest-XL
   - NanoDet
+- 物体分割
+  - YOLOv5-seg
+  - YOLOv8-seg
 - 人型检测
   - YOLO-Fastest-Body
 - 人脸检测
