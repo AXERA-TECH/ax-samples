@@ -19,6 +19,9 @@ if (NOT BSP_MSP_DIR)
     set (BSP_MSP_DIR ${CMAKE_SOURCE_DIR}/out)
 endif ()
 
+MESSAGE (STATUS ${BSP_MSP_DIR})
+include_directories(/home/ubuntu/Build/cross_complier/workdir/ax620a/ax_bsp/include)
+
 # example generation function
 function (axera_example name)
     add_executable(${name})
@@ -61,7 +64,8 @@ function (axera_example name)
 endfunction()
 
 if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
-    set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
+#    set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
+    set (OpenCV_DIR /home/ubuntu/Build/cross_complier/workdir/opencv/build_armv7/install/lib/cmake/opencv4)
 else()
     set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
 endif()
@@ -115,6 +119,16 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_yolov6s               ax_yolov6s_steps.cc)
     axera_example (ax_yolov8s               ax_yolov8s_steps.cc)
     axera_example (ax_yolov8s_seg           ax_yolov8s_seg_steps.cc)
+
+    #******************************** MMYOLO model ********************************#
+    #    axera_example (ax_mmyolov5s             mmyolo/ax_mmyolov5s.cc)
+    axera_example(ax_mmyoloxs               mmyolo/ax_mmyoloxs.cc)
+    axera_example(ax_mmppyoloeps            mmyolo/ax_mmppyoloeps.cc)
+    axera_example(ax_mmyolov6s              mmyolo/ax_mmyolov6s.cc)
+    #    axera_example (ax_mmyolov7t             mmyolo/ax_mmyolov7t.cc)
+    #    axera_example (ax_mmrtmdets             mmyolo/ax_mmrtmdets.cc)
+    axera_example(ax_mmyolov8s              mmyolo/ax_mmyolov8s.cc)
+
 else() # ax630a support
     axera_example (ax_classification        ax_classification_steps.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
