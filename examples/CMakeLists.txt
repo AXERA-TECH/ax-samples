@@ -19,9 +19,6 @@ if (NOT BSP_MSP_DIR)
     set (BSP_MSP_DIR ${CMAKE_SOURCE_DIR}/out)
 endif ()
 
-MESSAGE (STATUS ${BSP_MSP_DIR})
-include_directories(/home/ubuntu/Build/cross_complier/workdir/ax620a/ax_bsp/include)
-
 # example generation function
 function (axera_example name)
     add_executable(${name})
@@ -64,8 +61,7 @@ function (axera_example name)
 endfunction()
 
 if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
-#    set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
-    set (OpenCV_DIR /home/ubuntu/Build/cross_complier/workdir/opencv/build_armv7/install/lib/cmake/opencv4)
+    set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
 else()
     set (OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
 endif()

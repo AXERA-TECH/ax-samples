@@ -67,27 +67,25 @@ namespace detection
         const float alpha = *std::max_element(src, src + length);
         float denominator = 0;
         float dis_sum = 0;
-        for (int i = 0; i < length; ++i)
-        {
+        for (int i = 0; i < length; ++i) {
             dst[i] = exp(src[i] - alpha);
             denominator += dst[i];
         }
-        for (int i = 0; i < length; ++i)
-        {
+        for (int i = 0; i < length; ++i) {
             dst[i] /= denominator;
             dis_sum += i * dst[i];
         }
         return dis_sum;
     }
 
-    template<typename T>
+    template <typename T>
     static inline float intersection_area(const T& a, const T& b)
     {
         cv::Rect_<float> inter = a.rect & b.rect;
         return inter.area();
     }
 
-    template<typename T>
+    template <typename T>
     static void qsort_descent_inplace(std::vector<T>& faceobjects, int left, int right)
     {
         int i = left;
@@ -124,7 +122,7 @@ namespace detection
         }
     }
 
-    template<typename T>
+    template <typename T>
     static void qsort_descent_inplace(std::vector<T>& faceobjects)
     {
         if (faceobjects.empty())
@@ -133,7 +131,7 @@ namespace detection
         qsort_descent_inplace(faceobjects, 0, faceobjects.size() - 1);
     }
 
-    template<typename T>
+    template <typename T>
     static void nms_sorted_bboxes(const std::vector<T>& faceobjects, std::vector<int>& picked, float nms_threshold)
     {
         picked.clear();
@@ -552,7 +550,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov5_license_plate(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                                        int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
+                                               int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
@@ -640,8 +638,9 @@ namespace detection
         }
     }
 
+
     static void generate_proposals_yolov5(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                          int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 80)
+                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 80)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
@@ -718,7 +717,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov5_seg(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                              int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 80, int mask_proto_dim = 32)
+                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 80, int mask_proto_dim = 32)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
@@ -786,7 +785,7 @@ namespace detection
                         obj.label = class_index;
                         obj.prob = final_score;
                         obj.mask_feat.resize(mask_proto_dim);
-                        for (int k = 0; k < mask_proto_dim; k++)
+                        for(int k = 0; k < mask_proto_dim; k++)
                         {
                             obj.mask_feat[k] = feature_ptr[cls_num + 5 + k];
                         }
@@ -800,7 +799,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov5_visdrone(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                                   int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 10)
+                                       int letterbox_cols, int letterbox_rows, const float* anchors, float prob_threshold_unsigmoid, int cls_num = 10)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
@@ -877,7 +876,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov6(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                          int letterbox_cols, int letterbox_rows, int cls_num = 80)
+                                         int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
@@ -1002,7 +1001,7 @@ namespace detection
                         const float* landmark_ptr = feature_ptr + 6;
                         for (int l = 0; l < 5; l++)
                         {
-                            float lx = (landmark_ptr[3 * l] * 2.0f - 0.5f + w) * stride;
+                            float lx = (landmark_ptr[3 * l] * 2.0f - 0.5f+ w) * stride;
                             float ly = (landmark_ptr[3 * l + 1] * 2.0f - 0.5f + h) * stride;
                             //float score = sigmoid(landmark_ptr[3 * l + 2]);
                             obj.landmark[l] = cv::Point2f(lx, ly);
@@ -1126,7 +1125,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov8(int stride, const float* dfl_feat, const float* cls_feat, const float* cls_idx, float prob_threshold, std::vector<Object>& objects,
-                                          int letterbox_cols, int letterbox_rows, int cls_num = 80)
+                                         int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
@@ -1145,7 +1144,7 @@ namespace detection
                 int class_index = static_cast<int>(cls_idx_ptr[h * feat_w + w]);
                 float class_score = cls_ptr[h * feat_w * cls_num + w * cls_num + class_index];
 
-                float box_prob = sigmoid(class_score);
+                float box_prob =  sigmoid(class_score);
 
                 if (box_prob > prob_threshold)
                 {
@@ -1185,7 +1184,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov8_seg(int stride, const float* dfl_feat, const float* cls_feat, const float* cls_idx, float prob_threshold, std::vector<Object>& objects,
-                                              int letterbox_cols, int letterbox_rows, int cls_num = 80, int mask_proto_dim = 32)
+                                         int letterbox_cols, int letterbox_rows, int cls_num = 80, int mask_proto_dim = 32)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
@@ -1201,10 +1200,10 @@ namespace detection
             for (int w = 0; w <= feat_w - 1; w++)
             {
                 //process cls score
-                int class_index = static_cast<int>(cls_idx_ptr[h * feat_w + w]);
-                float class_score = cls_ptr[h * feat_w * cls_num + w * cls_num + class_index];
+                int class_index = static_cast<int>(cls_idx_ptr[h*feat_w+w]);
+                float class_score = cls_ptr[h*feat_w*cls_num+w*cls_num+class_index];
 
-                float box_prob = sigmoid(class_score);
+                float box_prob =  sigmoid(class_score);
                 if (box_prob > prob_threshold)
                 {
                     float pred_ltrb[4];
@@ -1235,7 +1234,7 @@ namespace detection
                     obj.label = class_index;
                     obj.prob = box_prob;
                     obj.mask_feat.resize(mask_proto_dim);
-                    for (int k = 0; k < mask_proto_dim; k++)
+                    for(int k = 0; k < mask_proto_dim; k++)
                     {
                         obj.mask_feat[k] = dfl_ptr[4 * reg_max + k];
                     }
@@ -1248,7 +1247,7 @@ namespace detection
     }
 
     static void generate_proposals(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                   int letterbox_cols, int letterbox_rows, const float* anchors, int cls_num = 80)
+                                   int letterbox_cols, int letterbox_rows, const float* anchors,int cls_num = 80)
     {
         int anchor_num = 3;
         int feat_w = letterbox_cols / stride;
@@ -1323,7 +1322,7 @@ namespace detection
     static void generate_proposals_palm(std::vector<PalmObject>& region_list, float score_thresh, int input_img_w, int input_img_h, float* scores_ptr, float* bboxes_ptr, int head_count, const int* strides, const int* anchor_size, const float* anchor_offset, const int* feature_map_size, float prob_threshold_unsigmoid)
     {
         int idx = 0;
-        for (int i = 0; i < head_count; i++)
+        for(int i = 0; i < head_count; i++)
         {
             for (int y = 0; y < feature_map_size[i]; y++)
             {
@@ -1347,8 +1346,8 @@ namespace detection
 
                             float cx = p[0] / input_img_w + x_center;
                             float cy = p[1] / input_img_h + y_center;
-                            float w = p[2] / input_img_w;
-                            float h = p[3] / input_img_h;
+                            float w  = p[2] / input_img_w;
+                            float h  = p[3] / input_img_h;
 
                             float x0 = cx - w * 0.5f;
                             float y0 = cy - h * 0.5f;
@@ -1356,10 +1355,10 @@ namespace detection
                             float y1 = cy + h * 0.5f;
 
                             PalmObject region;
-                            region.prob = score;
-                            region.rect.x = x0;
-                            region.rect.y = y0;
-                            region.rect.width = x1 - x0;
+                            region.prob        = score;
+                            region.rect.x      = x0;
+                            region.rect.y      = y0;
+                            region.rect.width  = x1 - x0;
                             region.rect.height = y1 - y0;
 
                             for (int j = 0; j < 7; j++)
@@ -1428,13 +1427,13 @@ namespace detection
         {
             const Object& obj = objects[i];
 
-            const auto& color = colors[color_index % 80];
+            const auto&  color = colors[color_index % 80];
             color_index++;
 
             fprintf(stdout, "%2d: %3.0f%%, [%4.0f, %4.0f, %4.0f, %4.0f], %s\n", obj.label, obj.prob * 100, obj.rect.x,
                     obj.rect.y, obj.rect.x + obj.rect.width, obj.rect.y + obj.rect.height, class_names[obj.label]);
 
-            mask(cv::Rect((int)obj.rect.x, (int)obj.rect.y, (int)objects[i].rect.width, (int)objects[i].rect.height)).setTo(color, objects[i].mask);
+            mask(cv::Rect((int)obj.rect.x,(int)obj.rect.y,(int)objects[i].rect.width, (int)objects[i].rect.height)).setTo(color, objects[i].mask);
 
             cv::rectangle(image, obj.rect, cv::Scalar(255, 0, 0));
 
@@ -1478,7 +1477,7 @@ namespace detection
             cv::line(image, obj.vertices[3], obj.vertices[0], cv::Scalar(0, 0, 255), 2, 8, 0);
             for (auto ld : obj.landmarks)
             {
-                cv::circle(image, ld, 2, cv::Scalar(0, 255, 0), -1, 8);
+                cv::circle(image, ld, 2, cv::Scalar(0,255,0),-1, 8);
             }
         }
         cv::imwrite(std::string(output_name) + ".jpg", image);
@@ -1498,8 +1497,8 @@ namespace detection
             cv::rectangle(image, obj.rect, cv::Scalar(0, 255, 255), 2, 8, 0);
         }
 
-        mask.setTo(cv::Scalar(0, 255, 0), da_seg_mask);
-        mask.setTo(cv::Scalar(0, 0, 255), ll_seg_mask);
+        mask.setTo(cv::Scalar(0,255,0), da_seg_mask);
+        mask.setTo(cv::Scalar(0,0,255), ll_seg_mask);
         float blended_alpha = 0.5;
         image = (1 - blended_alpha) * mask + blended_alpha * image;
 
@@ -1711,7 +1710,7 @@ namespace detection
             int mask_h = hend - hstart;
 
             cv::Mat mask = cv::Mat(mask_h, mask_w, CV_32FC1);
-            if (mask_w > 0 && mask_h > 0)
+            if(mask_w > 0 && mask_h > 0)
             {
                 std::vector<cv::Range> roi_ranges;
                 roi_ranges.push_back(cv::Range(0, 1));
@@ -1720,13 +1719,13 @@ namespace detection
                 roi_ranges.push_back(cv::Range(wstart, wend));
 
                 cv::Mat mask_protos = cv::Mat(mask_proto_dim, mask_proto_h * mask_proto_w, CV_32FC1, (float*)mask_proto);
-                int sz[] = {1, mask_proto_dim, mask_proto_h, mask_proto_w};
+                int sz[] = { 1, mask_proto_dim, mask_proto_h, mask_proto_w };
                 cv::Mat mask_protos_reshape = mask_protos.reshape(1, 4, sz);
-                cv::Mat protos = mask_protos_reshape(roi_ranges).clone().reshape(0, {mask_proto_dim, mask_w * mask_h});
+                cv::Mat protos = mask_protos_reshape(roi_ranges).clone().reshape(0, { mask_proto_dim, mask_w * mask_h });
                 cv::Mat mask_proposals = cv::Mat(1, mask_proto_dim, CV_32FC1, (float*)objects[i].mask_feat.data());
                 cv::Mat masks_feature = (mask_proposals * protos);
                 /* sigmoid */
-                cv::exp(-masks_feature.reshape(1, {mask_h, mask_w}), mask);
+                cv::exp( -masks_feature.reshape(1, { mask_h, mask_w }), mask);
                 mask = 1.0 / (1.0 + mask);
             }
 
@@ -1746,6 +1745,7 @@ namespace detection
             objects[i].rect.height = y1 - y0;
             cv::resize(mask, mask, cv::Size((int)objects[i].rect.width, (int)objects[i].rect.height));
             objects[i].mask = mask > 0.5;
+
         }
     }
 
@@ -1763,14 +1763,16 @@ namespace detection
         float shift_y = -0.5f;
         if (rotation == 0)
         {
-            hand_cx = object.rect.x + object.rect.width * 0.5f + (object.rect.width * shift_x);
+            hand_cx = object.rect.x + object.rect.width* 0.5f + (object.rect.width * shift_x);
             hand_cy = object.rect.y + object.rect.height * 0.5f + (object.rect.height * shift_y);
         }
         else
         {
-            float dx = (object.rect.width * shift_x) * std::cos(rotation) - (object.rect.height * shift_y) * std::sin(rotation);
-            float dy = (object.rect.width * shift_x) * std::sin(rotation) + (object.rect.height * shift_y) * std::cos(rotation);
-            hand_cx = object.rect.x + object.rect.width * 0.5f + dx;
+            float dx = (object.rect.width * shift_x) * std::cos(rotation) -
+                        (object.rect.height * shift_y) * std::sin(rotation);
+            float dy = (object.rect.width * shift_x) * std::sin(rotation) +
+                        (object.rect.height * shift_y) * std::cos(rotation);
+            hand_cx = object.rect.x + object.rect.width* 0.5f + dx;
             hand_cy = object.rect.y + object.rect.height * 0.5f + dy;
         }
 
