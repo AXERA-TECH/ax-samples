@@ -115,6 +115,16 @@ if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
     axera_example (ax_yolov6s               ax_yolov6s_steps.cc)
     axera_example (ax_yolov8s               ax_yolov8s_steps.cc)
     axera_example (ax_yolov8s_seg           ax_yolov8s_seg_steps.cc)
+
+    #******************************** MMYOLO model ********************************#
+    #    axera_example (ax_mmyolov5s             mmyolo/ax_mmyolov5s.cc)
+    axera_example(ax_mmyoloxs               mmyolo/ax_mmyoloxs.cc)
+    axera_example(ax_mmppyoloeps            mmyolo/ax_mmppyoloeps.cc)
+    axera_example(ax_mmyolov6s              mmyolo/ax_mmyolov6s.cc)
+    #    axera_example (ax_mmyolov7t             mmyolo/ax_mmyolov7t.cc)
+    #    axera_example (ax_mmrtmdets             mmyolo/ax_mmrtmdets.cc)
+    axera_example(ax_mmyolov8s              mmyolo/ax_mmyolov8s.cc)
+
 else() # ax630a support
     axera_example (ax_classification        ax_classification_steps.cc)
     axera_example (ax_yolov5s               ax_yolov5s_steps.cc)
