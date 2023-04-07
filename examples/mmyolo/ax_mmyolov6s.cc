@@ -15,7 +15,7 @@
  */
 
 /*
- * Author: FeiGeChuanShu
+ * Author: TripleMu
  */
 
 #include <cstdio>

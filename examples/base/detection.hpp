@@ -44,6 +44,7 @@ namespace detection
         /* for yolov5-seg */
         cv::Mat mask;
         std::vector<float> mask_feat;
+        std::vector<float> kps_feat;
     } Object;
 
     /* for palm detection */
@@ -1246,6 +1247,70 @@ namespace detection
         }
     }
 
+    static void generate_proposals_yolov8_pose(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                              int letterbox_cols, int letterbox_rows, int cls_num = 80, int num_point = 17)
+    {
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+        int reg_max = 16;
+
+        std::vector<float> dis_after_sm(reg_max, 0.f);
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                //process cls score
+                auto scores = feat;
+                auto bboxes = feat + 1;
+                auto kps = feat + 1 + 4 * reg_max;
+
+                float box_prob =  sigmoid(*scores);
+                if (box_prob > prob_threshold)
+                {
+                    float pred_ltrb[4];
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float dis = softmax(bboxes + k * reg_max, dis_after_sm.data(), reg_max);
+                        pred_ltrb[k] = dis * stride;
+                    }
+
+                    float pb_cx = (w + 0.5f) * stride;
+                    float pb_cy = (h + 0.5f) * stride;
+
+                    float x0 = pb_cx - pred_ltrb[0];
+                    float y0 = pb_cy - pred_ltrb[1];
+                    float x1 = pb_cx + pred_ltrb[2];
+                    float y1 = pb_cy + pred_ltrb[3];
+
+                    x0 = std::max(std::min(x0, (float)(letterbox_cols - 1)), 0.f);
+                    y0 = std::max(std::min(y0, (float)(letterbox_rows - 1)), 0.f);
+                    x1 = std::max(std::min(x1, (float)(letterbox_cols - 1)), 0.f);
+                    y1 = std::max(std::min(y1, (float)(letterbox_rows - 1)), 0.f);
+
+                    Object obj;
+                    obj.rect.x = x0;
+                    obj.rect.y = y0;
+                    obj.rect.width = x1 - x0;
+                    obj.rect.height = y1 - y0;
+                    obj.label = 0;
+                    obj.prob = box_prob;
+                    obj.kps_feat.clear();
+                    for (int k = 0; k < num_point; k++)
+                    {
+                        float kps_x = (kps[k * 3] * 2.f + w) * stride;
+                        float kps_y = (kps[k * 3 + 1] * 2.f + h) * stride;
+                        float kps_s = sigmoid(kps[k * 3 + 2]);
+                        obj.kps_feat.push_back(kps_x);
+                        obj.kps_feat.push_back(kps_y);
+                        obj.kps_feat.push_back(kps_s);
+                    }
+                    objects.push_back(obj);
+                }
+                feat += (1 + 4 * reg_max + 3 * num_point);
+            }
+        }
+    }
+
     static void generate_proposals(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
                                    int letterbox_cols, int letterbox_rows, const float* anchors,int cls_num = 80)
     {
@@ -1413,6 +1478,75 @@ namespace detection
 
             cv::putText(image, text, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.5,
                         cv::Scalar(0, 0, 0));
+        }
+
+        cv::imwrite(std::string(output_name) + ".jpg", image);
+    }
+
+    static void draw_keypoints(const cv::Mat& bgr, const std::vector<Object>& objects,
+                               const std::vector<std::vector<uint8_t> >& kps_colors,
+                               const std::vector<std::vector<uint8_t> >& limb_colors,
+                               const std::vector<std::vector<uint8_t> >& skeleton,
+                               const char* output_name)
+    {
+        cv::Mat image = bgr.clone();
+
+        for (size_t i = 0; i < objects.size(); i++)
+        {
+            const Object& obj = objects[i];
+
+            fprintf(stdout, "%2d: %3.0f%%, [%4.0f, %4.0f, %4.0f, %4.0f], person\n", obj.label, obj.prob * 100, obj.rect.x,
+                    obj.rect.y, obj.rect.x + obj.rect.width, obj.rect.y + obj.rect.height);
+
+            cv::rectangle(image, obj.rect, cv::Scalar(255, 0, 0));
+
+            char text[256];
+            sprintf(text, "person %.1f%%", obj.prob * 100);
+
+            int baseLine = 0;
+            cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+
+            int x = obj.rect.x;
+            int y = obj.rect.y - label_size.height - baseLine;
+            if (y < 0)
+                y = 0;
+            if (x + label_size.width > image.cols)
+                x = image.cols - label_size.width;
+
+            cv::rectangle(image, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
+                          cv::Scalar(255, 255, 255), -1);
+
+            cv::putText(image, text, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                        cv::Scalar(0, 0, 0));
+
+            for (int j = 0; j < obj.kps_feat.size() + 2; j++) {
+                // draw circle
+                if (i < obj.kps_feat.size()) {
+                    int kps_x = std::round(obj.kps_feat[j * 3]);
+                    int kps_y = std::round(obj.kps_feat[j * 3 + 1]);
+                    float kps_s = obj.kps_feat[j * 3 + 2];
+                    if (kps_s > 0.5f) {
+                        auto kps_color = cv::Scalar(kps_colors[i][0], kps_colors[i][1], kps_colors[i][2]);
+                        cv::circle(image, {kps_x, kps_y}, 5, kps_color, -1);
+                    }
+                }
+
+                // draw line
+                auto &ske = skeleton[i];
+                int pos1_x = obj.kps_feat[(ske[0] - 1) * 3];
+                int pos1_y = obj.kps_feat[(ske[0] - 1) * 3 + 1];
+
+                int pos2_x = obj.kps_feat[(ske[1] - 1) * 3];
+                int pos2_y = obj.kps_feat[(ske[1] - 1) * 3 + 1];
+
+                float pos1_s = obj.kps_feat[(ske[0] - 1) * 3 + 2];
+                float pos2_s = obj.kps_feat[(ske[1] - 1) * 3 + 2];
+
+                if (pos1_s > 0.5f && pos2_s > 0.5f) {
+                    auto limb_color = cv::Scalar(limb_colors[i][0], limb_colors[i][1], limb_colors[i][2]);
+                    cv::line(image, {pos1_x, pos1_y}, {pos2_x, pos2_y}, limb_color, 2);
+                }
+            }
         }
 
         cv::imwrite(std::string(output_name) + ".jpg", image);
@@ -1749,7 +1883,71 @@ namespace detection
         }
     }
 
-    static void transform_rects_palm(PalmObject& object)
+    void get_out_bbox_kps(std::vector<Object>& proposals, std::vector<Object>& objects, const float nms_threshold, int letterbox_rows, int letterbox_cols, int src_rows, int src_cols)
+    {
+        qsort_descent_inplace(proposals);
+        std::vector<int> picked;
+        nms_sorted_bboxes(proposals, picked, nms_threshold);
+
+        /* yolov8 draw the result */
+        float scale_letterbox;
+        int resize_rows;
+        int resize_cols;
+        if ((letterbox_rows * 1.0 / src_rows) < (letterbox_cols * 1.0 / src_cols))
+        {
+            scale_letterbox = letterbox_rows * 1.0 / src_rows;
+        }
+        else
+        {
+            scale_letterbox = letterbox_cols * 1.0 / src_cols;
+        }
+        resize_cols = int(scale_letterbox * src_cols);
+        resize_rows = int(scale_letterbox * src_rows);
+
+        int tmp_h = (letterbox_rows - resize_rows) / 2;
+        int tmp_w = (letterbox_cols - resize_cols) / 2;
+
+        float ratio_x = (float)src_rows / resize_rows;
+        float ratio_y = (float)src_cols / resize_cols;
+
+        int count = picked.size();
+
+        objects.resize(count);
+        for (int i = 0; i < count; i++)
+        {
+            objects[i] = proposals[picked[i]];
+            float x0 = (objects[i].rect.x);
+            float y0 = (objects[i].rect.y);
+            float x1 = (objects[i].rect.x + objects[i].rect.width);
+            float y1 = (objects[i].rect.y + objects[i].rect.height);
+
+            x0 = (x0 - tmp_w) * ratio_x;
+            y0 = (y0 - tmp_h) * ratio_y;
+            x1 = (x1 - tmp_w) * ratio_x;
+            y1 = (y1 - tmp_h) * ratio_y;
+
+            x0 = std::max(std::min(x0, (float)(src_cols - 1)), 0.f);
+            y0 = std::max(std::min(y0, (float)(src_rows - 1)), 0.f);
+            x1 = std::max(std::min(x1, (float)(src_cols - 1)), 0.f);
+            y1 = std::max(std::min(y1, (float)(src_rows - 1)), 0.f);
+
+            objects[i].rect.x = x0;
+            objects[i].rect.y = y0;
+            objects[i].rect.width = x1 - x0;
+            objects[i].rect.height = y1 - y0;
+
+            for (int j = 0; j < objects[j].kps_feat.size() / 3; j++)
+            {
+                objects[i].kps_feat[j * 3] = std::max(
+                    std::min((objects[i].kps_feat[j * 3] - tmp_w) * ratio_x, (float)(src_cols - 1)), 0.f);
+
+                objects[i].kps_feat[j * 3 + 1] = std::max(
+                    std::min((objects[i].kps_feat[j * 3 + 1] - tmp_h) * ratio_y, (float)(src_rows - 1)), 0.f);
+            }
+        }
+    }
+
+static void transform_rects_palm(PalmObject& object)
     {
         float x0 = object.landmarks[0].x;
         float y0 = object.landmarks[0].y;
