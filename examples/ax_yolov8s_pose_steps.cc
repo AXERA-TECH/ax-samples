@@ -46,7 +46,7 @@ static const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 2
 const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
 const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
 const int DEFAULT_LOOP_COUNT = 1;
-const int CLS_NUM = 80;
+const int NUM_POINT = 17;
 const float PROB_THRESHOLD = 0.3f;
 const float NMS_THRESHOLD = 0.65f;
 namespace ax
@@ -253,7 +253,7 @@ namespace ax
             auto& feat_info = joint_io_arr.pOutputs[i];
             auto feat_ptr = (float*)feat_info.pVirAddr;
             int32_t stride = (1 << i) * 8;
-            det::generate_proposals_yolov8_pose(stride, feat_ptr, PROB_THRESHOLD, proposals, input_w, input_h, CLS_NUM, 17);
+            det::generate_proposals_yolov8_pose(stride, feat_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT);
         }
         det::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         // 6. show time costs

@@ -1248,7 +1248,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov8_pose(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                              int letterbox_cols, int letterbox_rows, int cls_num = 80, const int num_point = 17)
+                                              int letterbox_cols, int letterbox_rows, const int num_point = 17)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
