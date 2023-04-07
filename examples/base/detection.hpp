@@ -1248,7 +1248,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov8_pose(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                              int letterbox_cols, int letterbox_rows, int cls_num = 80, int num_point = 17)
+                                              int letterbox_cols, int letterbox_rows, int cls_num = 80, const int num_point = 17)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
@@ -1519,20 +1519,23 @@ namespace detection
             cv::putText(image, text, cv::Point(x, y + label_size.height), cv::FONT_HERSHEY_SIMPLEX, 0.5,
                         cv::Scalar(0, 0, 0));
 
-            for (int j = 0; j < obj.kps_feat.size() + 2; j++) {
+            const int num_point = obj.kps_feat.size() / 3;
+            for (int j = 0; j < num_point + 2; j++)
+            {
                 // draw circle
-                if (i < obj.kps_feat.size()) {
+                if (j < num_point)
+                {
                     int kps_x = std::round(obj.kps_feat[j * 3]);
                     int kps_y = std::round(obj.kps_feat[j * 3 + 1]);
                     float kps_s = obj.kps_feat[j * 3 + 2];
-                    if (kps_s > 0.5f) {
-                        auto kps_color = cv::Scalar(kps_colors[i][0], kps_colors[i][1], kps_colors[i][2]);
+                    if (kps_s > 0.5f)
+                    {
+                        auto kps_color = cv::Scalar(kps_colors[j][0], kps_colors[j][1], kps_colors[j][2]);
                         cv::circle(image, {kps_x, kps_y}, 5, kps_color, -1);
                     }
                 }
-
                 // draw line
-                auto &ske = skeleton[i];
+                auto& ske = skeleton[j];
                 int pos1_x = obj.kps_feat[(ske[0] - 1) * 3];
                 int pos1_y = obj.kps_feat[(ske[0] - 1) * 3 + 1];
 
@@ -1542,13 +1545,13 @@ namespace detection
                 float pos1_s = obj.kps_feat[(ske[0] - 1) * 3 + 2];
                 float pos2_s = obj.kps_feat[(ske[1] - 1) * 3 + 2];
 
-                if (pos1_s > 0.5f && pos2_s > 0.5f) {
-                    auto limb_color = cv::Scalar(limb_colors[i][0], limb_colors[i][1], limb_colors[i][2]);
+                if (pos1_s > 0.5f && pos2_s > 0.5f)
+                {
+                    auto limb_color = cv::Scalar(limb_colors[j][0], limb_colors[j][1], limb_colors[j][2]);
                     cv::line(image, {pos1_x, pos1_y}, {pos2_x, pos2_y}, limb_color, 2);
                 }
             }
         }
-
         cv::imwrite(std::string(output_name) + ".jpg", image);
     }
 
@@ -1936,11 +1939,10 @@ namespace detection
             objects[i].rect.width = x1 - x0;
             objects[i].rect.height = y1 - y0;
 
-            for (int j = 0; j < objects[j].kps_feat.size() / 3; j++)
+            for (int j = 0; j < objects[i].kps_feat.size() / 3 ; j++)
             {
                 objects[i].kps_feat[j * 3] = std::max(
                     std::min((objects[i].kps_feat[j * 3] - tmp_w) * ratio_x, (float)(src_cols - 1)), 0.f);
-
                 objects[i].kps_feat[j * 3 + 1] = std::max(
                     std::min((objects[i].kps_feat[j * 3 + 1] - tmp_h) * ratio_y, (float)(src_rows - 1)), 0.f);
             }

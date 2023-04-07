@@ -250,7 +250,7 @@ namespace ax
 
         for (uint32_t i = 0; i < 3; ++i)
         {
-            auto& feat_info = joint_io_arr.pOutputs[i + 3];
+            auto& feat_info = joint_io_arr.pOutputs[i];
             auto feat_ptr = (float*)feat_info.pVirAddr;
             int32_t stride = (1 << i) * 8;
             det::generate_proposals_yolov8_pose(stride, feat_ptr, PROB_THRESHOLD, proposals, input_w, input_h, CLS_NUM, 17);
