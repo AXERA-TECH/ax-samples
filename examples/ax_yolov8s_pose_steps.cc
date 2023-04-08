@@ -40,20 +40,13 @@
 
 const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
-
-const char* CLASS_NAMES[] = {
-    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
-    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
-    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
-    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
-    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
-    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
-    "hair drier", "toothbrush"};
-
+const int DEFAULT_MASK_PROTO_DIM = 32;
+const int DEFAULT_MASK_SAMPLE_STRIDE = 4;
+static const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}};
+const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
+const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
 const int DEFAULT_LOOP_COUNT = 1;
-const int CLS_NUM = 80;
+const int NUM_POINT = 17;
 const float PROB_THRESHOLD = 0.3f;
 const float NMS_THRESHOLD = 0.65f;
 namespace ax
@@ -125,7 +118,7 @@ namespace ax
         fprintf(stdout, "Tools version: %s\n", version);
 
         // 1.6 drop the model buffer
-        model_buffer.clear();
+        std::vector<char>().swap(model_buffer);
         auto io_info = AX_JOINT_GetIOInfo(joint_handle);
 
         // 1.7 create context
@@ -252,25 +245,17 @@ namespace ax
         fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
 
         // 5. get bbox
-        std::vector<det::Object> proporsel;
+        std::vector<det::Object> proposals;
         std::vector<det::Object> objects;
 
-        uint32_t num_layer = io_info->nOutputSize / 2;
-
-        for (uint32_t i = 0; i < num_layer; ++i)
+        for (uint32_t i = 0; i < 3; ++i)
         {
-            // cls + box
-            auto& cls_info = joint_io_arr.pOutputs[i * 2];
-            auto cls_ptr = (float*)cls_info.pVirAddr;
-
-            auto& box_info = joint_io_arr.pOutputs[i * 2 + 1];
-            auto box_ptr = (float*)box_info.pVirAddr;
-
+            auto& feat_info = joint_io_arr.pOutputs[i];
+            auto feat_ptr = (float*)feat_info.pVirAddr;
             int32_t stride = (1 << i) * 8;
-            det::mmyolo::generate_proposals_ppyoloeplus(stride, cls_ptr, box_ptr, PROB_THRESHOLD, proporsel, input_w, input_h, CLS_NUM);
+            det::generate_proposals_yolov8_pose(stride, feat_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT);
         }
-
-        det::get_out_bbox(proporsel, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
+        det::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         // 6. show time costs
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout,
@@ -293,7 +278,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %d\n", objects.size());
 
-        det::draw_objects(mat, objects, CLASS_NAMES, "mmppyoloeps");
+        det::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolov8s_pose");
         clear_and_exit();
         return true;
     }
