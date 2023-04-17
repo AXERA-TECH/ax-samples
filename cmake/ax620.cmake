@@ -15,42 +15,51 @@
 # Author: ls.wang
 #
 
-function (axera_example name)
+function(axera_example name)
     add_executable(${name})
-    
+
     # add srcs
-    foreach (file IN LISTS ARGN)
-        target_sources (${name} PRIVATE ${file})
+    foreach(file IN LISTS ARGN)
+        target_sources(${name} PRIVATE ${file})
     endforeach()
 
     # headers
-    target_include_directories (${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_include_directories (${name} PRIVATE ${BSP_MSP_DIR}/include)
-    if (${AXERA_TARGET_PROCESSOR} MATCHES "ARM" AND AXERA_TARGET_PROCESSOR_32Bit)
-        target_include_directories (${name} PRIVATE /opt/include)
+    target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${name} PRIVATE ${BSP_MSP_DIR}/include)
+
+    if(${AXERA_TARGET_PROCESSOR} MATCHES "ARM" AND AXERA_TARGET_PROCESSOR_32Bit)
+        target_include_directories(${name} PRIVATE /opt/include)
     endif()
 
     # libs
-    if (AXERA_TARGET_CHIP MATCHES "ax620a")   # ax620 support
-        target_link_libraries (${name} PRIVATE pthread dl) # ax620a use this
+    if(AXERA_TARGET_CHIP MATCHES "ax620a") # ax620 support
+        target_link_libraries(${name} PRIVATE pthread dl) # ax620a use this
+
         # target_link_libraries (${name} PRIVATE pthread dl stdc++fs) # ax620u use this
-        target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys axsyslog stdc++fs)
-    else()  # ax630a support
-        target_link_libraries (${name} PRIVATE pthread dl stdc++fs)
-        target_link_libraries (${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys)
+        target_link_libraries(${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys axsyslog stdc++fs)
+    else() # ax630a support
+        target_link_libraries(${name} PRIVATE pthread dl stdc++fs)
+        target_link_libraries(${name} PRIVATE ax_run_joint ax_interpreter_external ax_interpreter ax_sys)
     endif()
-    target_link_libraries (${name} PRIVATE ax_ivps ax_npu_cv_kit)
+
+    target_link_libraries(${name} PRIVATE ax_ivps ax_npu_cv_kit)
 
     # folders
-    target_link_directories (${name} PRIVATE ${BSP_MSP_DIR}/lib)
-    if (${AXERA_TARGET_PROCESSOR} MATCHES "ARM" AND AXERA_TARGET_PROCESSOR_32Bit)
-        target_link_libraries (${name} PRIVATE dl)
-        target_link_directories (${name} PRIVATE /opt/lib)
+    target_link_directories(${name} PRIVATE ${BSP_MSP_DIR}/lib)
+
+    if(${AXERA_TARGET_PROCESSOR} MATCHES "ARM" AND AXERA_TARGET_PROCESSOR_32Bit)
+        target_link_libraries(${name} PRIVATE dl)
+        target_link_directories(${name} PRIVATE /opt/lib)
     endif()
 
     # opencv
-    target_include_directories (${name} PRIVATE ${OpenCV_INCLUDE_DIRS})
+    target_include_directories(${name} PRIVATE ${OpenCV_INCLUDE_DIRS})
     target_link_libraries(${name} PRIVATE ${OpenCV_LIBS})
 
-    install (TARGETS ${name} DESTINATION bin)
+    # install (TARGETS ${name} DESTINATION bin)
+    if(AXERA_TARGET_CHIP MATCHES "ax620a")
+        install(TARGETS ${name} DESTINATION ax620)
+    elseif(AXERA_TARGET_CHIP MATCHES "ax630a")
+        install(TARGETS ${name} DESTINATION ax630)
+    endif()
 endfunction()

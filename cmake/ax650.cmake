@@ -56,5 +56,5 @@ function(axera_example example_name)
             $<$<COMPILE_LANGUAGE:C,CXX>: -O3>
             )
 
-    install(TARGETS ${example_name} DESTINATION bin)
+    install(TARGETS ${example_name} DESTINATION ax650)
 endfunction()
