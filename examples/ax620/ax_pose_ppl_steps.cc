@@ -32,9 +32,10 @@
 
 #include "base/detection.hpp"
 #include "base/pose.hpp"
-#include "base/common.hpp"
+
 #include "base/transform.hpp"
 #include "middleware/io.hpp"
+#include "middleware/common_ax620.hpp"
 
 #include "utilities/args.hpp"
 #include "utilities/cmdline.hpp"

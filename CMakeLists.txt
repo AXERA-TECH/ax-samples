@@ -59,6 +59,9 @@ if (NOT AXERA_TARGET_CHIP)
     add_definitions(-DAXERA_TARGET_CHIP_AX620)
 endif ()
 
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O1 -Wall -s -fPIC")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O1 -Wall -s -fPIC")
+
 # src files
 add_subdirectory(examples)
 
