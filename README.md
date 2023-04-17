@@ -11,6 +11,7 @@
 
 已支持芯片
 
+- AX650N
 - [AX630A](docs/AX630A.md)
 - [AX620A](docs/AX620A.md)
 - [AX620U](docs/AX620U.md)
@@ -18,6 +19,7 @@
 已支持开发板
 
 - [AXera-Pi](https://wiki.sipeed.com/m3axpi)(AX620A)
+- AXera-Pi Pro(AX650N, WIP)
 
 ## 快速上手
 
