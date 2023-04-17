@@ -15,7 +15,7 @@
 */
 
 /*
-* Author: hebing
+* Author: ZHEQIUSHUI
 */
 
 #include <cstdio>
