@@ -26,37 +26,9 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
-#include "ax_interpreter_external_api.h"
 
 namespace common
 {
-    static inline AX_NPU_SDK_EX_HARD_MODE_T get_hard_mode_by_model_type(int model_type)
-    {
-        if (AX_NPU_MODEL_TYPE_DEFUALT == model_type)
-        {
-            return AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_DISABLE;
-        }
-#ifdef AXERA_TARGET_CHIP_AX620
-        else if (model_type == AX_NPU_MODEL_TYPE_1_1_1 || model_type == AX_NPU_MODEL_TYPE_1_1_2)
-        {
-            return AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_1_1;
-        }
-#else
-        else if (model_type == AX_NPU_MODEL_TYPE_3_1_1 || model_type == AX_NPU_MODEL_TYPE_3_1_2)
-        {
-            return AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_3_1;
-        }
-        else if (model_type == AX_NPU_MODEL_TYPE_2_2_1 || model_type == AX_NPU_MODEL_TYPE_2_2_2)
-        {
-            return AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_2_2;
-        }
-#endif
-        else
-        {
-            fprintf(stderr, "[ERR]: get_hard_mode_by_model_type(int model_type) Unknown npu mode(%d). return default mode\n", model_type);
-            return (AX_NPU_SDK_EX_HARD_MODE_T)0;
-        }
-    }
     // opencv mat(h, w)
     // resize cv::Size(dstw, dsth)
     void get_input_data_no_letterbox(const cv::Mat& mat, std::vector<uint8_t>& image, int model_h, int model_w, bool bgr2rgb = false)

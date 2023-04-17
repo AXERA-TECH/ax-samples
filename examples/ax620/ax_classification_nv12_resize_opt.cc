@@ -1,41 +1,34 @@
 /*
- * AXERA is pleased to support the open source community by making ax-samples available.
- * 
- * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
- * 
- * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * https://opensource.org/licenses/BSD-3-Clause
- * 
- * Unless required by applicable law or agreed to in writing, software distributed
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
+* AXERA is pleased to support the open source community by making ax-samples available.
+*
+* Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
+*
+* Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* https://opensource.org/licenses/BSD-3-Clause
+*
+* Unless required by applicable law or agreed to in writing, software distributed
+* under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+* CONDITIONS OF ANY KIND, either express or implied. See the License for the
+* specific language governing permissions and limitations under the License.
+*/
 
 /*
- * Author: hebing
- */
+* Author: hebing
+*/
 
 #include <cstdio>
 #include <cstring>
-#include <memory>
 #include <numeric>
 
-#include <opencv2/opencv.hpp>
-
 #include "base/topk.hpp"
-#include "base/common.hpp"
+#include "middleware/common_ax620.hpp"
 
 #include "middleware/io.hpp"
-
-#include "utilities/args.hpp"
 #include "utilities/cmdline.hpp"
 #include "utilities/file.hpp"
 #include "utilities/timer.hpp"
-
-#include "cv/cv.hpp"
 #include "cv/utils.hpp"
 
 #include "ax_interpreter_external_api.h"
@@ -54,96 +47,8 @@ namespace ax
     namespace mw = middleware;
     namespace utl = utilities;
 
-    class ax_crop_resize_nv12
-    {
-    public:
-        ax_crop_resize_nv12() = default;
-        ~ax_crop_resize_nv12();
-        int init(int input_h, int input_w, int model_h, int model_w, int model_type);
-        int run_crop_resize_nv12(std::vector<char>& input_data, std::vector<uint8_t>& output_data);
-
-    private:
-        AX_NPU_CV_Image* m_input_image;
-        AX_NPU_CV_Image* m_output_image;
-        AX_NPU_CV_Box* m_box;
-
-        int m_model_type = AX_NPU_MODEL_TYPE_1_1_1;
-    };
-
-    int
-    ax_crop_resize_nv12::init(int input_h, int input_w, int model_h, int model_w, int model_type)
-    {
-        axcv::ax_image input;
-        input.w = input_w;
-        input.h = input_h;
-        input.stride_w = input.w;
-        input.color_space = AX_NPU_CV_FDT_NV12;
-        m_input_image = axcv::alloc_cv_image(input);
-        if (!m_input_image)
-        {
-            fprintf(stderr, "[ERR] alloc_cv_image input falil \n");
-            return -1;
-        }
-
-        axcv::ax_box box;
-        box.h = input_h;
-        box.w = input_w;
-        box.x = 0;
-        box.y = 0;
-        m_box = axcv::filter_box(input, box);
-        if (!m_box)
-        {
-            fprintf(stderr, "[ERR] box not legal \n");
-            return -1;
-        }
-
-        axcv::ax_image output;
-        output.w = model_w;
-        output.h = model_h;
-        output.stride_w = output.w;
-        output.color_space = AX_NPU_CV_FDT_NV12;
-        m_output_image = axcv::alloc_cv_image(output);
-        if (!m_output_image)
-        {
-            fprintf(stderr, "[ERR] alloc_cv_image output falil \n");
-            return -1;
-        }
-
-        m_model_type = model_type;
-
-        return 0;
-    }
-
-    int ax_crop_resize_nv12::run_crop_resize_nv12(std::vector<char>& input_data, std::vector<uint8_t>& output_data)
-    {
-        /**
-         *  when copy_to_device or memcpy slow
-         *  try:
-         *      1. set model_input and crop_resize.dst_image as same block address: ref ax_classification_nv12_resize_opt.cc
-         *      2. use npu_cv_crop implement dma copy
-         *      3. use ivps_cmm_copy but require 32k align
-         */
-
-        int ret = axcv::npu_crop_resize(m_input_image, input_data.data(), m_output_image, m_box, (AX_NPU_SDK_EX_MODEL_TYPE_T)m_model_type);
-        if (ret != AX_NPU_DEV_STATUS_SUCCESS)
-        {
-            fprintf(stderr, "[ERR] npu_crop_resize err code:%x \n", ret);
-            return ret;
-        }
-
-        memcpy(output_data.data(), m_output_image->pVir, cv::get_image_data_size(m_output_image));
-        return 0;
-    }
-
-    ax_crop_resize_nv12::~ax_crop_resize_nv12()
-    {
-        axcv::free_cv_image(m_input_image);
-        axcv::free_cv_image(m_output_image);
-        delete m_box;
-    }
-
     bool
-    run_classification(const std::string& model, const std::vector<uint8_t>& data, const int& repeat)
+    run_classification(const std::string& model, AX_NPU_CV_Image* model_input, const int& repeat)
     {
         // 1. create a runtime handle and load the model
         AX_JOINT_HANDLE joint_handle;
@@ -227,7 +132,7 @@ namespace ax
         std::memset(&joint_io_arr, 0, sizeof(joint_io_arr));
         std::memset(&joint_io_setting, 0, sizeof(joint_io_setting));
 
-        ret = mw::prepare_io(data.data(), data.size(), joint_io_arr, io_info);
+        ret = mw::prepare_io_npu_cv_image(model_input, joint_io_arr, io_info);
         if (AX_ERR_NPU_JOINT_SUCCESS != ret)
         {
             fprintf(stderr, "Fill input failed.\n");
@@ -376,8 +281,8 @@ namespace ax
     }
 } // namespace ax
 
-// ./ax_classification_nv12 -m mobilenetv2-7.joint -i 800x480car.nv12 -h 480 -w 800
-// ./ax_classification_nv12 -m mobilenetv2-7.joint -i 480x360cat.yuv -h 360 -w 480
+// ./ax_classification_nv12_opt -m mobilenetv2-7.joint -i 800x480car.nv12 -h 480 -w 800
+// ./ax_classification_nv12_opt -m mobilenetv2-7.joint -i 480x360cat.yuv -h 360 -w 480
 int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
@@ -450,18 +355,44 @@ int main(int argc, char* argv[])
     utilities::read_file(input_file, input);
 
     // 4. crop_resize
-    //    use sys_npu_api so sys_init before process nv12
-    std::vector<uint8_t> model_input(MODEL_BGR_INPUT_W * MODEL_BGR_INPUT_H * 3 / 2);
+    //    use sys_npu_api so dont forget sys_init before process nv12
+    auto* image_input = new AX_NPU_CV_Image;
+    image_input->nSize = input_h * input_w * 3 / 2;
+    image_input->nHeight = input_h;
+    image_input->nWidth = input_w;
+    image_input->eDtype = AX_NPU_CV_FDT_NV12;
+    image_input->tStride.nW = image_input->nWidth;
+    ret = AX_SYS_MemAlloc(&image_input->pPhy, (AX_VOID**)&image_input->pVir, image_input->nSize, 128, (const AX_S8*)"NPU_CV");
+    if (ret != AX_ERR_NPU_CV_SUCCESS)
     {
-        auto crop_resize_helper = std::make_unique<ax::ax_crop_resize_nv12>();
-        crop_resize_helper->init((int)input_h, (int)input_w, MODEL_BGR_INPUT_H, MODEL_BGR_INPUT_W, model_type);
-        timer crop_resize_timer;
-        for (size_t i = 0; i < 10; i++)
-        {
-            crop_resize_helper->run_crop_resize_nv12(input, model_input);
-        }
-        float crop_resize_cost = crop_resize_timer.cost();
-        fprintf(stdout, "run crop_resize time cost avg: %f :ms \n", crop_resize_cost / 10);
+        fprintf(stderr, "[ERR] AX_SYS_MemAlloc err code: %x", ret);
+        return ret;
+    }
+    memcpy(image_input->pVir, input.data(), image_input->nSize);
+
+    auto* model_input = new AX_NPU_CV_Image;
+    model_input->nSize = MODEL_BGR_INPUT_H * MODEL_BGR_INPUT_W * 3 / 2;
+    model_input->nHeight = MODEL_BGR_INPUT_H;
+    model_input->nWidth = MODEL_BGR_INPUT_W;
+    model_input->eDtype = AX_NPU_CV_FDT_NV12;
+    model_input->tStride.nW = model_input->nWidth;
+    ret = AX_SYS_MemAlloc(&model_input->pPhy, (AX_VOID**)&model_input->pVir, model_input->nSize, 128, (const AX_S8*)"NPU_CV");
+    if (ret != AX_ERR_NPU_CV_SUCCESS)
+    {
+        fprintf(stderr, "[ERR] AX_SYS_MemAlloc err code: %x", ret);
+        return ret;
+    }
+
+    AX_NPU_CV_Color color;
+    color.nYUVColorValue[0] = 0;
+    color.nYUVColorValue[1] = 128;
+    auto horizontal = (AX_NPU_CV_ImageResizeAlignParam)0;
+    auto vertical = (AX_NPU_CV_ImageResizeAlignParam)0;
+    ret = AX_NPU_CV_CropResizeImage(model_type, image_input, 1, &model_input, nullptr, horizontal, vertical, color);
+    if (ret != AX_NPU_DEV_STATUS_SUCCESS)
+    {
+        fprintf(stderr, "[ERR] AX_NPU_CV_CropResizeImage err code: %X", ret);
+        return ret;
     }
 
     // 5. show the version (optional)
@@ -474,6 +405,10 @@ int main(int argc, char* argv[])
     {
         fprintf(stderr, "Run classification failed.\n");
     }
+
+    AX_SYS_MemFree(image_input->pPhy, image_input->pVir);
+    delete image_input;
+    delete model_input;
 
     // 7. last de-init
     //   as step 1, if the device inited by another app, DO NOT de-init the
