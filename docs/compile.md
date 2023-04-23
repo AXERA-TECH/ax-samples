@@ -91,11 +91,13 @@ install
 
 #### 依赖库准备
 
-- 下载 **ax-samples** 交叉编译依赖库文件并解压到指定路径 `ax_bsp`, [依赖库获取地址](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.3/arm_axpi_r1.22.2801.zip)
+- 下载 **ax-samples** 交叉编译依赖库文件并解压到指定路径 `ax_bsp`, [依赖库获取地址](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.3/arm_axpi_r1.22.2801.zip)，并将其目录设置到临时环境变量 `$ax_bsp`
 
 ```
 wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.3/arm_axpi_r1.22.2801.zip
 unzip arm_axpi_r1.22.2801.zip -d ax_bsp
+export ax_bsp=$PWD/ax_bsp
+echo $ax_bsp
 ```
 
 #### 源码编译
@@ -201,7 +203,10 @@ install
 
 #### 依赖库准备
 
-请联系 FAE 获取 AX650 BSP 开发包，执行如下操作
+请联系 FAE 获取 AX650 BSP 开发包，并将文件夹内此 `msp/out` 目录设置到临时环境变量，具体操作如下：
+```
+export ax_bsp=$AX650_SDK_PATH/msp/out
+```
 
 #### 源码编译
 git clone 下载源码，进入 ax-samples 根目录，创建 cmake 编译任务：
