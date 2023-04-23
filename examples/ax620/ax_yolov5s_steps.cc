@@ -54,7 +54,7 @@ const char* CLASS_NAMES[] = {
 const float ANCHORS[18] = {10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116, 90, 156, 198, 373, 326};
 
 const int DEFAULT_LOOP_COUNT = 1;
-const int CLS_NUM = 80;
+int CLS_NUM = 80;
 const float PROB_THRESHOLD = 0.35f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
     cmd.add<std::string>("image", 'i', "image file", true, "");
     cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(DEFAULT_IMG_H) + "," + std::to_string(DEFAULT_IMG_W));
-
+    cmd.add<int>("num_class", 'c', "", false, CLS_NUM);
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
     cmd.parse_check(argc, argv);
 
@@ -345,10 +345,10 @@ int main(int argc, char* argv[])
     }
 
     auto repeat = cmd.get<int>("repeat");
-
+    CLS_NUM = cmd.get<int>("num_class");
     // 1. print args
     fprintf(stdout, "--------------------------------------\n");
-
+    fprintf(stdout, "num of class : %d\n", CLS_NUM);
     fprintf(stdout, "model file : %s\n", model_file.c_str());
     fprintf(stdout, "image file : %s\n", image_file.c_str());
     fprintf(stdout, "img_h, img_w : %d %d\n", input_size[0], input_size[1]);

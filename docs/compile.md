@@ -10,6 +10,7 @@ ax-samples 的源码编译目前有两种实现路径：
 ### 硬件需求
 
 - AX-Pi（基于 AX620A，面向社区开发者的高性价比开发板）
+- AX650
 
 ### 编译过程
 
@@ -61,7 +62,7 @@ install
 
 ### 3rdparty 准备
 
-- 下载预编译好的 OpenCV 库文件 [[AX620A/U 匹配](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)] [[AX630A 匹配](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-aarch64-linux-gnu-gcc-7.5.0.zip)]；
+- 下载预编译好的 OpenCV 库文件 [[AX620A/U 匹配](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)] [[AX630A 匹配](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-aarch64-linux-gnu-gcc-7.5.0.zip)] [[AX650 匹配]()]；
 - 在 ax-samples 创建 3rdparty 文件，并将下载好的 OpenCV 库文件压缩包解压到该文件夹中。
 
 ### 交叉编译 armv7a 版本
@@ -171,5 +172,54 @@ install
     ├── ax_classification
     ├── ax_yolo_fastest
     ├── ax_yolov3
+    └── ax_yolov5s
+```
+
+### 交叉编译 aarch64 版本
+
+针对 **AX650** 硬件平台
+
+#### 编译环境
+- cmake 版本大于等于 3.13
+- AX620A/U 配套的交叉编译工具链 `aarch64-none-linux-gnu-gcc` 已添加到环境变量中
+
+#### 安装交叉编译工具链
+
+- aarch64 Linux 交叉编译工具链 [获取地址](https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz)
+
+#### 依赖库准备
+
+- 下载 **ax-samples** 交叉编译依赖库文件并解压到指定路径 `ax_bsp`, [依赖库获取地址]()
+
+```
+
+```
+
+#### 源码编译
+git clone 下载源码，进入 ax-samples 根目录，创建 cmake 编译任务：
+
+```bash
+$ git clone https://github.com/AXERA-TECH/ax-samples.git
+$ cd ax-samples
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax650 ..
+$ make install
+```
+
+编译完成后，生成的可执行示例存放在 `ax-samples/build/install/ax650/` 路径下：
+
+```bash
+ax-samples/build$ tree install
+install
+└── ax650
+    ├── ax_classification
+    ├── ax_pp_humanseg
+    ├── ax_pp_liteseg_stdc2_cityscapes
+    ├── ax_pp_ocr_rec
+    ├── ax_pp_person_attribute
+    ├── ax_pp_vehicle_attribute
+    ├── ax_ppyoloe
+    ├── ax_ppyoloe_obj365
     └── ax_yolov5s
 ```
