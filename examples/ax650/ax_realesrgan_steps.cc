@@ -44,9 +44,6 @@ namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
-        std::vector<detection::Object> proposals;
-        std::vector<detection::Object> objects;
-
         timer timer_postprocess;
         auto& info = io_info->pOutputs[0];
         float* output = (float*)io_data->pOutputs[0].pVirAddr;
@@ -70,7 +67,6 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        fprintf(stdout, "detection num: %zu\n", objects.size());
         cv::imwrite("realesrgan_out.jpg", dst);
     }
 
