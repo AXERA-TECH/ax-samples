@@ -298,3 +298,25 @@ detection num: 11
 26:  50%, [  90,  325,  120,  419], handbag
 ```
 ![YOLOv8s](../../docs/ax650/yolov8s_out.jpg)
+
+#### HRNet
+```
+root@AXERA:/home/test# ./ax_hrnet -m hrnet_256x192.axmodel -i apic33179.jpg
+--------------------------------------
+model file : hrnet_256x192.axmodel
+image file : apic33179.jpg
+img_h, img_w : 256 192
+--------------------------------------
+[Axera version]: libax_sys.so V1.13.0 Apr 26 2023 16:24:35
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.23 ms
+--------------------------------------
+Repeat 1 times, avg time 5.16 ms, max_time 5.16 ms, min_time 5.16 ms
+--------------------------------------
+```
+![HRNet](../../docs/ax650/hrnet_out.jpg)

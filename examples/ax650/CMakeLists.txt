@@ -32,7 +32,6 @@ if (AXERA_TARGET_CHIP MATCHES "ax650")
     axera_example(ax_yolov7_tiny_face ax_yolov7_tiny_face_steps.cc)
     axera_example(ax_yolov7 ax_yolov7_steps.cc)
     axera_example(ax_yolov8 ax_yolov8s_steps.cc)
-    axera_example(ax_yolox ax_yolox_steps.cc)
 
     axera_example(ax_ppyoloe ax_ppyoloe_steps.cc)
     axera_example(ax_ppyoloe_obj365 ax_ppyoloe_obj365_steps.cc)
@@ -43,7 +42,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax650")
     axera_example(ax_pp_ocr_rec ax_pp_ocr_rec_steps.cc)
 
     axera_example(ax_realesrgan ax_realesrgan_steps.cc)
-
     axera_example(ax_detr ax_detr_steps.cc)
+    axera_example(ax_hrnet ax_hrnet_steps.cc)
     axera_example(ax_scrfd ax_scrfd_steps.cc)
 endif ()
