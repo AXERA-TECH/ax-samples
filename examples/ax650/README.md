@@ -299,6 +299,44 @@ detection num: 11
 ```
 ![YOLOv8s](../../docs/ax650/yolov8s_out.jpg)
 
+#### YOLOX-S
+```
+root@AXERA:/home/test# ./ax_yolox -m yolox.axmodel -i test.jpg
+--------------------------------------
+model file : yolox.axmodel
+image file : test.jpg
+img_h, img_w : 640 640
+--------------------------------------
+[Axera version]: libax_sys.so V1.13.0 Apr 26 2023 16:24:35
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.82 ms
+--------------------------------------
+Repeat 1 times, avg time 10.84 ms, max_time 10.84 ms, min_time 10.84 ms
+--------------------------------------
+detection num: 14
+16:  92%, [ 329,  556,  459,  826], dog
+ 0:  92%, [ 173,  310,  364,  818], person
+ 0:  90%, [ 494,  286,  672,  806], person
+ 5:  88%, [ 874,  145, 1235,  492], bus
+ 0:  88%, [ 441,  299,  496,  440], person
+ 0:  83%, [  88,  294,  192,  488], person
+ 2:  74%, [ 814,  273,  869,  333], car
+ 0:  73%, [ 733,  302,  768,  392], person
+ 0:  73%, [ 608,  277,  681,  462], person
+14:  72%, [ 743,  608,  804,  649], bird
+ 2:  70%, [1210,  292, 1279,  402], car
+24:  57%, [ 518,  411,  627,  553], backpack
+ 0:  55%, [ 185,  297,  223,  399], person
+26:  48%, [  88,  340,  118,  411], handbag
+--------------------------------------
+```
+![YOLOX](../../docs/ax650/yolox_out.jpg)
+
 #### HRNet
 ```
 root@AXERA:/home/test# ./ax_hrnet -m hrnet_256x192.axmodel -i apic33179.jpg

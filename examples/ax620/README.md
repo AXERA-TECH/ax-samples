@@ -60,7 +60,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 
 登录 AX620A 开发板，在 `root` 路径下创建 `samples` 文件夹。
 
-- 将 [快速编译](../docs/compile.md) 中编译生成的可执行示例拷贝到 `/root/samples/` 路径下；
+- 将 [快速编译](../../docs/ax620/compile.md) 中编译生成的可执行示例拷贝到 `/root/samples/` 路径下；
 - 将 **[ModelZoo](https://pan.baidu.com/s/1ZHW2P6Y3lPf2odmj3fo8hA?pwd=sow9)** 中相应的 **joint** 模型 `mobilenetv2.joint` 、 `yolov5s.joint` 拷贝到  `/root/samples/` 路径下；
 - 将测试图片拷贝到 `/root/samples` 路径下。
 
@@ -123,7 +123,7 @@ detection num: 3
  2:  77%, [ 468,   76,  692,  171], car
  1:  65%, [ 167,  120,  564,  417], bicycle
 ```
-![YOLOv5s](../docs/yolov5s.jpg)
+![YOLOv5s](../../docs/ax620/yolov5s.jpg)
 
 #### YOLOv5-Lite
 ```
@@ -165,7 +165,7 @@ detection num: 18
 12:  38%, [1861, 1370, 1949, 1530], parking meter
  0:  35%, [ 171, 1305,  284, 1788], person
 ```
-![YOLOv5-Lite](../docs/yolov5_lite_out.jpg)
+![YOLOv5-Lite](../../docs/ax620/yolov5_lite_out.jpg)
 
 #### YOLOv5s_visdrone
 ```
@@ -208,7 +208,7 @@ detection num: 19
 1:  36%, [ 972,  793,  997,  843], people
 9:  35%, [ 662,  466,  698,  495], motor
 ```
-![YOLOv5s-visdrone](../docs/yolov5s_visdrone.jpg)
+![YOLOv5s-visdrone](../../docs/ax620/yolov5s_visdrone.jpg)
 
 #### YOLOv7-Tiny
 ```
@@ -234,7 +234,7 @@ detection num: 3
  1:  86%, [ 139,  130,  571,  422], bicycle
  2:  63%, [ 468,   76,  691,  169], car
 ```
-![YOLOv7-Tiny](../docs/yolov7-tiny.jpg)
+![YOLOv7-Tiny](../../docs/ax620/yolov7-tiny.jpg)
 
 #### YOLOX-S
 ```
@@ -283,7 +283,7 @@ Repeat 10 times, avg time 5.76 ms, max_time 6.09 ms, min_time 5.71 ms
 --------------------------------------
 detection num: 111
 ```
-![Scrfd](../docs/scrfd.jpg)
+![Scrfd](../../docs/ax620/scrfd.jpg)
 
 #### YOLOv5-Face
 ```
@@ -307,7 +307,7 @@ Repeat 10 times, avg time 21.89 ms, max_time 22.31 ms, min_time 21.83 ms
 --------------------------------------
 detection num: 310
 ```
-![yolov5s-face](../docs/yolov5s_face.jpg)
+![yolov5s-face](../../docs/ax620/yolov5s_face.jpg)
 
 #### Monodlex
 ```
@@ -329,7 +329,7 @@ Repeat 10 times, avg time 111.77 ms, max_time 112.34 ms, min_time 111.66 ms
 --------------------------------------
 detection num: 7
 ```
-![Monodlex](../docs/monodlex.png)
+![Monodlex](../../docs/ax620/monodlex.png)
 
 #### HRNet
 ```
@@ -351,7 +351,7 @@ Create handle took 1385.15 ms (neu 25.64 ms, axe 0.00 ms, overhead 1359.51 ms)
 Repeat 10 times, avg time 14.11 ms, max_time 14.64 ms, min_time 14.04 ms
 --------------------------------------
 ```
-![HRNet](../docs/hrnet.png)
+![HRNet](../../docs/ax620/hrnet.png)
 
 #### HRNet_animal
 ```
@@ -373,7 +373,7 @@ Create handle took 1420.85 ms (neu 28.09 ms, axe 0.00 ms, overhead 1392.76 ms)
 Repeat 10 times, avg time 17.49 ms, max_time 18.06 ms, min_time 17.40 ms
 --------------------------------------
 ```
-![HRNet](../docs/hrnet_animal.jpg)
+![HRNet](../../docs/ax620/hrnet_animal.jpg)
 
 #### AX-POSE-PPL
 ```
@@ -439,7 +439,7 @@ pose Repeat 1 times, avg time 8.95 ms, max_time 8.95 ms, min_time 8.95 ms
 ax_pose_ppl.png
 --------------------------------------
 ```
-![HRNet](../docs/ax_pose_ppl.jpg)
+![HRNet](../../docs/ax620/ax_pose_ppl.jpg)
 
 #### FaceParsing
 ```
@@ -461,7 +461,7 @@ Create handle took 683.64 ms (neu 20.54 ms, axe 0.00 ms, overhead 663.10 ms)
 Repeat 10 times, avg time 49.38 ms, max_time 50.02 ms, min_time 49.29 ms
 --------------------------------------
 ```
-![FaceParsing](../docs/face_parsing_res.jpg)
+![FaceParsing](../../docs/ax620/face_parsing_res.jpg)
 
 #### HandPose
 ```
@@ -484,7 +484,7 @@ Create handle took 298.99 ms (neu 15.22 ms, axe 0.00 ms, overhead 283.78 ms)
 Repeat 10 times, avg time 10.00 ms, max_time 10.33 ms, min_time 9.95 ms
 --------------------------------------
 ```
-![HandPose](../docs/handpose.png)
+![HandPose](../../docs/ax620/handpose.png)
 
 #### YOLOv5-Seg
 ```
@@ -510,7 +510,7 @@ detection num: 2
 17:  93%, [ 119,  113,  485,  403], horse
  0:  82%, [ 229,   17,  333,  278], person
 ```
-![yolov5s-seg](../docs/yolov5s_seg.jpg)
+![yolov5s-seg](../../docs/ax620/yolov5s_seg.jpg)
 
 #### YOLOv5-License-plate
 ```
@@ -534,7 +534,7 @@ Repeat 1 times, avg time 30.51 ms, max_time 30.51 ms, min_time 30.51 ms
 --------------------------------------
 detection num: 1
 ```
-![yolov5s-license](../docs/yolov5s_license_plate_out.jpg)
+![yolov5s-license](../../docs/ax620/yolov5s_license_plate_out.jpg)
 
 #### PalmDetection
 ```
@@ -558,7 +558,7 @@ Repeat 10 times, avg time 20.46 ms, max_time 22.86 ms, min_time 20.11 ms
 --------------------------------------
 detection num: 2
 ```
-![PalmDetection](../docs/palm_detection.jpg)
+![PalmDetection](../../docs/ax620/palm_detection.jpg)
 
 #### YOLOPv2
 ```
@@ -594,7 +594,7 @@ detection num: 12
  3:  42%, [ 675,  275,  700,  300]
  3:  39%, [ 620,  278,  661,  302]
 ```
-![YOLOPv2](../docs/yolopv2.jpg)
+![YOLOPv2](../../docs/ax620/yolopv2.jpg)
 
 #### YOLOv7-Face
 ```
@@ -618,7 +618,7 @@ Repeat 10 times, avg time 25.46 ms, max_time 25.83 ms, min_time 25.39 ms
 --------------------------------------
 detection num: 217
 ```
-![yolov7s-face](../docs/yolov7s_face.jpg)
+![yolov7s-face](../../docs/ax620/yolov7s_face.jpg)
 
 #### YOLOv7-Palm
 ```
@@ -642,7 +642,7 @@ Repeat 10 times, avg time 7.65 ms, max_time 12.25 ms, min_time 7.11 ms
 --------------------------------------
 detection num: 2
 ```
-![yolov7s-palm](../docs/yolov7s_palm.jpg)
+![yolov7s-palm](../../docs/ax620/yolov7s_palm.jpg)
 
 #### YOLOv6s
 ```
@@ -669,7 +669,7 @@ detection num: 3
  0:  90%, [ 291,   80,  635,  532], person
 27:  84%, [ 195,  200,  254,  411], tie
 ```
-![YOLOv6s](../docs/yolov6s.jpg)
+![YOLOv6s](../../docs/ax620/yolov6s.jpg)
 
 #### YOLOv8s
 ```
@@ -698,7 +698,7 @@ detection num: 5
  0:  88%, [ 222,  405,  346,  859], person
  0:  65%, [   0,  551,   77,  874], person
 ```
-![YOLOv8s](../docs/yolov8s.jpg)
+![YOLOv8s](../../docs/ax620/yolov8s.jpg)
 
 #### YOLOv8s-Seg
 ```
@@ -727,7 +727,7 @@ detection num: 5
  0:  85%, [ 670,  390,  809,  879], person
  0:  62%, [   0,  553,   78,  867], person
 ```
-![YOLOv8s-seg](../docs/yolov8s_seg.jpg)
+![YOLOv8s-seg](../../docs/ax620/yolov8s_seg.jpg)
 
 ## 模型说明
 ### YOLOv3(Paddle)
@@ -767,7 +767,7 @@ detection num: 3
 16:  57%, [ 126,  193,  312,  536], dog
  2:  54%, [ 453,   78,  686,  174], car
 ```
-![yolov3_paddle](../docs/yolov3_paddle.jpg)
+![yolov3_paddle](../../docs/ax620/yolov3_paddle.jpg)
 
 ### MobileSeg
 MobileSeg 源自国内产业级深度学习开源框架飞桨的高性能图像分割开发套件 [PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)，通过速度与精度权衡，我们选择基于 *MobileNetV2*  Backbone 的 [MobileSeg](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.6/configs/mobileseg/) 进行功能展示。
@@ -800,7 +800,7 @@ Create handle took 303.45 ms (neu 26.27 ms, axe 0.00 ms, overhead 277.19 ms)
 --------------------------------------
 Repeat 10 times, avg time 74.90 ms, max_time 76.26 ms, min_time 74.66 ms
 ```
-![paddle_mobileseg](../docs/seg_res.jpg)
+![paddle_mobileseg](../../docs/ax620/seg_res.jpg)
 
 ### PP-HumanSeg
 PP-HumanSeg 源自国内产业级深度学习开源框架飞桨的高性能图像分割开发套件 [PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)，通过速度与精度权衡，我们选择  [PP-HumanSegV1-Mobile](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.6/contrib/PP-HumanSeg/) 进行功能展示。
@@ -833,4 +833,4 @@ Create handle took 97.94 ms (neu 3.85 ms, axe 0.00 ms, overhead 94.09 ms)
 --------------------------------------
 Repeat 10 times, avg time 2.58 ms, max_time 2.82 ms, min_time 2.53 ms
 ```
-![PP-HumanSeg](../docs/body_seg_bg_res.jpg)
+![PP-HumanSeg](../../docs/ax620/body_seg_bg_res.jpg)
