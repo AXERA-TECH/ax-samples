@@ -23,8 +23,17 @@ if (AXERA_TARGET_CHIP MATCHES "ax650")
 
     include("${CMAKE_SOURCE_DIR}/cmake/ax650.cmake")
 
-    axera_example(ax_yolov5s ax_yolov5s_steps.cc)
     axera_example(ax_classification ax_classification_steps.cc)
+    
+    axera_example(ax_yolov5s ax_yolov5s_steps.cc)
+    axera_example(ax_yolov5s_seg ax_yolov5s_seg_steps.cc)
+    axera_example(ax_yolov5_face ax_yolov5_face_steps.cc)
+    axera_example(ax_yolov6 ax_yolov6_steps.cc)
+    axera_example(ax_yolov7_tiny_face ax_yolov7_tiny_face_steps.cc)
+    axera_example(ax_yolov7 ax_yolov7_steps.cc)
+    axera_example(ax_yolov8 ax_yolov8s_steps.cc)
+    axera_example(ax_yolox ax_yolox_steps.cc)
+
     axera_example(ax_ppyoloe ax_ppyoloe_steps.cc)
     axera_example(ax_ppyoloe_obj365 ax_ppyoloe_obj365_steps.cc)
     axera_example(ax_pp_person_attribute ax_pp_person_attribute_steps.cc)
@@ -32,7 +41,9 @@ if (AXERA_TARGET_CHIP MATCHES "ax650")
     axera_example(ax_pp_humanseg ax_pp_humanseg_steps.cc)
     axera_example(ax_pp_liteseg_stdc2_cityscapes ax_pp_liteseg_stdc2_cityscapes_steps.cc)
     axera_example(ax_pp_ocr_rec ax_pp_ocr_rec_steps.cc)
+
     axera_example(ax_realesrgan ax_realesrgan_steps.cc)
-    axera_example(ax_yolov8 ax_yolov8s_steps.cc)
+
     axera_example(ax_detr ax_detr_steps.cc)
+    axera_example(ax_scrfd ax_scrfd_steps.cc)
 endif ()
