@@ -337,6 +337,36 @@ detection num: 14
 ```
 ![YOLOX](../../docs/ax650/yolox_out.jpg)
 
+#### YOLO-NAS
+```
+root@AXERA:/home/test# ./ax_yolo_nas -m yolonas.axmodel -i airport.jpg
+--------------------------------------
+model file : yolonas.axmodel
+image file : airport.jpg
+img_h, img_w : 640 640
+--------------------------------------
+[Axera version]: libax_sys.so V1.13.0 Apr 26 2023 16:24:35
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:3.13 ms
+--------------------------------------
+Repeat 1 times, avg time 12.88 ms, max_time 12.88 ms, min_time 12.88 ms
+--------------------------------------
+detection num: 6
+ 4:  59%, [ 130,  176,  297,  228], airplane
+ 4:  59%, [ 281,  193,  363,  223], airplane
+ 5:  59%, [ 462,  142,  639,  418], bus
+ 5:  59%, [ 374,  199,  464,  268], bus
+ 0:  50%, [ 216,  229,  230,  264], person
+ 0:  50%, [ 490,  228,  555,  279], person
+--------------------------------------
+```
+![HRNet](../../docs/ax650/yolo_nas_out.jpg)
+
 #### HRNet
 ```
 root@AXERA:/home/test# ./ax_hrnet -m hrnet_256x192.axmodel -i apic33179.jpg
