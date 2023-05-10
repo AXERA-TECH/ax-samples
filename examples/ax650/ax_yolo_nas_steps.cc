@@ -1,22 +1,22 @@
 /*
-* AXERA is pleased to support the open source community by making ax-samples available.
-*
-* Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
-*
-* Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://opensource.org/licenses/BSD-3-Clause
-*
-* Unless required by applicable law or agreed to in writing, software distributed
-* under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-* CONDITIONS OF ANY KIND, either express or implied. See the License for the
-* specific language governing permissions and limitations under the License.
-*/
+ * AXERA is pleased to support the open source community by making ax-samples available.
+ *
+ * Copyright (c) 2022, AXERA Semiconductor (Shanghai) Co., Ltd. All rights reserved.
+ *
+ * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * https://opensource.org/licenses/BSD-3-Clause
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 
 /*
-* Author: ZHEQIUSHUI
-*/
+ * Author: ZHEQIUSHUI
+ */
 
 #include <cstdio>
 #include <cstring>
@@ -35,9 +35,9 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 608;
-const int DEFAULT_IMG_W = 608;
-
+const int DEFAULT_IMG_H = 640;
+const int DEFAULT_IMG_W = 640;
+const int num_class = 80;
 const char* CLASS_NAMES[] = {
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
     "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
@@ -48,81 +48,117 @@ const char* CLASS_NAMES[] = {
     "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
     "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
     "hair drier", "toothbrush"};
-
-const char* CLASS_NAMES_91[] = {
-    "NULL", "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
-    "fire hydrant", "NULL", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
-    "elephant", "bear", "zebra", "giraffe", "NULL", "backpack", "umbrella", "NULL", "NULL", "handbag", "tie", "suitcase", "frisbee",
-    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-    "tennis racket", "bottle", "NULL", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
-    "potted plant", "bed", "NULL", "dining table", "NULL", "NULL", "toilet", "NULL", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
-    "microwave", "oven", "toaster", "sink", "refrigerator", "NULL", "book", "clock", "vase", "scissors", "teddy bear",
-    "hair drier", "toothbrush"};
+// const float ANCHORS[18] = {10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116, 90, 156, 198, 373, 326};
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.9f;
-
+const float PROB_THRESHOLD = 0.45f;
+const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
+    static void generate_proposals_yolonas(std::vector<detection::Object>& objects, const float* cls_ptr, const float* reg_ptr, float prob_threshold, int num_grid = 8400, int cls_num = 80)
+    {
+        int stride32_grid = sqrt(num_grid / 21);
+        int stride16_grid = stride32_grid * 2;
+        int stride8_grid = stride32_grid * 4;
+
+        // stride==32的格子结束的位置
+        int stride8_end = stride8_grid * stride8_grid;
+        // stride==16的格子结束的位置
+        int stride16_end = stride8_end + stride16_grid * stride16_grid;
+
+        for (uint anchor_idx = 0; anchor_idx < num_grid; ++anchor_idx)
+        {
+            float stride = 32.0f;
+            int row_i = 0;
+            int col_i = 0;
+            if (anchor_idx < stride8_end)
+            {
+                stride = 8.0f;
+                row_i = anchor_idx / stride8_grid;
+                col_i = anchor_idx % stride8_grid;
+            }
+            else if (anchor_idx < stride16_end)
+            {
+                stride = 16.0f;
+                row_i = (anchor_idx - stride8_end) / stride16_grid;
+                col_i = (anchor_idx - stride8_end) % stride16_grid;
+            }
+            else
+            {
+                stride = 32.0f;
+                row_i = (anchor_idx - stride16_end) / stride32_grid;
+                col_i = (anchor_idx - stride16_end) % stride32_grid;
+            }
+            // if (anchor_idx < stride32_end)
+            // {
+            //     stride = 32.0f;
+            //     row_i = anchor_idx / stride32_grid;
+            //     col_i = anchor_idx % stride32_grid;
+            // }
+            // else if (anchor_idx < stride16_end)
+            // {
+            //     stride = 16.0f;
+            //     row_i = (anchor_idx - stride32_end) / stride16_grid;
+            //     col_i = (anchor_idx - stride32_end) % stride16_grid;
+            // }
+            // else
+            // { // stride == 8
+            //     stride = 8.0f;
+            //     row_i = (anchor_idx - stride16_end) / stride8_grid;
+            //     col_i = (anchor_idx - stride16_end) % stride8_grid;
+            // }
+
+            float maxProb = 0.0f;
+            int maxIndex = -1;
+            for (uint c = 0; c < cls_num; ++c)
+            {
+                float prob = cls_ptr[anchor_idx * cls_num + c];
+                if (prob > maxProb)
+                {
+                    maxProb = prob;
+                    maxIndex = c;
+                }
+            }
+
+            if (maxProb < prob_threshold)
+                continue;
+
+            detection::Object obj;
+            obj.label = maxIndex;
+            obj.prob = maxProb;
+            float x_center = 0.5f + (float)col_i;
+            float y_center = 0.5f + (float)row_i;
+            float x0 = x_center - reg_ptr[anchor_idx * 4 + 0];
+            float y0 = y_center - reg_ptr[anchor_idx * 4 + 1];
+            float x1 = x_center + reg_ptr[anchor_idx * 4 + 2];
+            float y1 = y_center + reg_ptr[anchor_idx * 4 + 3];
+            x0 = x0 * stride;
+            y0 = y0 * stride;
+            x1 = x1 * stride;
+            y1 = y1 * stride;
+
+            obj.rect.x = x0;
+            obj.rect.y = y0;
+            obj.rect.width = x1 - x0;
+            obj.rect.height = y1 - y0;
+            objects.push_back(obj);
+        }
+    }
+
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
-        std::vector<detection::Object> proposals, objects;
-        int prob_pred_idx = 0;
-        int bbox_pred_idx = 1;
-        for (size_t i = 0; i < io_info->nOutputSize; i++)
-        {
-            if (io_info->pOutputs[i].nShapeSize >= 3)
-            {
-                if (io_info->pOutputs[i].pShape[2] == 92)
-                {
-                    prob_pred_idx = i;
-                }
-                else if (io_info->pOutputs[i].pShape[2] == 4)
-                {
-                    bbox_pred_idx = i;
-                }
-            }
-        }
-        printf("prob_pred_idx=%d ,bbox_pred_idx=%d\n", prob_pred_idx, bbox_pred_idx);
-
+        std::vector<detection::Object> proposals;
+        std::vector<detection::Object> objects;
+        float prob_threshold_u_sigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
         timer timer_postprocess;
-        auto& info = io_info->pOutputs[prob_pred_idx];
-        float* output_prob = (float*)io_data->pOutputs[prob_pred_idx].pVirAddr;
-        float* output_bbox = (float*)io_data->pOutputs[bbox_pred_idx].pVirAddr;
+        int num_grid = io_info->pOutputs[0].pShape[1];
+        const float* cls_ptr = (float*)io_data->pOutputs[0].pVirAddr;
+        const float* reg_ptr = (float*)io_data->pOutputs[1].pVirAddr;
 
-        for (size_t i = 0; i < info.pShape[1]; i++)
-        {
-            int maxid = -1;
-            float maxval = -FLT_MAX;
-            float dst[92];
-            detection::softmax(output_prob, &dst[0], io_info->pOutputs[prob_pred_idx].pShape[2]);
-            for (size_t j = 0; j < io_info->pOutputs[prob_pred_idx].pShape[2] - 1; j++)
-            {
-                if (dst[j] > maxval)
-                {
-                    maxval = dst[j];
-                    maxid = j;
-                }
-            }
+        generate_proposals_yolonas(proposals, cls_ptr, reg_ptr, PROB_THRESHOLD, num_grid, num_class);
 
-            if (maxval > PROB_THRESHOLD)
-            {
-                detection::Object obj;
-                obj.label = maxid;
-                obj.prob = maxval;
-                obj.rect.x = (output_bbox[0] - 0.5 * output_bbox[2]) * input_w;
-                obj.rect.y = (output_bbox[1] - 0.5 * output_bbox[3]) * input_h;
-                obj.rect.width = output_bbox[2] * input_w;
-                obj.rect.height = output_bbox[3] * input_h;
-                objects.push_back(obj);
-            }
-            output_prob += io_info->pOutputs[prob_pred_idx].pShape[2];
-            output_bbox += io_info->pOutputs[bbox_pred_idx].pShape[2];
-        }
-
-        detection::get_out_bbox(objects, input_h, input_w, mat.rows, mat.cols);
+        detection::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -136,7 +172,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_objects(mat, objects, CLASS_NAMES_91, "detr_out");
+        detection::draw_objects(mat, objects, CLASS_NAMES, "yolo_nas_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -236,8 +272,14 @@ int main(int argc, char* argv[])
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
-        if (!model_file_flag) { show_error("model", model_file); }
-        if (!image_file_flag) { show_error("image", image_file); }
+        if (!model_file_flag)
+        {
+            show_error("model", model_file);
+        }
+        if (!image_file_flag)
+        {
+            show_error("image", image_file);
+        }
 
         return -1;
     }

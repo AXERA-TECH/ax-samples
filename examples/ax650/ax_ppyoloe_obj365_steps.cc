@@ -427,41 +427,11 @@ const float PROB_THRESHOLD = 0.75f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
+    //去除grid的后处理方式
     static void generate_proposals_ppyoloe(std::vector<detection::Object> &objects, const float *cls_ptr, const float *reg_ptr, float prob_threshold, int num_grid = 8400, int cls_num = 80)
     {
-        int stride32_grid = sqrt(num_grid / 21);
-        int stride16_grid = stride32_grid * 2;
-        int stride8_grid = stride32_grid * 4;
-
-        // stride==32的格子结束的位置
-        int stride32_end = stride32_grid * stride32_grid;
-        // stride==16的格子结束的位置
-        int stride16_end = stride32_grid * stride32_grid * 5;
-
         for (uint anchor_idx = 0; anchor_idx < num_grid; ++anchor_idx)
         {
-            float stride = 32.0f;
-            int row_i = 0;
-            int col_i = 0;
-            if (anchor_idx < stride32_end)
-            {
-                stride = 32.0f;
-                row_i = anchor_idx / stride32_grid;
-                col_i = anchor_idx % stride32_grid;
-            }
-            else if (anchor_idx < stride16_end)
-            {
-                stride = 16.0f;
-                row_i = (anchor_idx - stride32_end) / stride16_grid;
-                col_i = (anchor_idx - stride32_end) % stride16_grid;
-            }
-            else
-            { // stride == 8
-                stride = 8.0f;
-                row_i = (anchor_idx - stride16_end) / stride8_grid;
-                col_i = (anchor_idx - stride16_end) % stride8_grid;
-            }
-
             float maxProb = 0.0f;
             int maxIndex = -1;
             for (uint c = 0; c < cls_num; ++c)
@@ -480,17 +450,6 @@ namespace ax
             detection::Object obj;
             obj.label = maxIndex;
             obj.prob = maxProb;
-            // float x_center = 0.5f + (float)col_i;
-            // float y_center = 0.5f + (float)row_i;
-            // float x0 = x_center - reg_ptr[anchor_idx * 4 + 0];
-            // float y0 = y_center - reg_ptr[anchor_idx * 4 + 1];
-            // float x1 = x_center + reg_ptr[anchor_idx * 4 + 2];
-            // float y1 = y_center + reg_ptr[anchor_idx * 4 + 3];
-            // x0 = x0 * stride;
-            // y0 = y0 * stride;
-            // x1 = x1 * stride;
-            // y1 = y1 * stride;
-
             obj.rect.x = reg_ptr[anchor_idx * 4 + 0];
             obj.rect.y = reg_ptr[anchor_idx * 4 + 1];
             obj.rect.width = reg_ptr[anchor_idx * 4 + 2] - reg_ptr[anchor_idx * 4 + 0];
@@ -510,14 +469,6 @@ namespace ax
         const float *reg_ptr = (float *)io_data->pOutputs[1].pVirAddr;
 
         generate_proposals_ppyoloe(proposals, cls_ptr, reg_ptr, PROB_THRESHOLD, num_grid, num_class);
-        // for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
-        // {
-        //     auto &output = io_data->pOutputs[i];
-        //     auto &info = io_info->pOutputs[i];
-        //     auto ptr = (float *)output.pVirAddr;
-        //     int32_t stride = (1 << i) * 8;
-        //     detection::generate_proposals_255(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_u_sigmoid);
-        // }
 
         detection::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
