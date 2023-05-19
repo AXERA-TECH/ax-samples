@@ -388,3 +388,26 @@ Repeat 1 times, avg time 5.16 ms, max_time 5.16 ms, min_time 5.16 ms
 --------------------------------------
 ```
 ![HRNet](../../docs/ax650/hrnet_out.jpg)
+
+### SegFormer
+```
+/opt/test # ./ax_segformer -m segformer-b0-finetuned-cityscapes-640-1280.axmodel
+ -i test.png
+--------------------------------------
+model file : segformer-b0-finetuned-cityscapes-640-1280.axmodel
+image file : test.png
+img_h, img_w : 640 1280
+--------------------------------------
+[Axera version]: libax_sys.so V1.14.0_20230506154237 May  6 2023 15:43:14 JK
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:2.28 ms
+--------------------------------------
+Repeat 1 times, avg time 115.85 ms, max_time 115.85 ms, min_time 115.85 ms
+--------------------------------------
+```
+![SegFormer](../../docs/ax650/segformer_out.png)
