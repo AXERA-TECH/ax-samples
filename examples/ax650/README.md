@@ -411,3 +411,25 @@ Repeat 1 times, avg time 115.85 ms, max_time 115.85 ms, min_time 115.85 ms
 --------------------------------------
 ```
 ![SegFormer](../../docs/ax650/segformer_out.png)
+
+### PFLD
+```
+/opt/test # ./ax_pfld -m pfld.axmodel -i liming.png -r 100
+--------------------------------------
+model file : pfld.axmodel
+image file : liming.png
+img_h, img_w : 112 112
+--------------------------------------
+[Axera version]: libax_sys.so V1.14.0_20230506154237 May  6 2023 15:43:14 JK
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.72 ms
+--------------------------------------
+Repeat 100 times, avg time 0.44 ms, max_time 0.45 ms, min_time 0.44 ms
+--------------------------------------
+```
+![PFLD](../../docs/ax650/pfld_out.jpg)
