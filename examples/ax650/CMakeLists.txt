@@ -32,6 +32,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax650")
     axera_example(ax_yolov7_tiny_face ax_yolov7_tiny_face_steps.cc)
     axera_example(ax_yolov7 ax_yolov7_steps.cc)
     axera_example(ax_yolov8 ax_yolov8s_steps.cc)
+    axera_example(ax_yolov8_pose ax_yolov8s_pose_steps.cc)
     axera_example(ax_yolox ax_yolox_steps.cc)
     axera_example(ax_yolo_nas ax_yolo_nas_steps.cc)
 
