@@ -433,3 +433,32 @@ Repeat 100 times, avg time 0.44 ms, max_time 0.45 ms, min_time 0.44 ms
 --------------------------------------
 ```
 ![PFLD](../../docs/ax650/pfld_out.jpg)
+
+### YOLOV8-POSE
+```
+/opt/test # ./ax_yolov8_pose -m yolov8s-pose.axmodel -i test.jpg
+--------------------------------------
+model file : yolov8s-pose.axmodel
+image file : test.jpg
+img_h, img_w : 640 640
+--------------------------------------
+[Axera version]: libax_sys.so V1.14.0_20230506154237 May  6 2023 15:43:14 JK
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.28 ms
+--------------------------------------
+Repeat 1 times, avg time 12.77 ms, max_time 12.77 ms, min_time 12.77 ms
+--------------------------------------
+detection num: 5
+ 0:  92%, [ 497,  291,  673,  804], person
+ 0:  90%, [ 175,  306,  365,  804], person
+ 0:  86%, [  89,  292,  192,  490], person
+ 0:  77%, [ 608,  271,  693,  465], person
+ 0:  55%, [ 443,  296,  498,  440], person
+--------------------------------------
+```
+![yolov8-pose](../../docs/ax650/yolov8s_pose_out.jpg)
