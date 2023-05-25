@@ -39,17 +39,14 @@ const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
 const char* CLASS_NAMES[] = {
-    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
-    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
-    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
-    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
-    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
-    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
-    "hair drier", "toothbrush"};
+    "person",
+};
+const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}};
+const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
+const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
 
-int NUM_CLASS = 80;
+int NUM_CLASS = 1;
+int NUM_POINT = 17;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
@@ -75,7 +72,7 @@ namespace ax
                 {
                     float pb_cx = (w + 0.5f);
                     float pb_cy = (h + 0.5f);
-                    grids.push_back({pb_cx, pb_cy, float(stride)});
+                    grids.push_back({pb_cx, pb_cy, float(stride), float(w), float(h)});
                     // printf("%f %f\n", pb_cx, pb_cy);
                 }
             }
@@ -83,8 +80,10 @@ namespace ax
 
         timer timer_postprocess;
         float* output_prob = (float*)io_data->pOutputs[0].pVirAddr;
-        float* output_bbox = (float*)io_data->pOutputs[1].pVirAddr;
-        
+        float* output_bbox = (float*)io_data->pOutputs[3].pVirAddr;
+        float* output_pose_prob = (float*)io_data->pOutputs[2].pVirAddr;
+        float* output_pose = (float*)io_data->pOutputs[1].pVirAddr;
+
         for (size_t i = 0; i < num_grid; i++)
         {
             int maxid = -1;
@@ -117,14 +116,31 @@ namespace ax
                 obj.rect.y = cy - height / 2;
                 obj.rect.width = width;
                 obj.rect.height = height;
+
+                for (size_t k = 0; k < NUM_POINT; k++)
+                {
+                    float xp = output_pose[2 * k] * 2;
+                    float yp = output_pose[2 * k + 1] * 2;
+                    float prob = output_pose_prob[k];
+                    xp += grid[3];
+                    yp += grid[4];
+                    xp *= grid[2];
+                    yp *= grid[2];
+                    obj.kps_feat.push_back(xp);
+                    obj.kps_feat.push_back(yp);
+                    obj.kps_feat.push_back(prob);
+                }
+
                 proposals.push_back(obj);
             }
 
             output_prob += NUM_CLASS;
             output_bbox += 4;
+            output_pose_prob += NUM_POINT;
+            output_pose += NUM_POINT * 2;
         }
 
-        detection::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
+        detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -138,7 +154,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_objects(mat, objects, CLASS_NAMES, "yolov8s_out", 1, 3);
+        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolov8s_pose_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
