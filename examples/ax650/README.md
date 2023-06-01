@@ -462,3 +462,26 @@ detection num: 5
 --------------------------------------
 ```
 ![yolov8-pose](../../docs/ax650/yolov8s_pose_out.jpg)
+
+### DinoV2
+```
+/opt/test # ./ax_dinov2 -m dinov2_small_518_precision_opt.axmodel -i dog-chai.jpeg
+--------------------------------------
+model file : dinov2_small_518_precision_opt.axmodel
+image file : dog-chai.jpeg
+img_h, img_w : 518 518
+--------------------------------------
+[Axera version]: libax_sys.so V1.14.0_20230506154237 May  6 2023 15:43:14 JK
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:8454.33 ms
+--------------------------------------
+Repeat 1 times, avg time 28.64 ms, max_time 28.64 ms, min_time 28.64 ms
+--------------------------------------
+```
+![](../../docs/ax650/dog-chai.jpeg)
+![](../../docs/ax650/dinov2_mask_out.png)
