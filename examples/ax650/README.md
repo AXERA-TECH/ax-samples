@@ -483,5 +483,5 @@ post process cost time:8454.33 ms
 Repeat 1 times, avg time 28.64 ms, max_time 28.64 ms, min_time 28.64 ms
 --------------------------------------
 ```
-![](../../docs/ax650/dog-chai.jpeg)
-![](../../docs/ax650/dinov2_mask_out.png)
+<img src="../../docs/ax650/dog-chai.jpeg" width="270" height="360">
+<img src="../../docs/ax650/dinov2_mask_out.png" width="270" height="360">
