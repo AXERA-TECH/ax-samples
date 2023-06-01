@@ -44,7 +44,7 @@ function(axera_example example_name)
             PRIVATE
             ${CMAKE_THREAD_LIBS_INIT}
             ax_interpreter
-            ax_sys
+            ax_sys ax_ivps
             )
     target_link_directories(${example_name}
             PRIVATE

@@ -35,8 +35,8 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 640;
-const int DEFAULT_IMG_W = 1280;
+const int DEFAULT_IMG_H = 518;
+const int DEFAULT_IMG_W = 518;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
@@ -44,37 +44,28 @@ namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
-        cv::Vec3b colors[] = {{128, 64, 128}, {244, 35, 232}, {70, 70, 70}, {102, 102, 156}, {190, 153, 153}, {153, 153, 153}, {250, 170, 30}, {220, 220, 0}, {107, 142, 35}, {152, 251, 152}, {70, 130, 180}, {220, 20, 60}, {255, 0, 0}, {0, 0, 142}, {0, 0, 70}, {0, 60, 100}, {0, 80, 100}, {0, 0, 230}, {119, 11, 32}};
-        for (size_t i = 0; i < 19; i++)
-        {
-            colors[i] = {uchar(rand() % 255), uchar(rand() % 255), uchar(rand() % 255)};
-        }
-
-        int width = input_w / 4;
-        int height = input_h / 4;
-        cv::Mat seg(height, width, CV_8UC3);
-
         timer timer_postprocess;
-        auto& output = io_data->pOutputs[1];
-        auto& info = io_info->pOutputs[1];
-        auto seg_data = (int*)output.pVirAddr;
+        auto& output = io_data->pOutputs[0];
+        auto& info = io_info->pOutputs[0];
 
-        for (size_t y = 0; y < height; y++)
+        cv::Mat feature(info.pShape[1], info.pShape[2], CV_32FC1, output.pVirAddr);
+
+        cv::PCA pca(feature, cv::noArray(), cv::PCA::Flags::USE_AVG, 3);
+        cv::Mat pca_features = pca.project(feature);
+        double minVal, maxVal;
+        cv::minMaxLoc(pca_features, &minVal, &maxVal);
+        pca_features -= minVal;
+        pca_features /= (maxVal - minVal);
+        pca_features *= 255;
+
+        cv::Mat out(37, 37, CV_8UC3);
+        float* pca_features_data = (float*)pca_features.data;
+        uchar* out_data = out.data;
+        for (size_t i = 0; i < pca_features.cols * pca_features.rows; i++)
         {
-            for (size_t x = 0; x < width; x++)
-            {
-                int idx = seg_data[y * width + x];
-                if (idx < 19)
-                {
-                    seg.at<cv::Vec3b>(y, x) = colors[idx];
-                }
-                else
-                {
-                    seg.at<cv::Vec3b>(y, x) = {0, 0, 0};
-                }
-            }
+            out_data[i] = pca_features_data[i] > UCHAR_MAX ? UCHAR_MAX : pca_features_data[i];
         }
-        cv::resize(seg, seg, cv::Size(mat.cols, mat.rows));
+        cv::resize(out, out, cv::Size(mat.cols, mat.rows));
 
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
@@ -87,10 +78,11 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
+        cv::imwrite("dinov2_mask_out.png", out);
 
         cv::Mat dst;
-        cv::addWeighted(mat, 0.4, seg, 0.6, 0, dst);
-        cv::imwrite("segformer_out.png", dst);
+        cv::addWeighted(mat, 0.4, out, 0.6, 0, dst);
+        cv::imwrite("dinov2_out.png", dst);
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -230,7 +222,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1]);
+    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
 
     // 3. sys_init
     AX_SYS_Init();
