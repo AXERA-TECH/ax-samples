@@ -485,3 +485,25 @@ Repeat 1 times, avg time 28.64 ms, max_time 28.64 ms, min_time 28.64 ms
 ```
 <img src="../../docs/ax650/dog-chai.jpeg" width="270" height="360">
 <img src="../../docs/ax650/dinov2_mask_out.png" width="270" height="360">
+
+### Simcc
+```
+/opt/test # ./ax_simcc_pose -m simcc-76fe95.axmodel -i R-C.jpg
+--------------------------------------
+model file : simcc-76fe95.axmodel
+image file : R-C.jpg
+img_h, img_w : 256 192
+--------------------------------------
+[Axera version]: libax_sys.so V1.14.0_20230506154237 May  6 2023 15:43:14 JK
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.07 ms
+--------------------------------------
+Repeat 1 times, avg time 4.79 ms, max_time 4.79 ms, min_time 4.79 ms
+--------------------------------------
+```
+<img src="../../docs/ax650/simcc_out.jpg" width="300" height="450">

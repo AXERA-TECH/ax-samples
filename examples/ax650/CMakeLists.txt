@@ -52,6 +52,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax650")
     axera_example(ax_rtmdet ax_rtmdet_steps.cc)
     axera_example(ax_pfld ax_pfld_steps.cc)
     axera_example(ax_dinov2 ax_dinov2_steps.cc)
+    axera_example(ax_simcc_pose ax_simcc_pose_steps.cc)
 
     axera_example(ax_imgproc ax_imgproc_steps.cc)
 endif ()
