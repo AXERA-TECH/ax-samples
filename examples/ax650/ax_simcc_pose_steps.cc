@@ -26,7 +26,7 @@
 #include "base/common.hpp"
 #include "base/detection.hpp"
 #include "middleware/io.hpp"
-
+#include "base/pose.hpp"
 #include "utilities/args.hpp"
 #include "utilities/cmdline.hpp"
 #include "utilities/file.hpp"
@@ -35,9 +35,9 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 518;
-const int DEFAULT_IMG_W = 518;
-
+const int INPUT_H = 256;
+const int INPUT_W = 192;
+const int NUM_JOINTS = 17;
 const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
@@ -45,28 +45,47 @@ namespace ax
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
         timer timer_postprocess;
-        auto& output = io_data->pOutputs[0];
-        auto& info = io_info->pOutputs[0];
+        auto& info_x = io_info->pOutputs[0];
+        float* output_x = (float*)io_data->pOutputs[0].pVirAddr;
 
-        cv::Mat feature(info.pShape[1], info.pShape[2], CV_32FC1, output.pVirAddr);
-        cv::resize(feature, feature, cv::Size(info.pShape[2] / 4, info.pShape[1]));
+        auto& info_y = io_info->pOutputs[1];
+        float* output_y = (float*)io_data->pOutputs[1].pVirAddr;
 
-        cv::PCA pca(feature, cv::noArray(), cv::PCA::Flags::USE_AVG, 3);
-        cv::Mat pca_features = pca.project(feature);
-        double minVal, maxVal;
-        cv::minMaxLoc(pca_features, &minVal, &maxVal);
-        pca_features -= minVal;
-        pca_features /= (maxVal - minVal);
-        pca_features *= 255;
+        pose::ai_body_parts_s ai_point_result;
 
-        cv::Mat out(37, 37, CV_8UC3);
-        float* pca_features_data = (float*)pca_features.data;
-        uchar* out_data = out.data;
-        for (size_t i = 0; i < pca_features.cols * pca_features.rows; i++)
+        for (size_t p = 0; p < info_x.pShape[1]; p++)
         {
-            out_data[i] = pca_features_data[i] > UCHAR_MAX ? UCHAR_MAX : pca_features_data[i];
+            float x, x_score, y, y_score;
+            float maxval = -FLT_MAX;
+            float maxidx = 0;
+            for (size_t i = 0; i < info_x.pShape[2]; i++)
+            {
+                if (output_x[i] > maxval)
+                {
+                    maxval = output_x[i];
+                    maxidx = i;
+                }
+            }
+            x = maxidx / info_x.pShape[2];
+            x_score = maxval;
+            output_x += info_x.pShape[2];
+
+            maxval = -FLT_MAX;
+            maxidx = 0;
+            for (size_t i = 0; i < info_y.pShape[2]; i++)
+            {
+                if (output_y[i] > maxval)
+                {
+                    maxval = output_y[i];
+                    maxidx = i;
+                }
+            }
+            y = maxidx / info_y.pShape[2];
+            y_score = maxval;
+            output_y += info_y.pShape[2];
+
+            ai_point_result.keypoints.push_back({x, y, (x_score + y_score) / 2});
         }
-        cv::resize(out, out, cv::Size(mat.cols, mat.rows));
 
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
@@ -79,11 +98,8 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        cv::imwrite("dinov2_mask_out.png", out);
-
-        cv::Mat dst;
-        cv::addWeighted(mat, 0.4, out, 0.6, 0, dst);
-        cv::imwrite("dinov2_out.png", dst);
+        pose::draw_result(mat, ai_point_result, NUM_JOINTS, INPUT_W, INPUT_H);
+        cv::imwrite("./simcc_out.jpg", mat);
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -165,7 +181,7 @@ int main(int argc, char* argv[])
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
     cmd.add<std::string>("image", 'i', "image file", true, "");
-    cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(DEFAULT_IMG_H) + "," + std::to_string(DEFAULT_IMG_W));
+    cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(INPUT_H) + "," + std::to_string(INPUT_W));
 
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
     cmd.parse_check(argc, argv);
@@ -191,7 +207,7 @@ int main(int argc, char* argv[])
 
     auto input_size_string = cmd.get<std::string>("size");
 
-    std::array<int, 2> input_size = {DEFAULT_IMG_H, DEFAULT_IMG_W};
+    std::array<int, 2> input_size = {INPUT_H, INPUT_W};
 
     auto input_size_flag = utilities::parse_string(input_size_string, input_size);
 
@@ -223,7 +239,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. sys_init
     AX_SYS_Init();
