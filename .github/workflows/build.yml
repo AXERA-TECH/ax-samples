@@ -18,7 +18,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -26,14 +26,24 @@ jobs:
       - uses: actions/checkout@v3
 
       # Runs a set of commands using the runners shell
-      - name: prepare 3rdparty
+      - name: prepare opencv-library
         run: |
           mkdir -p ./3rdparty
           wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip
           unzip opencv-arm-linux-gnueabihf-gcc-7.5.0.zip -d ./3rdparty
 
-      - name: configure
-        run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=/data/mc20/ ..
-
       - name: build
-        run: cmake --build build -j 16
+        run: |
+          mkdir build
+          cd build
+          wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.3/arm_axpi_r1.22.2801.zip
+          unzip arm_axpi_r1.22.2801.zip -d ax_bsp
+          export ax_bsp=$PWD/ax_bsp
+          echo $ax_bsp          
+          wget http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+          tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+          export PATH=$PATH:gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/
+          arm-linux-gnueabihf-gcc -v
+          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ ..
+          make -j8
+          make install
