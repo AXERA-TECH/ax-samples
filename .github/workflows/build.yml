@@ -39,13 +39,13 @@ jobs:
           export ax_bsp=$PWD/ax_bsp
           echo $ax_bsp
 
-      - name: build-configure
+      - name: build
         run: |
+          mkdir build
+          cd build
           wget http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
           tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
-          export PATH=gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/:$PATH
+          export PATH=$PATH:gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/
           arm-linux-gnueabihf-gcc -v
-          mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ ..
-
-      - name: build
-        run: cmake --build build -j 16
+          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ ..
+          cmake --build build -j 16
