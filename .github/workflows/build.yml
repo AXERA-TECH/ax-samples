@@ -48,4 +48,5 @@ jobs:
           export PATH=$PATH:gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/
           arm-linux-gnueabihf-gcc -v
           cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ ..
-          cmake --build build -j 16
+          make -j8
+          make install
