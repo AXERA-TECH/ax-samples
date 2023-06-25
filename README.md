@@ -11,7 +11,7 @@
 
 已支持芯片
 
-- AX650N
+- [AX650N](docs/AX650N.md)
 - [AX630A](docs/AX630A.md)
 - [AX620A](docs/AX620A.md)
 - [AX620U](docs/AX620U.md)
