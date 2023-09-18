@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
         resize_ctrl.eMode = AX_IVPS_ASPECT_RATIO_AUTO;
         resize_ctrl.eAligns[0] = AX_IVPS_ASPECT_RATIO_HORIZONTAL_CENTER;
         resize_ctrl.eAligns[1] = AX_IVPS_ASPECT_RATIO_VERTICAL_CENTER;
-        AX_IVPS_RECT_T pbox[1] = {{0, 0, ive_nv12.u32Width / 2, ive_nv12.u32Height / 2}};
+        AX_IVPS_RECT_T pbox[1] = {{0, 0, (AX_U16)(ive_nv12.u32Width / 2), (AX_U16)(ive_nv12.u32Height / 2)}};
         for (size_t i = 0; i < repeat; i++)
         {
             auto temp = &ive_nv12_crop_resize;
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
         resize_ctrl.eMode = AX_IVPS_ASPECT_RATIO_STRETCH;
         resize_ctrl.eAligns[0] = AX_IVPS_ASPECT_RATIO_HORIZONTAL_CENTER;
         resize_ctrl.eAligns[1] = AX_IVPS_ASPECT_RATIO_VERTICAL_CENTER;
-        AX_IVPS_RECT_T pbox[1] = {{0, 0, ive_nv12.u32Width, ive_nv12.u32Height}};
+        AX_IVPS_RECT_T pbox[1] = {{0, 0, (AX_U16)(ive_nv12.u32Width), (AX_U16)(ive_nv12.u32Height)}};
         for (size_t i = 0; i < repeat; i++)
         {
             auto temp = &ive_nv12_crop_resize;

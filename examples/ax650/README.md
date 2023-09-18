@@ -507,3 +507,24 @@ Repeat 1 times, avg time 4.79 ms, max_time 4.79 ms, min_time 4.79 ms
 --------------------------------------
 ```
 <img src="../../docs/ax650/simcc_out.jpg" width="300" height="450">
+
+### GLPDepth
+```
+/opt/test # ./ax_glpdepth -m install/bin/models/glpdepth_896x1152.axmodel -i test.jpg
+--------------------------------------
+model file : install/bin/models/glpdepth_896x1152.axmodel
+image file : test.jpg
+img_h, img_w : 896 1152
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:29.89 ms
+--------------------------------------
+Repeat 1 times, avg time 258.29 ms, max_time 258.29 ms, min_time 258.29 ms
+--------------------------------------
+```
+<img src="../../docs/ax650/glpdepth_out.png">
