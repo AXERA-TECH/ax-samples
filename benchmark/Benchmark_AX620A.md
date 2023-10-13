@@ -1,9 +1,8 @@
-# Benchmark
+# Benchmark(AX620A)
 
 Benchmark 是了解硬件平台网络模型运行速度的最佳途径。以下数据基于 AXera-Pi 测试获取，不代表商业交付最终性能。
 
-## 1. AX620A
-### 1.1 vnpu 1_1, 1.8Tops@Int8
+## vnpu 1_1, 1.8Tops@Int8
 | Models       | Input Size | 耗时（ms） |
 | ------------ | ---------- | ---------- |
 | mobilenetv1  | 224        | 4.1        |
