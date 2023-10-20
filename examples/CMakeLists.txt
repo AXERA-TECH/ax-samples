@@ -21,7 +21,7 @@ endif()
 message(STATUS "BSP_MSP_DIR = ${BSP_MSP_DIR}")
 
 if(AXERA_TARGET_CHIP MATCHES "ax650")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/libopencv-4.5.5-aarch64/lib/cmake/opencv4)
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
 elseif(AXERA_TARGET_CHIP MATCHES "ax620a")
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
 elseif(AXERA_TARGET_CHIP MATCHES "ax630a")
