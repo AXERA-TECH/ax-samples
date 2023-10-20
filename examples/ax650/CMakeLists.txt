@@ -16,7 +16,7 @@
 #
 
 if (AXERA_TARGET_CHIP MATCHES "ax650")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/libopencv-4.5.5-aarch64/lib/cmake/opencv4)
+    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
 
     find_package(Threads)
     find_package(OpenCV REQUIRED)
