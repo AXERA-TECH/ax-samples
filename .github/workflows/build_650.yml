@@ -43,6 +43,6 @@ jobs:
           tar -xf gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
           export PATH=$PATH:gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/
           aarch64-none-linux-gnu-gcc -v
-          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax650 ..
+          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp} -DAXERA_TARGET_CHIP=ax650 ..
           make -j8
           make install
