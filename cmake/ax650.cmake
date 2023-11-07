@@ -55,6 +55,9 @@ function(axera_example example_name)
             PUBLIC
             $<$<COMPILE_LANGUAGE:C,CXX>: -O3>
             )
-
-    install(TARGETS ${example_name} DESTINATION ax650)
+    if (AXERA_TARGET_CHIP MATCHES "ax650")
+        install(TARGETS ${example_name} DESTINATION ax650)
+    elseif (AXERA_TARGET_CHIP MATCHES "ax620e")
+        install(TARGETS ${example_name} DESTINATION ax620e)
+    endif()
 endfunction()

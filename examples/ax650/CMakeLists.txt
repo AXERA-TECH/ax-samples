@@ -15,9 +15,7 @@
 # Author:
 #
 
-if (AXERA_TARGET_CHIP MATCHES "ax650")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
-
+if (AXERA_TARGET_CHIP MATCHES "ax650" OR AXERA_TARGET_CHIP MATCHES "ax620e")
     find_package(Threads)
     find_package(OpenCV REQUIRED)
 
@@ -56,4 +54,5 @@ if (AXERA_TARGET_CHIP MATCHES "ax650")
     axera_example(ax_glpdepth ax_glpdepth_steps.cc)
 
     axera_example(ax_imgproc ax_imgproc_steps.cc)
+    axera_example(ax_model_info ax_model_info.cc)
 endif ()

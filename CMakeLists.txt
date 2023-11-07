@@ -56,7 +56,6 @@ project(AXERA-Samples)
 # TODO: set as an option
 if (NOT AXERA_TARGET_CHIP)
     set (AXERA_TARGET_CHIP "ax620a")
-    add_definitions(-DAXERA_TARGET_CHIP_AX620)
 endif ()
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O1 -Wall -s -fPIC")

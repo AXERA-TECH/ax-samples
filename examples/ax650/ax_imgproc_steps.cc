@@ -31,7 +31,6 @@
 #include <ax_sys_api.h>
 #include "ax_ivps_api.h"
 
-
 const int DEFAULT_IMG_H = 1080;
 const int DEFAULT_IMG_W = 1920;
 const int DEFAULT_LOOP_COUNT = 1;
@@ -128,7 +127,7 @@ int main(int argc, char* argv[])
     timer timer_csc;
     for (size_t i = 0; i < repeat; i++)
     {
-        ret = AX_IVPS_CscVpp(&ive_bgr, &ive_nv12);
+        ret = AX_IVPS_CscTdp(&ive_bgr, &ive_nv12);
         if (ret != 0)
         {
             fprintf(stderr, "AX_IVPS_CSC failed. 0x%x\n", ret);
@@ -148,7 +147,14 @@ int main(int argc, char* argv[])
         resize_ctrl.eAligns[1] = AX_IVPS_ASPECT_RATIO_VERTICAL_CENTER;
         for (size_t i = 0; i < repeat; i++)
         {
+#ifdef AXERA_TARGET_CHIP_AX620E
+            AX_IVPS_CROP_RESIZE_ATTR_T crop_resize_attr;
+            memset(&crop_resize_attr, 0, sizeof(crop_resize_attr));
+            memcpy(&crop_resize_attr.tAspectRatio, &resize_ctrl, sizeof(resize_ctrl));
+            ret = AX_IVPS_CropResizeVpp(&ive_nv12, &ive_nv12_crop_resize, &crop_resize_attr);
+#else
             ret = AX_IVPS_CropResizeVpp(&ive_nv12, &ive_nv12_crop_resize, &resize_ctrl);
+#endif
             if (ret != 0)
             {
                 fprintf(stderr, "AX_IVPS_CropResize failed. 0x%x\n", ret);
@@ -171,7 +177,14 @@ int main(int argc, char* argv[])
         for (size_t i = 0; i < repeat; i++)
         {
             auto temp = &ive_nv12_crop_resize;
+#ifdef AXERA_TARGET_CHIP_AX620E
+            AX_IVPS_CROP_RESIZE_ATTR_T crop_resize_attr;
+            memset(&crop_resize_attr, 0, sizeof(crop_resize_attr));
+            memcpy(&crop_resize_attr.tAspectRatio, &resize_ctrl, sizeof(resize_ctrl));
+            ret = AX_IVPS_CropResizeV2Vpp(&ive_nv12, 1, pbox, temp, &crop_resize_attr);
+#else
             ret = AX_IVPS_CropResizeV2Vpp(&ive_nv12, pbox, 1, &temp, &resize_ctrl);
+#endif
             if (ret != 0)
             {
                 fprintf(stderr, "AX_IVPS_CropResize failed. 0x%x\n", ret);
@@ -194,7 +207,14 @@ int main(int argc, char* argv[])
         for (size_t i = 0; i < repeat; i++)
         {
             auto temp = &ive_nv12_crop_resize;
+#ifdef AXERA_TARGET_CHIP_AX620E
+            AX_IVPS_CROP_RESIZE_ATTR_T crop_resize_attr;
+            memset(&crop_resize_attr, 0, sizeof(crop_resize_attr));
+            memcpy(&crop_resize_attr.tAspectRatio, &resize_ctrl, sizeof(resize_ctrl));
+            ret = AX_IVPS_CropResizeV2Vpp(&ive_nv12, 1, pbox, temp, &crop_resize_attr);
+#else
             ret = AX_IVPS_CropResizeV2Vpp(&ive_nv12, pbox, 1, &temp, &resize_ctrl);
+#endif
             if (ret != 0)
             {
                 fprintf(stderr, "AX_IVPS_CropResize failed. 0x%x\n", ret);
