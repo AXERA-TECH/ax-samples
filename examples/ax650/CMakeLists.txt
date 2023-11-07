@@ -52,6 +52,7 @@ if (AXERA_TARGET_CHIP MATCHES "ax650" OR AXERA_TARGET_CHIP MATCHES "ax620e")
     axera_example(ax_dinov2 ax_dinov2_steps.cc)
     axera_example(ax_simcc_pose ax_simcc_pose_steps.cc)
     axera_example(ax_glpdepth ax_glpdepth_steps.cc)
+    axera_example(ax_rtdetr ax_rtdetr_steps.cc)
 
     axera_example(ax_imgproc ax_imgproc_steps.cc)
     axera_example(ax_model_info ax_model_info.cc)

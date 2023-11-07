@@ -174,12 +174,12 @@ namespace middleware
             {AX_ENGINE_DT_UINT14_PACKED, "UINT14_PACKED"},
             {AX_ENGINE_DT_UINT16_PACKED, "UINT16_PACKED"},
         };
-        printf("input size: %d\n", io_info->nInputSize);
+        printf("\ninput size: %d\n", io_info->nInputSize);
         for (uint32_t i = 0; i < io_info->nInputSize; ++i)
         {
             // print shape info,like [batchsize x channel x height x width]
             auto& info = io_info->pInputs[i];
-            printf("name: %s [%s]\n    ", info.pName, data_type[info.eDataType]);
+            printf("    name: \e[1;32m%8s \e[1;34m[%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType]);
             for (size_t s = 0; s < info.nShapeSize; s++)
             {
                 printf("%d", info.pShape[s]);
@@ -188,15 +188,15 @@ namespace middleware
                     printf(" x ");
                 }
             }
-            printf("\n");
+            printf("\e[0m\n\n");
         }
 
-        printf("output size: %d\n", io_info->nOutputSize);
+        printf("\noutput size: %d\n", io_info->nOutputSize);
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
             // print shape info,like [batchsize x channel x height x width]
             auto& info = io_info->pOutputs[i];
-            printf("name: %s [%s]\n    ", info.pName, data_type[info.eDataType]);
+            printf("    name: \e[1;32m%8s \e[1;34m[%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType]);
             for (size_t s = 0; s < info.nShapeSize; s++)
             {
                 printf("%d", info.pShape[s]);
@@ -205,7 +205,7 @@ namespace middleware
                     printf(" x ");
                 }
             }
-            printf("\n");
+            printf("\e[0m\n\n");
         }
     }
 
