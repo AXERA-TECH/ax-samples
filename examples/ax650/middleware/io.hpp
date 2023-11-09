@@ -24,7 +24,7 @@
 #include <cstring>
 #include <vector>
 #include <utility>
-
+#include <map>
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
@@ -37,7 +37,6 @@ typedef enum
     AX_ENGINE_ABST_DEFAULT = 0,
     AX_ENGINE_ABST_CACHED = 1,
 } AX_ENGINE_ALLOC_BUFFER_STRATEGY_T;
-
 
 typedef std::pair<AX_ENGINE_ALLOC_BUFFER_STRATEGY_T, AX_ENGINE_ALLOC_BUFFER_STRATEGY_T> INPUT_OUTPUT_ALLOC_STRATEGY;
 
@@ -157,4 +156,57 @@ namespace middleware
 
         return 0;
     }
+
+    static void print_io_info(AX_ENGINE_IO_INFO_T* io_info)
+    {
+        static std::map<AX_ENGINE_DATA_TYPE_T, const char*> data_type = {
+            {AX_ENGINE_DT_UNKNOWN, "UNKNOWN"},
+            {AX_ENGINE_DT_UINT8, "UINT8"},
+            {AX_ENGINE_DT_UINT16, "UINT16"},
+            {AX_ENGINE_DT_FLOAT32, "FLOAT32"},
+            {AX_ENGINE_DT_SINT16, "SINT16"},
+            {AX_ENGINE_DT_SINT8, "SINT8"},
+            {AX_ENGINE_DT_SINT32, "SINT32"},
+            {AX_ENGINE_DT_UINT32, "UINT32"},
+            {AX_ENGINE_DT_FLOAT64, "FLOAT64"},
+            {AX_ENGINE_DT_UINT10_PACKED, "UINT10_PACKED"},
+            {AX_ENGINE_DT_UINT12_PACKED, "UINT12_PACKED"},
+            {AX_ENGINE_DT_UINT14_PACKED, "UINT14_PACKED"},
+            {AX_ENGINE_DT_UINT16_PACKED, "UINT16_PACKED"},
+        };
+        printf("\ninput size: %d\n", io_info->nInputSize);
+        for (uint32_t i = 0; i < io_info->nInputSize; ++i)
+        {
+            // print shape info,like [batchsize x channel x height x width]
+            auto& info = io_info->pInputs[i];
+            printf("    name: \e[1;32m%8s \e[1;34m[%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType]);
+            for (size_t s = 0; s < info.nShapeSize; s++)
+            {
+                printf("%d", info.pShape[s]);
+                if (s != info.nShapeSize - 1)
+                {
+                    printf(" x ");
+                }
+            }
+            printf("\e[0m\n\n");
+        }
+
+        printf("\noutput size: %d\n", io_info->nOutputSize);
+        for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
+        {
+            // print shape info,like [batchsize x channel x height x width]
+            auto& info = io_info->pOutputs[i];
+            printf("    name: \e[1;32m%8s \e[1;34m[%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType]);
+            for (size_t s = 0; s < info.nShapeSize; s++)
+            {
+                printf("%d", info.pShape[s]);
+                if (s != info.nShapeSize - 1)
+                {
+                    printf(" x ");
+                }
+            }
+            printf("\e[0m\n\n");
+        }
+    }
+
 } // namespace middleware

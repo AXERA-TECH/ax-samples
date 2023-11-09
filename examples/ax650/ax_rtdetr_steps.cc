@@ -38,33 +38,62 @@
 const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
-const char* CLASS_NAMES[] = {"face"};
-const float ANCHORS[18] = {4,5,  6,8,  10,12,              //# P3/8
-                           15,19,  23,30,  39,52,          //# P4/16
-                           72,97,  123,164,  209,297 };   //# P5/32
+const char* CLASS_NAMES[] = {
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
+    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
+    "hair drier", "toothbrush"};
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.45f;
-const float NMS_THRESHOLD = 0.45f;
+const float PROB_THRESHOLD = 0.1f;
+
 namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
-        std::vector<detection::Object> proposals;
-        std::vector<detection::Object> objects;
-        float prob_threshold_u_sigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
+        std::vector<detection::Object> proposals, objects;
+
         timer timer_postprocess;
-        for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
+        auto& info = io_info->pOutputs[0];
+        float* output_prob = (float*)io_data->pOutputs[0].pVirAddr;
+        float* output_bbox = (float*)io_data->pOutputs[1].pVirAddr;
+
+        for (size_t i = 0; i < info.pShape[1]; i++)
         {
-            auto& output = io_data->pOutputs[i];
-            auto& info = io_info->pOutputs[i];
-            auto ptr = (float*)output.pVirAddr;
-            int32_t stride = (1 << i) * 8;
-            detection::generate_proposals_yolov7_face(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_u_sigmoid);
+            int maxid = -1;
+            float maxval = -FLT_MAX;
+            for (size_t j = 0; j < io_info->pOutputs[0].pShape[2]; j++)
+            {
+                if (output_prob[j] > maxval)
+                {
+                    maxval = output_prob[j];
+                    maxid = j;
+                }
+            }
+            maxval = detection::sigmoid(maxval);
+
+            if (maxval > PROB_THRESHOLD)
+            {
+                detection::Object obj;
+                obj.label = maxid;
+                obj.prob = maxval;
+                obj.rect.x = (output_bbox[0] - 0.5 * output_bbox[2]) * input_w;
+                obj.rect.y = (output_bbox[1] - 0.5 * output_bbox[3]) * input_h;
+                obj.rect.width = output_bbox[2] * input_w;
+                obj.rect.height = output_bbox[3] * input_h;
+                objects.push_back(obj);
+            }
+            output_prob += io_info->pOutputs[0].pShape[2];
+            output_bbox += io_info->pOutputs[1].pShape[2];
         }
 
-        detection::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
+        detection::get_out_bbox(objects, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -78,7 +107,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_objects(mat, objects, CLASS_NAMES, "yolov7_face_out");
+        detection::draw_objects(mat, objects, CLASS_NAMES, "rtdetr_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -222,7 +251,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1], true);
 
     // 3. sys_init
     AX_SYS_Init();

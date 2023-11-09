@@ -15,6 +15,8 @@
 - [AX630A](docs/AX630A.md)
 - [AX620A](docs/AX620A.md)
 - [AX620U](docs/AX620U.md)
+- [AX630C](docs/AX630C.md)
+- [AX620Q](docs/AX620Q.md)
 
 已支持开发板
 
