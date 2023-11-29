@@ -98,7 +98,7 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        pose::draw_result(mat, ai_point_result, NUM_JOINTS, INPUT_W, INPUT_H);
+        pose::draw_result(mat, ai_point_result, ai_point_result.keypoints.size(), INPUT_W, INPUT_H);
         cv::imwrite("./simcc_out.jpg", mat);
     }
 

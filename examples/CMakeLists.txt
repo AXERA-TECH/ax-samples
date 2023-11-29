@@ -18,19 +18,32 @@
 if(NOT BSP_MSP_DIR)
     set(BSP_MSP_DIR ${CMAKE_SOURCE_DIR}/out)
 endif()
+
 message(STATUS "BSP_MSP_DIR = ${BSP_MSP_DIR}")
 
 if(AXERA_TARGET_CHIP MATCHES "ax650")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+    if(NOT OpenCV_DIR)
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+    endif()
+
     add_definitions(-DAXERA_TARGET_CHIP_AX650)
 elseif(AXERA_TARGET_CHIP MATCHES "ax620e")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+    if(NOT OpenCV_DIR)
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+    endif()
+
     add_definitions(-DAXERA_TARGET_CHIP_AX620E)
 elseif(AXERA_TARGET_CHIP MATCHES "ax620a")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
+    if(NOT OpenCV_DIR)
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
+    endif()
+
     add_definitions(-DAXERA_TARGET_CHIP_AX620)
 elseif(AXERA_TARGET_CHIP MATCHES "ax630a")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+    if(NOT OpenCV_DIR)
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+    endif()
+
     add_definitions(-DAXERA_TARGET_CHIP_AX630)
 endif()
 
