@@ -103,6 +103,7 @@ if(AXERA_TARGET_CHIP MATCHES "ax620a") # ax620 support
     axera_example(ax_yolov6s ax_yolov6s_steps.cc)
     axera_example(ax_yolov8s ax_yolov8s_steps.cc)
     axera_example(ax_yolov8s_seg ax_yolov8s_seg_steps.cc)
+    axera_example(ax_yolov8s_pose ax_yolov8s_pose_steps.cc)
 
     # ******************************** MMYOLO model ********************************#
     # axera_example (ax_mmyolov5s             mmyolo/ax_mmyolov5s.cc)
