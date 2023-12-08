@@ -34,6 +34,9 @@ if (AXERA_TARGET_CHIP MATCHES "ax650" OR AXERA_TARGET_CHIP MATCHES "ax620e")
     axera_example(ax_yolox ax_yolox_steps.cc)
     axera_example(ax_yolo_nas ax_yolo_nas_steps.cc)
 
+    axera_example(ax_yolov8_native ax_yolov8s_native_steps.cc)
+    axera_example(ax_yolov8_pose_native ax_yolov8s_pose_native_steps.cc)
+
     axera_example(ax_ppyoloe ax_ppyoloe_steps.cc)
     axera_example(ax_ppyoloe_obj365 ax_ppyoloe_obj365_steps.cc)
     axera_example(ax_pp_person_attribute ax_pp_person_attribute_steps.cc)
