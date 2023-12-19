@@ -85,6 +85,7 @@ namespace middleware
     {
         memset(io_data, 0, sizeof(*io_data));
         io_data->pInputs = new AX_ENGINE_IO_BUFFER_T[info->nInputSize];
+        memset(io_data->pInputs, 0, sizeof(AX_ENGINE_IO_BUFFER_T) * info->nInputSize);
         io_data->nInputSize = info->nInputSize;
 
         auto ret = 0;
@@ -111,6 +112,7 @@ namespace middleware
         }
 
         io_data->pOutputs = new AX_ENGINE_IO_BUFFER_T[info->nOutputSize];
+        memset(io_data->pOutputs, 0, sizeof(AX_ENGINE_IO_BUFFER_T) * info->nOutputSize);
         io_data->nOutputSize = info->nOutputSize;
         for (int i = 0; i < info->nOutputSize; ++i)
         {
