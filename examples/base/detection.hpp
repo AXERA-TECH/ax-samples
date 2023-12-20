@@ -1329,7 +1329,7 @@ namespace detection
                 // process cls score
                 int class_index = 0;
                 float class_score = -FLT_MAX;
-                for (int s = 0; s <= cls_num - 1; s++)
+                for (int s = 0; s < cls_num; s++)
                 {
                     float score = feat_ptr[s + 4 * reg_max];
                     if (score > class_score)
@@ -1395,7 +1395,7 @@ namespace detection
                 // process cls score
                 int class_index = 0;
                 float class_score = -FLT_MAX;
-                for (int s = 0; s <= cls_num - 1; s++)
+                for (int s = 0; s < cls_num ; s++)
                 {
                     float score = feat_ptr[s + 4 * reg_max];
                     if (score > class_score)
@@ -1465,7 +1465,7 @@ namespace detection
                 // process cls score
                 int class_index = 0;
                 float class_score = -FLT_MAX;
-                for (int s = 0; s <= cls_num - 1; s++)
+                for (int s = 0; s < cls_num; s++)
                 {
                     float score = feat_ptr[s + 4 * reg_max];
                     if (score > class_score)

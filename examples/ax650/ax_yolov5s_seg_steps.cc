@@ -65,7 +65,7 @@ namespace ax
         std::vector<detection::Object> objects;
         float prob_threshold_u_sigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
         timer timer_postprocess;
-        float* output_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,
+        float* output_ptr[3] = {(float*)io_data->pOutputs[1].pVirAddr,
                                 (float*)io_data->pOutputs[2].pVirAddr,
                                 (float*)io_data->pOutputs[3].pVirAddr};
         for (uint32_t i = 0; i < 3; ++i)
@@ -75,8 +75,8 @@ namespace ax
             detection::generate_proposals_yolov5_seg(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h, ANCHORS, prob_threshold_u_sigmoid);
         }
 
-        auto& output = io_info->pOutputs[1];
-        auto& info = io_data->pOutputs[1];
+        auto& output = io_info->pOutputs[0];
+        auto& info = io_data->pOutputs[0];
         auto ptr = (float*)info.pVirAddr;
         detection::get_out_bbox_mask(proposals, objects, ptr, DEFAULT_MASK_PROTO_DIM, DEFAULT_MASK_SAMPLE_STRIDE, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
 

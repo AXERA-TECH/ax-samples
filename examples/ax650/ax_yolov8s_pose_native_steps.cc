@@ -61,8 +61,8 @@ namespace ax
         timer timer_postprocess;
         for (int i = 0; i < 3; ++i)
         {
-            auto feat_ptr = (float*)io_data->pOutputs[2 * i + 1].pVirAddr;
-            auto feat_kps_ptr = (float*)io_data->pOutputs[2 * i].pVirAddr;
+            auto feat_ptr = (float*)io_data->pOutputs[i + 3].pVirAddr;
+            auto feat_kps_ptr = (float*)io_data->pOutputs[i].pVirAddr;
             int32_t stride = (1 << i) * 8;
             detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
         }
