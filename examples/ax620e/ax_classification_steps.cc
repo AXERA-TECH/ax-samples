@@ -24,7 +24,6 @@
 
 #include <opencv2/opencv.hpp>
 #include "base/common.hpp"
-#include "base/detection.hpp"
 #include "middleware/io.hpp"
 
 #include "utilities/args.hpp"
@@ -35,40 +34,33 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 640;
-const int DEFAULT_IMG_W = 640;
+#include "base/score.hpp"
+#include "base/topk.hpp"
 
-const char* CLASS_NAMES[] = {
-    "person",
-};
-const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}};
-const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
-const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
-
-int NUM_CLASS = 1;
-int NUM_POINT = 17;
-
+const int DEFAULT_IMG_H = 224;
+const int DEFAULT_IMG_W = 224;
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.45f;
-const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
-    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
+    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, const std::vector<float>& time_costs)
     {
-        std::vector<detection::Object> proposals;
-        std::vector<detection::Object> objects;
         timer timer_postprocess;
-        for (int i = 0; i < 3; ++i)
-        {
-            auto feat_ptr = (float*)io_data->pOutputs[i + 3].pVirAddr;
-            auto feat_kps_ptr = (float*)io_data->pOutputs[i].pVirAddr;
-            int32_t stride = (1 << i) * 8;
-            detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
-        }
 
-        detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
-        fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
+        auto& output = io_data->pOutputs[0];
+        auto& info = io_info->pOutputs[0];
+        auto ptr = (float*)output.pVirAddr;
+        auto class_num = info.nSize / sizeof(float);
+        std::vector<classification::score> result(class_num);
+        for (uint32_t id = 0; id < class_num; id++)
+        {
+            result[id].id = id;
+            result[id].score = ptr[id];
+        }
+        classification::sort_score(result);
+        fprintf(stdout, "topk cost time:%.2f ms \n", timer_postprocess.cost());
+        classification::print_score(result, 5);
+
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
         auto min_max_time = std::minmax_element(time_costs.begin(), time_costs.end());
@@ -78,13 +70,9 @@ namespace ax
                 total_time / (float)time_costs.size(),
                 *min_max_time.second,
                 *min_max_time.first);
-        fprintf(stdout, "--------------------------------------\n");
-        fprintf(stdout, "detection num: %zu\n", objects.size());
-
-        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolov8s_pose_out");
     }
 
-    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
+    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat)
     {
         // 1. init engine
 #ifdef AXERA_TARGET_CHIP_AX620E
@@ -154,7 +142,7 @@ namespace ax
         }
 
         // 10. get result
-        post_process(io_info, &io_data, mat, input_w, input_h, time_costs);
+        post_process(io_info, &io_data, mat, time_costs);
         fprintf(stdout, "--------------------------------------\n");
 
         middleware::free_io(&io_data);
@@ -225,7 +213,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
+    common::get_input_data_centercrop(mat, image, input_size[0], input_size[1]);
 
     // 3. sys_init
     AX_SYS_Init();
@@ -233,7 +221,7 @@ int main(int argc, char* argv[])
     // 4. -  engine model  -  can only use AX_ENGINE** inside
     {
         // AX_ENGINE_NPUReset(); // todo ??
-        ax::run_model(model_file, image, repeat, mat, input_size[0], input_size[1]);
+        ax::run_model(model_file, image, repeat, mat);
 
         // 4.3 engine de init
         AX_ENGINE_Deinit();

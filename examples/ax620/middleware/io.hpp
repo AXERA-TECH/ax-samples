@@ -162,6 +162,7 @@ namespace middleware
             return nullptr;
         }
         io.pInputs = new AX_JOINT_IO_BUFFER_T[io.nInputSize];
+        memset(io.pInputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nInputSize);
 
         // fill input
 
@@ -202,6 +203,7 @@ namespace middleware
         // deal with output
         io.nOutputSize = io_info->nOutputSize;
         io.pOutputs = new AX_JOINT_IO_BUFFER_T[io.nOutputSize];
+        memset(io.pOutputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nOutputSize);
         for (size_t i = 0; i < io.nOutputSize; ++i)
         {
             const AX_JOINT_IOMETA_T* pMeta = io_info->pOutputs + i;
@@ -223,6 +225,7 @@ namespace middleware
             return -1;
         }
         io.pInputs = new AX_JOINT_IO_BUFFER_T[io.nInputSize];
+        memset(io.pInputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nInputSize);
 
         // fill input
         {
@@ -255,6 +258,7 @@ namespace middleware
         {
             io.nOutputSize = io_info->nOutputSize;
             io.pOutputs = new AX_JOINT_IO_BUFFER_T[io.nOutputSize];
+            memset(io.pOutputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nOutputSize);
             for (size_t i = 0; i < io.nOutputSize; ++i)
             {
                 const AX_JOINT_IOMETA_T* pMeta = io_info->pOutputs + i;
@@ -277,6 +281,7 @@ namespace middleware
             return -1;
         }
         io.pInputs = new AX_JOINT_IO_BUFFER_T[io.nInputSize];
+        memset(io.pInputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nInputSize);
 
         // fill input
         {
@@ -319,6 +324,7 @@ namespace middleware
         {
             io.nOutputSize = io_info->nOutputSize;
             io.pOutputs = new AX_JOINT_IO_BUFFER_T[io.nOutputSize];
+            memset(io.pOutputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nOutputSize);
             for (size_t i = 0; i < io.nOutputSize; ++i)
             {
                 const AX_JOINT_IOMETA_T* pMeta = io_info->pOutputs + i;
@@ -340,6 +346,7 @@ namespace middleware
             return -1;
         }
         io.pInputs = new AX_JOINT_IO_BUFFER_T[io.nInputSize];
+        memset(io.pInputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nInputSize);
 
         // fill input
         {
@@ -382,6 +389,7 @@ namespace middleware
         {
             io.nOutputSize = io_info->nOutputSize;
             io.pOutputs = new AX_JOINT_IO_BUFFER_T[io.nOutputSize];
+            memset(io.pOutputs, 0, sizeof(AX_JOINT_IO_BUFFER_T) * io.nOutputSize);
             for (size_t i = 0; i < io.nOutputSize; ++i)
             {
                 const AX_JOINT_IOMETA_T* pMeta = io_info->pOutputs + i;

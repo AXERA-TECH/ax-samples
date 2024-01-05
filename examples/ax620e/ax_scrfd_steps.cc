@@ -38,15 +38,10 @@
 const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
-const char* CLASS_NAMES[] = {
-    "person",
-};
-const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}};
-const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
-const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
-
-int NUM_CLASS = 1;
-int NUM_POINT = 17;
+const char* CLASS_NAMES[] = {"face"};
+const float ANCHORS[18] = {4, 5, 8, 10, 13, 16,           //# P3/8
+                           23, 29, 43, 55, 73, 105,       //# P4/16
+                           146, 217, 231, 300, 335, 433}; //# P5/32
 
 const int DEFAULT_LOOP_COUNT = 1;
 
@@ -58,16 +53,34 @@ namespace ax
     {
         std::vector<detection::Object> proposals;
         std::vector<detection::Object> objects;
+        std::map<std::string, float*> output_map;
         timer timer_postprocess;
-        for (int i = 0; i < 3; ++i)
+        for (uint32_t i = 0; i < io_info->nOutputSize; i++)
         {
-            auto feat_ptr = (float*)io_data->pOutputs[i + 3].pVirAddr;
-            auto feat_kps_ptr = (float*)io_data->pOutputs[i].pVirAddr;
-            int32_t stride = (1 << i) * 8;
-            detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
+            auto& output = io_info->pOutputs[i];
+            auto& info = io_data->pOutputs[i];
+            output_map[output.pName] = (float*)info.pVirAddr;
+        }
+        int strides[] = {8, 16, 32};
+        const char* score_pred_name[] = {
+            "score_8", "score_16", "score_32"};
+        const char* bbox_pred_name[] = {
+            "bbox_8", "bbox_16", "bbox_32"};
+        const char* kps_pred_name[] = {
+            "kps_8", "kps_16", "kps_32"};
+
+        for (int stride_index = 0; stride_index < 3; stride_index++)
+        {
+            std::vector<detection::Object> objects_temp;
+            float* score_pred = output_map[score_pred_name[stride_index]];
+            float* bbox_pred = output_map[bbox_pred_name[stride_index]];
+            float* kps_pred = output_map[kps_pred_name[stride_index]];
+            detection::generate_proposals_scrfd(strides[stride_index], score_pred, bbox_pred, kps_pred, PROB_THRESHOLD, objects_temp, DEFAULT_IMG_H, DEFAULT_IMG_W);
+
+            proposals.insert(proposals.end(), objects_temp.begin(), objects_temp.end());
         }
 
-        detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
+        detection::get_out_bbox(proposals, objects, NMS_THRESHOLD, DEFAULT_IMG_H, DEFAULT_IMG_W, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -81,7 +94,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolov8s_pose_out");
+        detection::draw_objects(mat, objects, CLASS_NAMES, "scrfd_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)

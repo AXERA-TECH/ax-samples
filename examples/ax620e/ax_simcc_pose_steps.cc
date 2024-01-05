@@ -26,7 +26,7 @@
 #include "base/common.hpp"
 #include "base/detection.hpp"
 #include "middleware/io.hpp"
-
+#include "base/pose.hpp"
 #include "utilities/args.hpp"
 #include "utilities/cmdline.hpp"
 #include "utilities/file.hpp"
@@ -35,39 +35,58 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 640;
-const int DEFAULT_IMG_W = 640;
-
-const char* CLASS_NAMES[] = {
-    "person",
-};
-const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}};
-const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
-const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
-
-int NUM_CLASS = 1;
-int NUM_POINT = 17;
-
+const int INPUT_H = 256;
+const int INPUT_W = 192;
+const int NUM_JOINTS = 17;
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.45f;
-const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
-        std::vector<detection::Object> proposals;
-        std::vector<detection::Object> objects;
         timer timer_postprocess;
-        for (int i = 0; i < 3; ++i)
+        auto& info_x = io_info->pOutputs[0];
+        float* output_x = (float*)io_data->pOutputs[0].pVirAddr;
+
+        auto& info_y = io_info->pOutputs[1];
+        float* output_y = (float*)io_data->pOutputs[1].pVirAddr;
+
+        pose::ai_body_parts_s ai_point_result;
+
+        for (size_t p = 0; p < info_x.pShape[1]; p++)
         {
-            auto feat_ptr = (float*)io_data->pOutputs[i + 3].pVirAddr;
-            auto feat_kps_ptr = (float*)io_data->pOutputs[i].pVirAddr;
-            int32_t stride = (1 << i) * 8;
-            detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
+            float x, x_score, y, y_score;
+            float maxval = -FLT_MAX;
+            float maxidx = 0;
+            for (size_t i = 0; i < info_x.pShape[2]; i++)
+            {
+                if (output_x[i] > maxval)
+                {
+                    maxval = output_x[i];
+                    maxidx = i;
+                }
+            }
+            x = maxidx / info_x.pShape[2];
+            x_score = maxval;
+            output_x += info_x.pShape[2];
+
+            maxval = -FLT_MAX;
+            maxidx = 0;
+            for (size_t i = 0; i < info_y.pShape[2]; i++)
+            {
+                if (output_y[i] > maxval)
+                {
+                    maxval = output_y[i];
+                    maxidx = i;
+                }
+            }
+            y = maxidx / info_y.pShape[2];
+            y_score = maxval;
+            output_y += info_y.pShape[2];
+
+            ai_point_result.keypoints.push_back({x, y, (x_score + y_score) / 2});
         }
 
-        detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -79,9 +98,8 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        fprintf(stdout, "detection num: %zu\n", objects.size());
-
-        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolov8s_pose_out");
+        pose::draw_result(mat, ai_point_result, ai_point_result.keypoints.size(), INPUT_W, INPUT_H);
+        cv::imwrite("./simcc_out.jpg", mat);
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -167,7 +185,7 @@ int main(int argc, char* argv[])
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
     cmd.add<std::string>("image", 'i', "image file", true, "");
-    cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(DEFAULT_IMG_H) + "," + std::to_string(DEFAULT_IMG_W));
+    cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(INPUT_H) + "," + std::to_string(INPUT_W));
 
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
     cmd.parse_check(argc, argv);
@@ -193,7 +211,7 @@ int main(int argc, char* argv[])
 
     auto input_size_string = cmd.get<std::string>("size");
 
-    std::array<int, 2> input_size = {DEFAULT_IMG_H, DEFAULT_IMG_W};
+    std::array<int, 2> input_size = {INPUT_H, INPUT_W};
 
     auto input_size_flag = utilities::parse_string(input_size_string, input_size);
 
