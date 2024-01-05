@@ -20,6 +20,7 @@
 
 - [AXera-Pi](https://wiki.sipeed.com/m3axpi)(AX620A)
 - [AXera-Pi Pro](https://wiki.sipeed.com/m4ndock)(AX650N)
+- AXera-Pi Zero(AX620Q, WIP)
 
 ## 快速上手
 
