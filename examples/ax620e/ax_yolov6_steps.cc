@@ -55,19 +55,72 @@ const float PROB_THRESHOLD = 0.45f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
+    static void generate_proposals_yolov6(int stride, const float* feat_prob, const float* feat_bbox, float prob_threshold, std::vector<detection::Object>& objects,
+                                          int letterbox_cols, int letterbox_rows, int cls_num = 80)
+    {
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                //process cls score
+                int class_index = 0;
+                float class_score = -FLT_MAX;
+                for (int s = 0; s <= cls_num - 1; s++)
+                {
+                    float score = feat_prob[s];
+                    if (score > class_score)
+                    {
+                        class_index = s;
+                        class_score = score;
+                    }
+                }
+
+                float box_prob = class_score;
+
+                if (box_prob > prob_threshold)
+                {
+                    float x0 = (w + 0.5f - feat_bbox[0]) * stride;
+                    float y0 = (h + 0.5f - feat_bbox[1]) * stride;
+                    float x1 = (w + 0.5f + feat_bbox[2]) * stride;
+                    float y1 = (h + 0.5f + feat_bbox[3]) * stride;
+
+                    float w = x1 - x0;
+                    float h = y1 - y0;
+
+                    detection::Object obj;
+                    obj.rect.x = x0;
+                    obj.rect.y = y0;
+                    obj.rect.width = w;
+                    obj.rect.height = h;
+                    obj.label = class_index;
+                    obj.prob = box_prob;
+
+                    objects.push_back(obj);
+                }
+
+                feat_prob += cls_num;
+                feat_bbox += 4;
+            }
+        }
+    }
+
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
         std::vector<detection::Object> proposals;
         std::vector<detection::Object> objects;
         float prob_threshold_u_sigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
         timer timer_postprocess;
-        for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
+        for (uint32_t i = 0; i < 3; ++i)
         {
-            auto& output = io_data->pOutputs[i];
-            auto& info = io_info->pOutputs[i];
-            auto ptr = (float*)output.pVirAddr;
+            auto& output_prob = io_data->pOutputs[i];
+            auto& output_bbox = io_data->pOutputs[i + 3];
+            auto ptr_prob = (float*)output_prob.pVirAddr;
+            auto ptr_bbox = (float*)output_bbox.pVirAddr;
             int32_t stride = (1 << i) * 8;
-            detection::generate_proposals_yolov6(stride, ptr, PROB_THRESHOLD, proposals, input_w, input_h);
+            ax::generate_proposals_yolov6(stride, ptr_prob, ptr_bbox, PROB_THRESHOLD, proposals, input_w, input_h);
         }
 
         detection::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
