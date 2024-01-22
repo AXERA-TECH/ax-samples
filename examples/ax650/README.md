@@ -528,3 +528,59 @@ Repeat 1 times, avg time 258.29 ms, max_time 258.29 ms, min_time 258.29 ms
 --------------------------------------
 ```
 <img src="../../docs/ax650/glpdepth_out.png">
+
+### YoloV8-Seg
+```
+/opt/test # ./ax_yolov8_seg -m yolov8n_seg.axmodel -i ssd_horse.jpg
+--------------------------------------
+model file : yolov8n_seg.axmodel
+image file : ssd_horse.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+
+input size: 1
+    name:   images [UINT8]
+        1 x 640 x 640 x 3
+
+
+output size: 7
+    name:  output1 [FLOAT32]
+        1 x 32 x 160 x 160
+
+    name: /model.22/cv4.0/cv4.0.2/Conv_output_0 [FLOAT32]
+        1 x 80 x 80 x 32
+
+    name: /model.22/cv4.1/cv4.1.2/Conv_output_0 [FLOAT32]
+        1 x 40 x 40 x 32
+
+    name: /model.22/cv4.2/cv4.2.2/Conv_output_0 [FLOAT32]
+        1 x 20 x 20 x 32
+
+    name: /model.22/Concat_1_output_0 [FLOAT32]
+        1 x 80 x 80 x 144
+
+    name: /model.22/Concat_2_output_0 [FLOAT32]
+        1 x 40 x 40 x 144
+
+    name: /model.22/Concat_3_output_0 [FLOAT32]
+        1 x 20 x 20 x 144
+
+post process cost time:8.62 ms
+--------------------------------------
+Repeat 1 times, avg time 5.16 ms, max_time 5.16 ms, min_time 5.16 ms
+--------------------------------------
+detection num: 5
+17:  90%, [ 214,   75,  419,  369], horse
+ 0:  83%, [ 272,   13,  349,  232], person
+ 7:  77%, [   0,  105,  133,  196], truck
+ 0:  77%, [ 427,  125,  451,  175], person
+16:  69%, [ 144,  203,  195,  343], dog
+--------------------------------------
+```
+<img src="../../docs/ax650/yolov8_seg_out.jpg">
