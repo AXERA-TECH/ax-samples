@@ -58,7 +58,7 @@ namespace middleware
 
     void free_io_index(AX_ENGINE_IO_BUFFER_T* io_buf, size_t index)
     {
-        for (int i = 0; i < index; ++i)
+        for (int i = 0; i < (int)index; ++i)
         {
             AX_ENGINE_IO_BUFFER_T* pBuf = io_buf + i;
             AX_SYS_MemFree(pBuf->phyAddr, pBuf->pVirAddr);
@@ -89,7 +89,7 @@ namespace middleware
         io_data->nInputSize = info->nInputSize;
 
         auto ret = 0;
-        for (int i = 0; i < info->nInputSize; ++i)
+        for (int i = 0; i < (int)info->nInputSize; ++i)
         {
             auto meta = info->pInputs[i];
             auto buffer = &io_data->pInputs[i];
@@ -114,7 +114,7 @@ namespace middleware
         io_data->pOutputs = new AX_ENGINE_IO_BUFFER_T[info->nOutputSize];
         memset(io_data->pOutputs, 0, sizeof(AX_ENGINE_IO_BUFFER_T) * info->nOutputSize);
         io_data->nOutputSize = info->nOutputSize;
-        for (int i = 0; i < info->nOutputSize; ++i)
+        for (int i = 0; i < (int)info->nOutputSize; ++i)
         {
             auto meta = info->pOutputs[i];
             auto buffer = &io_data->pOutputs[i];
@@ -185,7 +185,7 @@ namespace middleware
             for (size_t s = 0; s < info.nShapeSize; s++)
             {
                 printf("%d", info.pShape[s]);
-                if (s != info.nShapeSize - 1)
+                if (s != (int)info.nShapeSize - 1)
                 {
                     printf(" x ");
                 }
@@ -202,7 +202,7 @@ namespace middleware
             for (size_t s = 0; s < info.nShapeSize; s++)
             {
                 printf("%d", info.pShape[s]);
-                if (s != info.nShapeSize - 1)
+                if (s != (int)info.nShapeSize - 1)
                 {
                     printf(" x ");
                 }
