@@ -61,15 +61,16 @@ namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
+        middleware::print_io_info(io_info);
         std::vector<detection::Object> proposals;
         std::vector<detection::Object> objects;
         timer timer_postprocess;
-        float* output_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,
-                                (float*)io_data->pOutputs[1].pVirAddr,
-                                (float*)io_data->pOutputs[2].pVirAddr};
-        float* output_seg_ptr[3] = {(float*)io_data->pOutputs[3].pVirAddr,
-                                    (float*)io_data->pOutputs[4].pVirAddr,
-                                    (float*)io_data->pOutputs[5].pVirAddr};
+        float* output_ptr[3] = {(float*)io_data->pOutputs[4].pVirAddr,      // 1*80*80*144
+                                (float*)io_data->pOutputs[5].pVirAddr,      // 1*40*40*144
+                                (float*)io_data->pOutputs[6].pVirAddr};     // 1*20*20*144
+        float* output_seg_ptr[3] = {(float*)io_data->pOutputs[1].pVirAddr,  // 1*80*80*32
+                                    (float*)io_data->pOutputs[2].pVirAddr,  // 1*40*40*32
+                                    (float*)io_data->pOutputs[3].pVirAddr}; // 1*20*20*32
         for (int i = 0; i < 3; ++i)
         {
             auto feat_ptr = output_ptr[i];
@@ -77,8 +78,8 @@ namespace ax
             int32_t stride = (1 << i) * 8;
             detection::generate_proposals_yolov8_seg_native(stride, feat_ptr, feat_seg_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_CLASS);
         }
-
-        auto mask_proto_ptr = (float*)io_data->pOutputs[6].pVirAddr;
+        // 1*32*160*160
+        auto mask_proto_ptr = (float*)io_data->pOutputs[0].pVirAddr;
 
         detection::get_out_bbox_mask(proposals, objects, mask_proto_ptr, DEFAULT_MASK_PROTO_DIM, DEFAULT_MASK_SAMPLE_STRIDE, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
