@@ -176,16 +176,32 @@ namespace middleware
             {AX_ENGINE_DT_UINT14_PACKED, "UINT14_PACKED"},
             {AX_ENGINE_DT_UINT16_PACKED, "UINT16_PACKED"},
         };
+
+        static std::map<AX_ENGINE_COLOR_SPACE_T, const char*> color_type = {
+            {AX_ENGINE_CS_FEATUREMAP, "FEATUREMAP"},
+            {AX_ENGINE_CS_RAW8, "RAW8"},
+            {AX_ENGINE_CS_RAW10, "RAW10"},
+            {AX_ENGINE_CS_RAW12, "RAW12"},
+            {AX_ENGINE_CS_RAW14, "RAW14"},
+            {AX_ENGINE_CS_RAW16, "RAW16"},
+            {AX_ENGINE_CS_NV12, "NV12"},
+            {AX_ENGINE_CS_NV21, "NV21"},
+            {AX_ENGINE_CS_RGB, "RGB"},
+            {AX_ENGINE_CS_BGR, "BGR"},
+            {AX_ENGINE_CS_RGBA, "RGBA"},
+            {AX_ENGINE_CS_GRAY, "GRAY"},
+            {AX_ENGINE_CS_YUV444, "YUV444"},
+        };
         printf("\ninput size: %d\n", io_info->nInputSize);
         for (uint32_t i = 0; i < io_info->nInputSize; ++i)
         {
             // print shape info,like [batchsize x channel x height x width]
             auto& info = io_info->pInputs[i];
-            printf("    name: \e[1;32m%8s \e[1;34m[%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType]);
-            for (size_t s = 0; s < info.nShapeSize; s++)
+            printf("    name: \e[1;32m%8s \e[1;34m[%s] [%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType], color_type[info.pExtraMeta->eColorSpace]);
+            for (AX_U8 s = 0; s < info.nShapeSize; s++)
             {
                 printf("%d", info.pShape[s]);
-                if (s != (int)info.nShapeSize - 1)
+                if (s != info.nShapeSize - 1)
                 {
                     printf(" x ");
                 }
@@ -199,10 +215,10 @@ namespace middleware
             // print shape info,like [batchsize x channel x height x width]
             auto& info = io_info->pOutputs[i];
             printf("    name: \e[1;32m%8s \e[1;34m[%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType]);
-            for (size_t s = 0; s < info.nShapeSize; s++)
+            for (AX_U8 s = 0; s < info.nShapeSize; s++)
             {
                 printf("%d", info.pShape[s]);
-                if (s != (int)info.nShapeSize - 1)
+                if (s != info.nShapeSize - 1)
                 {
                     printf(" x ");
                 }
