@@ -23,6 +23,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/ax650.cmake")
 axera_example(ax_classification ax_classification_steps.cc)
 
 axera_example(ax_yolov5s ax_yolov5s_steps.cc)
+axera_example(ax_yolov5s_dynamic_batchsize ax_yolov5s_dynamic_batchsize_steps.cc)
 axera_example(ax_yolov5s_seg ax_yolov5s_seg_steps.cc)
 axera_example(ax_yolov5_face ax_yolov5_face_steps.cc)
 axera_example(ax_yolov6 ax_yolov6_steps.cc)
