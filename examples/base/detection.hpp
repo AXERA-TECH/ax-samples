@@ -45,6 +45,8 @@ namespace detection
         cv::Mat mask;
         std::vector<float> mask_feat;
         std::vector<float> kps_feat;
+        /* for yolov8-obb */
+        float angle;
     } Object;
 
     /* for palm detection */
@@ -1311,7 +1313,7 @@ namespace detection
             }
         }
     }
-
+    
     static void generate_proposals_yolov8_native(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
                                                  int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
@@ -2667,5 +2669,269 @@ namespace detection
             }
         }
     } // namespace mmyolo
+
+    namespace obb
+    {
+        static inline float fast_exp(const float& x)
+        {
+            union
+            {
+                uint32_t i;
+                float f;
+            } v;
+            v.i = (1 << 23) * (1.4426950409 * x + 126.93490512f);
+            return v.f;
+        }
+
+        static inline float clamp_(float v, float min = 0.f, float max = std::numeric_limits<float>::infinity())
+        {
+            return std::max(std::min(v, max), min);
+        }
+        static inline void get_covariance_matrix(
+            const std::vector<Object>& objects, 
+            std::vector<cv::Point3f>& covar_maxtirx)
+        {
+            int n = objects.size();
+            for (size_t i = 0; i < n; ++i) {
+
+                float a = objects[i].rect.width * objects[i].rect.width * 0.0833333333f;
+                float b = objects[i].rect.height * objects[i].rect.height * 0.0833333333f;
+                float c = objects[i].angle;
+                
+                float c_sin = std::sin(c);
+                float c_cos = std::cos(c);
+
+                float x = a * c_cos * c_cos + b * c_sin * c_sin;
+                float y = a * c_sin * c_sin + b * c_cos * c_cos;
+                float z = a * c_cos * c_sin - b * c_sin * c_cos;
+                covar_maxtirx.push_back(cv::Point3f(x, y, z));
+            }
+        }
+
+        static inline float fast_log2 (float x)
+        {
+            union {
+                float f; 
+                int i;
+            } v;
+            v.f = x;
+            int* const exp_ptr = &v.i;
+            int m  = *exp_ptr;
+            const int log_2 = ((m >> 23) & 255) - 128;
+            m &= ~(255 << 23);
+            m += 127 << 23;
+            *exp_ptr = m;
+            return (((-1.f / 3) * v.f + 2) * v.f - 2.f / 3 + log_2);
+        }
+
+        static inline float fast_log (const float x)
+        {
+            return 0.69314718f * fast_log2 (x);
+        }
+        
+        static inline float probiou(
+            const Object& obj1,
+            const Object& obj2,
+            const cv::Point3f& covar1,
+            const cv::Point3f& covar2)
+        {
+            
+            float v_x1_x2 = covar1.x + covar2.x;
+            float v_y1_y2 = covar1.y + covar2.y;
+            float x1_x2 = obj1.rect.x - obj2.rect.x;
+            float y1_y2 = obj1.rect.y - obj2.rect.y;
+            float dem1 = clamp_(covar1.x * covar1.y - covar1.z * covar1.z);
+            float dem2 = clamp_(covar2.x * covar2.y - covar2.z * covar2.z);
+            float dem_num = v_x1_x2 * v_y1_y2 - (covar1.z + covar2.z) * (covar1.z + covar2.z);
+            
+            float t1 = (v_x1_x2 * y1_y2 * y1_y2 + v_y1_y2 * x1_x2 * x1_x2) / (dem_num + 1e-7) * 0.25f;
+            float t2 = ((covar1.z + covar2.z) * (-x1_x2) * y1_y2) / (dem_num + 1e-7) * 0.5f;
+            float t3 = fast_log(0.25f * dem_num / (std::sqrt(dem1 * dem2) + 1e-7) + 1e-7) * 0.5f;
+           
+            float bd = t1 + t2 + t3;
+            float iou = fast_exp(-clamp_(bd, 1e-7, 100.f));
+            return iou;
+        }
+
+        static inline void nms_rotated_sorted_bboxes(
+            const std::vector<Object>& objects, 
+            std::vector<int>& picked,
+            float nms_threshold)
+        {
+            std::vector<cv::Point3f> covar_maxtrix;
+            get_covariance_matrix(objects, covar_maxtrix);
+            
+            float nms_threshold_ = (1.f - nms_threshold) * (1.f - nms_threshold);
+            int n = objects.size();
+            
+            for (size_t i = 0; i < n; ++i) {
+                float max_iou = 0.f;
+                const Object& obj1 = objects[i];
+
+                for (size_t j = 0; j < i; ++j) {
+                    const Object& obj2 = objects[j];
+                    
+                    float iou = probiou(obj1, obj2, covar_maxtrix[i], covar_maxtrix[j]);
+                    if (iou > max_iou){
+                        max_iou = iou;
+                    }
+                    
+                }
+                if (max_iou < nms_threshold_)
+                    picked.push_back(i);
+            }
+        }
+        static void get_out_obb_bbox(std::vector<Object>& proposals, std::vector<Object>& objects, const float nms_threshold, int letterbox_rows, int letterbox_cols, int src_rows, int src_cols)
+        {
+            qsort_descent_inplace(proposals);
+            std::vector<int> picked;
+            obb::nms_rotated_sorted_bboxes(proposals, picked, nms_threshold);
+            
+            /* yolov5 draw the result */
+            float scale_letterbox;
+            int resize_rows;
+            int resize_cols;
+            if ((letterbox_rows * 1.0 / src_rows) < (letterbox_cols * 1.0 / src_cols))
+            {
+                scale_letterbox = letterbox_rows * 1.0 / src_rows;
+            }
+            else
+            {
+                scale_letterbox = letterbox_cols * 1.0 / src_cols;
+            }
+            resize_cols = int(scale_letterbox * src_cols);
+            resize_rows = int(scale_letterbox * src_rows);
+
+            int tmp_h = (letterbox_rows - resize_rows) / 2;
+            int tmp_w = (letterbox_cols - resize_cols) / 2;
+
+            float ratio_x = (float)src_rows / resize_rows;
+            float ratio_y = (float)src_cols / resize_cols;
+
+            int count = picked.size();
+            double pi = M_PI;
+            double pi_2 = M_PI_2;
+            objects.resize(count);
+            for (int i = 0; i < count; i++) {
+                objects[i] = proposals[picked[i]];
+                
+                float w_ = objects[i].rect.width > objects[i].rect.height ? objects[i].rect.width : objects[i].rect.height;
+                float h_ = objects[i].rect.width > objects[i].rect.height ? objects[i].rect.height : objects[i].rect.width;
+                float a_ = (float)std::fmod((objects[i].rect.width > objects[i].rect.height ? objects[i].angle : objects[i].angle + pi_2), pi);
+
+                float xc = (objects[i].rect.x - tmp_w) * ratio_x;
+                float yc = (objects[i].rect.y - tmp_h) * ratio_y;
+                float w = w_ * ratio_x;
+                float h = h_ * ratio_y;
+
+                // clip
+                xc = std::max(std::min(xc, (float)(src_cols - 1)), 0.f);
+                yc = std::max(std::min(yc, (float)(src_rows - 1)), 0.f);
+                w = std::max(std::min(w, (float)(src_cols - 1)), 0.f);
+                h = std::max(std::min(h, (float)(src_rows - 1)), 0.f);
+
+
+                objects[i].rect.x = xc;
+                objects[i].rect.y = yc;
+                objects[i].rect.width = w;
+                objects[i].rect.height = h;
+                objects[i].angle = a_;
+            }
+        }
+        static void generate_proposals_yolov8_obb_native(const std::vector<GridAndStride>& grid_strides, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                                 int letterbox_cols, int letterbox_rows, int cls_num = 15)
+        {
+            const int num_points = grid_strides.size();
+            int reg_max = 16;
+            auto feat_ptr = feat;
+            std::vector<float> dis_after_sm(reg_max, 0.f);
+            for (int i = 0; i < num_points; i++)
+            {
+                // process cls score
+                int class_index = 0;
+                float class_score = -FLT_MAX;
+                for (int s = 0; s < cls_num; s++)
+                {
+                    float score = feat_ptr[s + 4 * reg_max];
+                    if (score > class_score)
+                    {
+                        class_index = s;
+                        class_score = score;
+                    }
+                }
+
+                float box_prob = sigmoid(class_score);
+                if (box_prob > prob_threshold)
+                {
+                    float pred_ltrb[4];
+                    for (int k = 0; k < 4; k++)
+                    {
+                        float dis = softmax(feat_ptr + k * reg_max, dis_after_sm.data(), reg_max);
+                        pred_ltrb[k] = dis * grid_strides[i].stride;
+                    }
+
+                    float angle = feat_ptr[4 * reg_max + cls_num];
+
+                    float pb_cx = (grid_strides[i].grid0 + 0.5f) * grid_strides[i].stride;
+                    float pb_cy = (grid_strides[i].grid1 + 0.5f) * grid_strides[i].stride;
+
+                    float cos = std::cos(angle);
+                    float sin = std::sin(angle);
+
+                    float x = (pred_ltrb[2] - pred_ltrb[0]) * 0.5f;
+                    float y = (pred_ltrb[3] - pred_ltrb[1]) * 0.5f;
+                    float xc = x * cos - y * sin + pb_cx;
+                    float yc = x * sin + y * cos + pb_cy;
+                    float w = pred_ltrb[2] + pred_ltrb[0];
+                    float h = pred_ltrb[3] + pred_ltrb[1];
+
+                    Object obj;
+                    obj.rect.x = xc; //center x
+                    obj.rect.y = yc; //center y
+                    obj.rect.width = w;
+                    obj.rect.height = h;
+                    obj.label = class_index;
+                    obj.prob = box_prob;
+                    obj.angle = angle;
+
+                    objects.push_back(obj);
+                }
+                feat_ptr += (cls_num + 4 * reg_max + 1);
+            }
+        }
+        static void draw_objects_obb(const cv::Mat& bgr, const std::vector<Object>& objects, const char** class_names, const char* output_name, int thickness = 1)
+        {
+            static const std::vector<cv::Scalar> COCO_COLORS = {
+                {128, 56, 0, 255}, {128, 226, 255, 0}, {128, 0, 94, 255}, {128, 0, 37, 255}, {128, 0, 255, 94}, {128, 255, 226, 0}, {128, 0, 18, 255}, {128, 255, 151, 0}, {128, 170, 0, 255}, {128, 0, 255, 56}, {128, 255, 0, 75}, {128, 0, 75, 255}, {128, 0, 255, 169}, {128, 255, 0, 207}, {128, 75, 255, 0}, {128, 207, 0, 255}, {128, 37, 0, 255}, {128, 0, 207, 255}, {128, 94, 0, 255}, {128, 0, 255, 113}, {128, 255, 18, 0}, {128, 255, 0, 56}, {128, 18, 0, 255}, {128, 0, 255, 226}, {128, 170, 255, 0}, {128, 255, 0, 245}, {128, 151, 255, 0}, {128, 132, 255, 0}, {128, 75, 0, 255}, {128, 151, 0, 255}, {128, 0, 151, 255}, {128, 132, 0, 255}, {128, 0, 255, 245}, {128, 255, 132, 0}, {128, 226, 0, 255}, {128, 255, 37, 0}, {128, 207, 255, 0}, {128, 0, 255, 207}, {128, 94, 255, 0}, {128, 0, 226, 255}, {128, 56, 255, 0}, {128, 255, 94, 0}, {128, 255, 113, 0}, {128, 0, 132, 255}, {128, 255, 0, 132}, {128, 255, 170, 0}, {128, 255, 0, 188}, {128, 113, 255, 0}, {128, 245, 0, 255}, {128, 113, 0, 255}, {128, 255, 188, 0}, {128, 0, 113, 255}, {128, 255, 0, 0}, {128, 0, 56, 255}, {128, 255, 0, 113}, {128, 0, 255, 188}, {128, 255, 0, 94}, {128, 255, 0, 18}, {128, 18, 255, 0}, {128, 0, 255, 132}, {128, 0, 188, 255}, {128, 0, 245, 255}, {128, 0, 169, 255}, {128, 37, 255, 0}, {128, 255, 0, 151}, {128, 188, 0, 255}, {128, 0, 255, 37}, {128, 0, 255, 0}, {128, 255, 0, 170}, {128, 255, 0, 37}, {128, 255, 75, 0}, {128, 0, 0, 255}, {128, 255, 207, 0}, {128, 255, 0, 226}, {128, 255, 245, 0}, {128, 188, 255, 0}, {128, 0, 255, 18}, {128, 0, 255, 75}, {128, 0, 255, 151}, {128, 255, 56, 0}, {128, 245, 255, 0}};
+            cv::Mat image = bgr.clone();
+
+            for (size_t i = 0; i < objects.size(); i++){
+                const Object& obj = objects[i];
+
+                fprintf(stdout, "%2d: %3.0f%%, [%4.0f, %4.0f, %4.0f, %4.0f], %s\n", obj.label, obj.prob * 100, obj.rect.x,
+                        obj.rect.y, obj.rect.x + obj.rect.width, obj.rect.y + obj.rect.height, class_names[obj.label]);
+                {
+                    float xc = obj.rect.x;
+                    float yc = obj.rect.y;
+                    float w = obj.rect.width;
+                    float h = obj.rect.height;
+                    float ag = obj.angle;
+                    float wx = w / 2 * std::cos(ag);
+                    float wy = w / 2 * std::sin(ag);
+                    float hx = -h / 2 * std::sin(ag);
+                    float hy = h / 2 * std::cos(ag);
+                    cv::Point2f p1{ xc - wx - hx, yc - wy - hy };
+                    cv::Point2f p2{ xc + wx - hx, yc + wy - hy };
+                    cv::Point2f p3{ xc + wx + hx, yc + wy + hy };
+                    cv::Point2f p4{ xc - wx + hx, yc - wy + hy };
+                    std::vector<cv::Point> points = { p1, p2, p3, p4, p1 };
+                    std::vector<std::vector<cv::Point>> contours= { points };
+                    cv::polylines(image, contours, true, COCO_COLORS[obj.label], thickness, cv::LINE_AA);
+                }
+            }
+
+            cv::imwrite(std::string(output_name) + ".jpg", image);
+        }
+    } // namespace obb
 
 } // namespace detection

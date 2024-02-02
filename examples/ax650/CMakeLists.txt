@@ -33,6 +33,7 @@ axera_example(ax_yolov8 ax_yolov8_steps.cc)
 axera_example(ax_yolov8_nv12 ax_yolov8_nv12_steps.cc)
 axera_example(ax_yolov8_seg ax_yolov8_seg_steps.cc)
 axera_example(ax_yolov8_pose ax_yolov8_pose_steps.cc)
+axera_example(ax_yolov8_obb ax_yolov8_obb_steps.cc)
 axera_example(ax_yolox ax_yolox_steps.cc)
 axera_example(ax_yolo_nas ax_yolo_nas_steps.cc)
 

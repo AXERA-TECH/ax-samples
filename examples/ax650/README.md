@@ -584,3 +584,61 @@ detection num: 5
 --------------------------------------
 ```
 <img src="../../docs/ax650/yolov8_seg_out.jpg">
+
+### YOLOV8-OBB
+```
+/opt/test # ./ax_yolov8_obb -m ./yolov8s-obb.axmodel -i ./dota_demo.jpg -r 10
+--------------------------------------
+model file : ./yolov8s-obb.axmodel
+image file : ./dota_demo.jpg
+img_h, img_w : 1024 1024
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:6.04 ms
+--------------------------------------
+Repeat 10 times, avg time 26.66 ms, max_time 26.71 ms, min_time 26.62 ms
+--------------------------------------
+detection num: 35
+ 0:  93%, [ 691,  632,  766,  697], plane
+ 0:  93%, [ 642,  579,  701,  634], plane
+ 0:  93%, [ 392,  318,  466,  382], plane
+ 0:  93%, [ 272,  191,  375,  281], plane
+ 0:  91%, [ 342,  260,  443,  347], plane
+ 0:  91%, [ 421,  593,  498,  660], plane
+ 0:  91%, [ 182,  409,  279,  501], plane
+ 0:  91%, [ 591,  522,  693,  608], plane
+ 0:  91%, [ 832,  781,  942,  857], plane
+10:  84%, [  99,  710,  120,  720], small vehicle
+10:  84%, [  25,  834,   45,  843], small vehicle
+10:  79%, [ 173,  724,  192,  733], small vehicle
+10:  79%, [  29,  715,   50,  725], small vehicle
+10:  79%, [  26,  823,   47,  832], small vehicle
+10:  79%, [ 101,  733,  119,  743], small vehicle
+10:  79%, [ 171,  704,  191,  714], small vehicle
+10:  79%, [ 100,  662,  120,  671], small vehicle
+10:  79%, [ 101,  686,  119,  696], small vehicle
+10:  79%, [  23,  867,   42,  876], small vehicle
+10:  73%, [  25,  884,   44,  895], small vehicle
+10:  73%, [ 167,  835,  185,  845], small vehicle
+10:  73%, [ 100,  672,  119,  682], small vehicle
+10:  73%, [ 100,  697,  119,  707], small vehicle
+10:  73%, [  31,  702,   53,  712], small vehicle
+10:  73%, [  25,  800,   41,  811], small vehicle
+10:  73%, [  31,  757,   60,  767], small vehicle
+10:  66%, [  23,  845,   40,  853], small vehicle
+10:  66%, [ 165,  903,  187,  914], small vehicle
+10:  58%, [  98,  450,  122,  461], small vehicle
+10:  58%, [  23,  856,   40,  865], small vehicle
+10:  50%, [ 170,  771,  186,  780], small vehicle
+10:  50%, [  28,  733,   48,  745], small vehicle
+10:  50%, [ 168,  925,  188,  936], small vehicle
+10:  50%, [ 102,  746,  120,  755], small vehicle
+10:  27%, [  91,  461,  116,  474], small vehicle
+--------------------------------------
+```
+![yolov8-obb](../../docs/ax650/yolov8s_obb_out.jpg)
