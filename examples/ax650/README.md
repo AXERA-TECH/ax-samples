@@ -510,9 +510,9 @@ Repeat 1 times, avg time 4.79 ms, max_time 4.79 ms, min_time 4.79 ms
 
 ### GLPDepth
 ```
-/opt/test # ./ax_glpdepth -m install/bin/models/glpdepth_896x1152.axmodel -i test.jpg
+/opt/test # ./ax_glpdepth -m glpdepth_896x1152.axmodel -i test.jpg
 --------------------------------------
-model file : install/bin/models/glpdepth_896x1152.axmodel
+model file : glpdepth_896x1152.axmodel
 image file : test.jpg
 img_h, img_w : 896 1152
 --------------------------------------
@@ -528,6 +528,28 @@ Repeat 1 times, avg time 258.29 ms, max_time 258.29 ms, min_time 258.29 ms
 --------------------------------------
 ```
 <img src="../../docs/ax650/glpdepth_out.png">
+
+### Depth-Anything
+```
+/opt/test # ./ax_depth_anything -m depth_anything.axmodel -i ssd_horse.jpg
+--------------------------------------
+model file : depth_anything.axmodel
+image file : ssd_horse.jpg
+img_h, img_w : 518 518
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:9.36 ms
+--------------------------------------
+Repeat 1 times, avg time 74.80 ms, max_time 74.80 ms, min_time 74.80 ms
+--------------------------------------
+
+```
+<img src="../../docs/ax650/depth_anything_out.png">
 
 ### YoloV8-Seg
 ```
