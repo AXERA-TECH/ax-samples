@@ -55,7 +55,7 @@ namespace ax
 
         feature -= minVal;
         feature /= (maxVal - minVal);
-        feature = 1.f - feature;
+        // feature = 1.f - feature;
         feature *= 255;
 
         feature.convertTo(feature, CV_8UC1);
