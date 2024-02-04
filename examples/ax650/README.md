@@ -545,7 +545,7 @@ Engine push input is done.
 --------------------------------------
 post process cost time:9.36 ms
 --------------------------------------
-Repeat 1 times, avg time 74.80 ms, max_time 74.80 ms, min_time 74.80 ms
+Repeat 1 times, avg time 56.67 ms, max_time 56.67 ms, min_time 56.67 ms
 --------------------------------------
 
 ```
