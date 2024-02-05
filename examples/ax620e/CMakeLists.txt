@@ -36,6 +36,7 @@ axera_example(ax_yolox ax_yolox_steps.cc)
 axera_example(ax_scrfd ax_scrfd_steps.cc)
 axera_example(ax_simcc_pose ax_simcc_pose_steps.cc)
 axera_example(ax_crowdcount ax_crowdcount_steps.cc)
+axera_example(ax_depth_anything ax_depth_anything_steps.cc)
 
 axera_example(ax_imgproc ax_imgproc_steps.cc)
 axera_example(ax_model_info ax_model_info.cc)

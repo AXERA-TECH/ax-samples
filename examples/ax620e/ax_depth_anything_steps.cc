@@ -35,190 +35,34 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 384;
-const int DEFAULT_IMG_W = 640;
+const int DEFAULT_IMG_H = 240;
+const int DEFAULT_IMG_W = 320;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.5f;
-
 namespace ax
 {
-    static void shift(int w, int h, int stride, std::vector<float> anchor_points, std::vector<float>& shifted_anchor_points)
-    {
-        std::vector<float> x_, y_;
-        for (int i = 0; i < w; i++)
-        {
-            float x = (i + 0.5) * stride;
-            x_.push_back(x);
-        }
-        for (int i = 0; i < h; i++)
-        {
-            float y = (i + 0.5) * stride;
-            y_.push_back(y);
-        }
-
-        std::vector<float> shift_x(w * h, 0), shift_y(w * h, 0);
-        for (int i = 0; i < h; i++)
-        {
-            for (int j = 0; j < w; j++)
-            {
-                shift_x[i * w + j] = x_[j];
-            }
-        }
-        for (int i = 0; i < h; i++)
-        {
-            for (int j = 0; j < w; j++)
-            {
-                shift_y[i * w + j] = y_[i];
-            }
-        }
-
-        std::vector<float> shifts(w * h * 2, 0);
-        for (int i = 0; i < w * h; i++)
-        {
-            shifts[i * 2] = shift_x[i];
-            shifts[i * 2 + 1] = shift_y[i];
-        }
-
-        shifted_anchor_points.resize(2 * w * h * anchor_points.size() / 2, 0);
-        for (int i = 0; i < w * h; i++)
-        {
-            for (int j = 0; j < (int)anchor_points.size() / 2; j++)
-            {
-                float x = anchor_points[j * 2] + shifts[i * 2];
-                float y = anchor_points[j * 2 + 1] + shifts[i * 2 + 1];
-                shifted_anchor_points[i * anchor_points.size() / 2 * 2 + j * 2] = x;
-                shifted_anchor_points[i * anchor_points.size() / 2 * 2 + j * 2 + 1] = y;
-            }
-        }
-    }
-    static void generate_anchor_points(int stride, int row, int line, std::vector<float>& anchor_points)
-    {
-        float row_step = (float)stride / row;
-        float line_step = (float)stride / line;
-
-        std::vector<float> x_, y_;
-        for (int i = 1; i < line + 1; i++)
-        {
-            float x = (i - 0.5) * line_step - stride / 2;
-            x_.push_back(x);
-        }
-        for (int i = 1; i < row + 1; i++)
-        {
-            float y = (i - 0.5) * row_step - stride / 2;
-            y_.push_back(y);
-        }
-        std::vector<float> shift_x(row * line, 0), shift_y(row * line, 0);
-        for (int i = 0; i < row; i++)
-        {
-            for (int j = 0; j < line; j++)
-            {
-                shift_x[i * line + j] = x_[j];
-            }
-        }
-        for (int i = 0; i < row; i++)
-        {
-            for (int j = 0; j < line; j++)
-            {
-                shift_y[i * line + j] = y_[i];
-            }
-        }
-        anchor_points.resize(row * line * 2, 0);
-        for (int i = 0; i < row * line; i++)
-        {
-            float x = shift_x[i];
-            float y = shift_y[i];
-            anchor_points[i * 2] = x;
-            anchor_points[i * 2 + 1] = y;
-        }
-    }
-    static void generate_anchor_points(int img_w, int img_h, std::vector<int> pyramid_levels, int row, int line, std::vector<float>& all_anchor_points)
-    {
-        std::vector<std::pair<int, int> > image_shapes;
-        std::vector<int> strides;
-        for (int i = 0; i < (int)pyramid_levels.size(); i++)
-        {
-            int new_h = std::floor((img_h + std::pow(2, pyramid_levels[i]) - 1) / std::pow(2, pyramid_levels[i]));
-            int new_w = std::floor((img_w + std::pow(2, pyramid_levels[i]) - 1) / std::pow(2, pyramid_levels[i]));
-            image_shapes.push_back(std::make_pair(new_w, new_h));
-            strides.push_back(std::pow(2, pyramid_levels[i]));
-        }
-
-        all_anchor_points.clear();
-        for (int i = 0; i < (int)pyramid_levels.size(); i++)
-        {
-            std::vector<float> anchor_points;
-            generate_anchor_points(std::pow(2, pyramid_levels[i]), row, line, anchor_points);
-            std::vector<float> shifted_anchor_points;
-            shift(image_shapes[i].first, image_shapes[i].second, strides[i], anchor_points, shifted_anchor_points);
-            all_anchor_points.insert(all_anchor_points.end(), shifted_anchor_points.begin(), shifted_anchor_points.end());
-        }
-    }
-
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
-        std::vector<int> pyramid_levels(1, 3);
-        std::vector<float> all_anchor_points;
-        generate_anchor_points(input_w, input_h, pyramid_levels, 2, 2, all_anchor_points);
-
         timer timer_postprocess;
+        auto& output = io_data->pOutputs[0];
+        auto& info = io_info->pOutputs[0];
 
-        int letterbox_rows = input_h;
-        int letterbox_cols = input_w;
-        int src_rows = mat.rows;
-        int src_cols = mat.cols;
-        float scale_letterbox;
-        int resize_rows;
-        int resize_cols;
-        if ((letterbox_rows * 1.0 / src_rows) < (letterbox_cols * 1.0 / src_cols))
-        {
-            scale_letterbox = letterbox_rows * 1.0 / src_rows;
-        }
-        else
-        {
-            scale_letterbox = letterbox_cols * 1.0 / src_cols;
-        }
-        resize_cols = int(scale_letterbox * src_cols);
-        resize_rows = int(scale_letterbox * src_rows);
+        cv::Mat feature(info.pShape[2], info.pShape[3], CV_32FC1, output.pVirAddr);
 
-        int tmp_h = (letterbox_rows - resize_rows) / 2;
-        int tmp_w = (letterbox_cols - resize_cols) / 2;
+        double minVal, maxVal;
+        cv::minMaxLoc(feature, &minVal, &maxVal);
 
-        float ratio_x = (float)src_rows / resize_rows;
-        float ratio_y = (float)src_cols / resize_cols;
+        feature -= minVal;
+        feature /= (maxVal - minVal);
+        // feature = 1.f - feature;
+        feature *= 255;
 
-        struct crowd_point_t
-        {
-            float x, y;
-        };
+        feature.convertTo(feature, CV_8UC1);
 
-        crowd_point_t* pred_points_ptr = (crowd_point_t*)(float*)io_data->pOutputs[0].pVirAddr;
-        crowd_point_t* pred_scores_ptr = (crowd_point_t*)(float*)io_data->pOutputs[1].pVirAddr;
-
-        int len = io_data->pOutputs[0].nSize / sizeof(float) / 2;
-
-        crowd_point_t* anchor_points_ptr = (crowd_point_t*)all_anchor_points.data();
-
-        std::vector<float> _softmax_result(2, 0);
-        std::vector<cv::Point> points;
-        for (int i = 0; i < len; i++)
-        {
-            if (pred_scores_ptr[i].x < pred_scores_ptr[i].y)
-            {
-                detection::softmax(&pred_scores_ptr[i].x, _softmax_result.data(), 2);
-                if (_softmax_result[1] > PROB_THRESHOLD)
-                {
-                    cv::Point p;
-                    p.x = pred_points_ptr[i].x * 100 + anchor_points_ptr[i].x;
-                    p.y = pred_points_ptr[i].y * 100 + anchor_points_ptr[i].y;
-
-                    p.x = (p.x - tmp_w) * ratio_x;
-                    p.y = (p.y - tmp_h) * ratio_y;
-                    points.push_back(p);
-                }
-            }
-        }
+        cv::Mat dst(info.pShape[2], info.pShape[3], CV_8UC3);
+        cv::applyColorMap(feature, dst, cv::ColormapTypes::COLORMAP_MAGMA);
+        cv::resize(dst, dst, cv::Size(mat.cols, mat.rows));
 
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
@@ -231,14 +75,8 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-
-        // draw points to mat
-        printf("there are %ld points\n", (long)points.size());
-        for (int i = 0; i < (int)points.size(); i++)
-        {
-            cv::circle(mat, points[i], 2, cv::Scalar(0, 0, 255), 2);
-        }
-        cv::imwrite("crowdcount_out.jpg", mat);
+        cv::hconcat(std::vector<cv::Mat>{mat, dst}, dst);
+        cv::imwrite("depth_anything_out.png", dst);
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -382,7 +220,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1], true);
+    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
 
     // 3. sys_init
     AX_SYS_Init();
