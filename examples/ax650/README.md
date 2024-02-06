@@ -664,3 +664,28 @@ detection num: 35
 --------------------------------------
 ```
 ![yolov8-obb](../../docs/ax650/yolov8s_obb_out.jpg)
+
+
+### CrowdCount
+```
+/opt/test # ./ax_crowdcount -m crowdcount_640x384.axmodel -i
+selfie.jpg
+--------------------------------------
+model file : crowdcount_640x384.axmodel
+image file : selfie.jpg
+img_h, img_w : 384 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.24 ms
+--------------------------------------
+Repeat 1 times, avg time 24.94 ms, max_time 24.94 ms, min_time 24.94 ms
+--------------------------------------
+there are 1012 points
+--------------------------------------
+```
+![yolov8-obb](../../docs/ax650/crowdcount_out.jpg)

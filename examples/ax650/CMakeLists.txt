@@ -58,6 +58,7 @@ axera_example(ax_simcc_pose ax_simcc_pose_steps.cc)
 axera_example(ax_glpdepth ax_glpdepth_steps.cc)
 axera_example(ax_depth_anything ax_depth_anything_steps.cc)
 axera_example(ax_rtdetr ax_rtdetr_steps.cc)
+axera_example(ax_crowdcount ax_crowdcount_steps.cc)
 
 axera_example(ax_imgproc ax_imgproc_steps.cc)
 axera_example(ax_model_info ax_model_info.cc)
