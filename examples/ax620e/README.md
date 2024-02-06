@@ -16,7 +16,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 - 人体关键点
   - [RTMPose](#RTMPose)
   - [YOLOv8-Pose](#YOLOv8-Pose)
-
+- 深度估计
+  - [Depth-Anything](#Depth-Anything) 
 
 ### 运行示例
 
@@ -282,3 +283,24 @@ Repeat 1 times, avg time 4.29 ms, max_time 4.29 ms, min_time 4.29 ms
 --------------------------------------
 ```
 <img src="../../docs/ax620e/simcc_out.jpg" width="300" height="450">
+
+### Depth-Anything
+```
+/opt/test # ./ax_depth_anything -m depth_anything.axmodel -i /opt/data/npu/images/dog.jpg
+--------------------------------------
+model file : depth_anything.axmodel
+image file : /opt/data/npu/images/dog.jpg
+img_h, img_w : 256 384
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:15.36 ms
+--------------------------------------
+Repeat 1 times, avg time 62.11 ms, max_time 62.11 ms, min_time 62.11 ms
+--------------------------------------
+```
+<img src="../../docs/ax620e/depth_anything_out.png">
