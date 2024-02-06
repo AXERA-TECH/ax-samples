@@ -35,8 +35,8 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 240;
-const int DEFAULT_IMG_W = 320;
+const int DEFAULT_IMG_H = 256;
+const int DEFAULT_IMG_W = 384;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
