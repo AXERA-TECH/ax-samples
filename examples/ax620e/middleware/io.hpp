@@ -30,7 +30,7 @@
 
 #define AX_CMM_ALIGN_SIZE 128
 
-const char* AX_CMM_SESSION_NAME = "npu";
+const char* AX_CMM_SESSION_NAME = "ax-samples-cmm";
 
 typedef enum
 {
