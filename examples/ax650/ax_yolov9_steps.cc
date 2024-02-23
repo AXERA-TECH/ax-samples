@@ -83,7 +83,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_objects(mat, objects, CLASS_NAMES, "yolov8s_out", 1, 3);
+        detection::draw_objects(mat, objects, CLASS_NAMES, "yolov9_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)

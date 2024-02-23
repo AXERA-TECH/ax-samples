@@ -8,6 +8,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv7-Tiny](#YOLOv7-Tiny)
   - [YOLOv8s](#YOLOv8s)
   - [YOLOX-S](#YOLOX-S)
+  - [YOLOv9](#YOLOv9)
 - 物体分割
   - YOLOv5-seg
 - 人脸检测
@@ -120,6 +121,35 @@ detection num: 4
  7:  72%, [ 470,   75,  688,  171], truck
 58:  53%, [ 685,  111,  716,  154], potted plant
 ```
+
+#### YOLOv9
+```
+/opt/test # ./ax_yolov9 -i ssd_horse.jpg -m yolov9c.axmodel
+--------------------------------------
+model file : yolov9c.axmodel
+image file : ssd_horse.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:3.94 ms
+--------------------------------------
+Repeat 1 times, avg time 26.22 ms, max_time 26.22 ms, min_time 26.22 ms
+--------------------------------------
+detection num: 6
+17:  94%, [ 214,   70,  423,  371], horse
+16:  88%, [ 144,  203,  196,  345], dog
+ 0:  87%, [ 273,   14,  349,  230], person
+ 0:  79%, [ 431,  125,  451,  178], person
+ 7:  76%, [   1,  105,  132,  197], truck
+13:  47%, [ 468,  149,  499,  179], bench
+--------------------------------------
+```
+![YOLOv5s](../../docs/ax650/yolov9_out.jpg)
 
 #### Scrfd
 ```
