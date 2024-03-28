@@ -61,7 +61,7 @@ install
 
 ### 3rdparty 准备
 
-- 下载预编译好的 OpenCV 库文件 [[AX620A/U 匹配](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)]]；
+- 下载预编译好的 OpenCV 库文件 [AX620A/U 匹配](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)；
 - 在 ax-samples 创建 3rdparty 文件，并将下载好的 OpenCV 库文件压缩包解压到该文件夹中。
 
 ### 交叉编译 armv7a 版本
