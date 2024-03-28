@@ -34,7 +34,7 @@ ax-samples$ tree -L 3
 
 ### 安装交叉编译工具链
 
-- aarch64 Linux 交叉编译工具链 [获取地址](http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz)
+- Arm32 Linux 交叉编译工具链 [获取地址](http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz)
 
 ### 依赖库准备
 
