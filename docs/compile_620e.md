@@ -13,16 +13,16 @@ ax-samples 的源码编译目前有两种实现路径：
 
 ### 3rdparty 准备
 
-- 下载预编译好的 [OpenCV 库文件](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-aarch64-linux-gnu-gcc-7.5.0.zip)；
+- 下载预编译好的 [OpenCV 库文件](https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip)；
 - 在 ax-samples 创建 3rdparty 文件，并将下载好的 OpenCV 库文件压缩包解压到该文件夹中，文件夹目录结构如下所示
 
 ```bash
 ax-samples$ tree -L 3
 .
 ├── 3rdparty
-│   └── opencv-aarch64-linux
+│   └── opencv-arm-linux
 │       ├── bin
-│       ├── build_opencv_aarch64.sh
+│       ├── build_opencv.sh
 │       ├── include
 │       ├── lib
 │       └── share
@@ -30,11 +30,11 @@ ax-samples$ tree -L 3
 
 ### 编译环境
 - cmake 版本大于等于 3.13
-- AX620E 配套的交叉编译工具链 `aarch64-none-linux-gnu-gcc` 已添加到环境变量中
+- AX620E 配套的交叉编译工具链 `arm-linux-gnueabihf-gxx` 已添加到环境变量中
 
 ### 安装交叉编译工具链
 
-- aarch64 Linux 交叉编译工具链 [获取地址](https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz)
+- aarch64 Linux 交叉编译工具链 [获取地址](http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz)
 
 ### 依赖库准备
 
@@ -59,7 +59,7 @@ git clone 下载源码，进入 ax-samples 根目录，创建 cmake 编译任务
 git clone https://github.com/AXERA-TECH/ax-samples.git
 cd ax-samples
 mkdir build & cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax620e ..
+cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax620e ..
 make -j6
 make install
 ```
