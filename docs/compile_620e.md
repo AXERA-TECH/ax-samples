@@ -58,7 +58,7 @@ git clone 下载源码，进入 ax-samples 根目录，创建 cmake 编译任务
 ```bash
 git clone https://github.com/AXERA-TECH/ax-samples.git
 cd ax-samples
-mkdir build & cd build
+mkdir build && cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax620e ..
 make -j6
 make install
@@ -71,25 +71,13 @@ ax-samples/build$ tree install
 install
 └── ax620e
     ├── ax_classification
-    ├── ax_detr
-    ├── ax_dinov2
-    ├── ax_glpdepth
-    ├── ax_hrnet
+    ├── ax_crowdcount
+    ├── ax_depth_anything
     ├── ax_imgproc
-    ├── ax_pfld
-    ├── ax_pp_humanseg
-    ├── ax_pp_liteseg_stdc2_cityscapes
-    ├── ax_pp_ocr_rec
-    ├── ax_pp_person_attribute
-    ├── ax_pp_vehicle_attribute
-    ├── ax_ppyoloe
-    ├── ax_ppyoloe_obj365
-    ├── ax_realesrgan
-    ├── ax_rtmdet
+    ├── ax_model_info
+    ├── ax_rtdetr
     ├── ax_scrfd
-    ├── ax_segformer
     ├── ax_simcc_pose
-    ├── ax_yolo_nas
     ├── ax_yolov5_face
     ├── ax_yolov5s
     ├── ax_yolov5s_seg
@@ -98,5 +86,7 @@ install
     ├── ax_yolov7_tiny_face
     ├── ax_yolov8
     ├── ax_yolov8_pose
+    ├── ax_yolov8_seg
+    ├── ax_yolov9
     └── ax_yolox
 ```

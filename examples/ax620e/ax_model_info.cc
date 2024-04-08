@@ -42,14 +42,11 @@ namespace ax
     bool run_model(const std::string& model)
     {
         // 1. init engine
-#ifdef AXERA_TARGET_CHIP_AX620E
-        auto ret = AX_ENGINE_Init();
-#else
         AX_ENGINE_NPU_ATTR_T npu_attr;
         memset(&npu_attr, 0, sizeof(npu_attr));
         npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_DISABLE;
         auto ret = AX_ENGINE_Init(&npu_attr);
-#endif
+
         if (0 != ret)
         {
             return ret;
