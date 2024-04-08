@@ -1,5 +1,3 @@
-简体中文 | [English](./README_EN.md)
-
 # AX-Samples
 
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://raw.githubusercontent.com/AXERA-TECH/ax-samples/main/LICENSE)
