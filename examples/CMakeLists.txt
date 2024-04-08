@@ -29,7 +29,7 @@ if(AXERA_TARGET_CHIP MATCHES "ax650")
     add_definitions(-DAXERA_TARGET_CHIP_AX650)
 elseif(AXERA_TARGET_CHIP MATCHES "ax620e")
     if(NOT OpenCV_DIR)
-        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-aarch64-linux/lib/cmake/opencv4)
+        set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/3rdparty/opencv-arm-linux/lib/cmake/opencv4)
     endif()
 
     add_definitions(-DAXERA_TARGET_CHIP_AX620E)
