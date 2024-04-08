@@ -7,7 +7,7 @@ Benchmark 是了解硬件平台网络模型运行速度的最佳途径。以下�
 
 ### 数据记录
 
-| Models         | Input Size | Inference Time(ms)@1Core@3.6T | Inference Time(ms)@3Core@10.8T |
+| Models         | Input Size | Inference Time(ms)@1 Core | Inference Time(ms)@3 Cores |
 | -------------- | ---------- | ----------------------------- | ------------------------------ |
 | Inceptionv1    | 224        | 1.166                         | 0.543                          |
 | Inceptionv3    | 299        | 4.370                         | 1.712                          |
