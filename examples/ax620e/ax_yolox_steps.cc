@@ -90,17 +90,10 @@ namespace ax
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
     {
         // 1. init engine
-#ifdef AXERA_TARGET_CHIP_AX620E
-        AX_ENGINE_NPU_ATTR_T npu_attr;
-        memset(&npu_attr, 0, sizeof(npu_attr));
-        npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_ENABLE;
-        auto ret = AX_ENGINE_Init(&npu_attr);
-#else
         AX_ENGINE_NPU_ATTR_T npu_attr;
         memset(&npu_attr, 0, sizeof(npu_attr));
         npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_DISABLE;
         auto ret = AX_ENGINE_Init(&npu_attr);
-#endif
         if (0 != ret)
         {
             return ret;
