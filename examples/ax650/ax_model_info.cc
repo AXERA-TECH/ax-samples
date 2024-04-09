@@ -21,6 +21,8 @@
 #include <cstdio>
 #include <cstring>
 #include <numeric>
+#include <fcntl.h>
+#include <sys/mman.h>
 
 #include <opencv2/opencv.hpp>
 #include "base/common.hpp"
@@ -43,7 +45,10 @@ namespace ax
     {
         // 1. init engine
 #ifdef AXERA_TARGET_CHIP_AX620E
-        auto ret = AX_ENGINE_Init();
+        AX_ENGINE_NPU_ATTR_T npu_attr;
+        memset(&npu_attr, 0, sizeof(npu_attr));
+        npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_ENABLE;
+        auto ret = AX_ENGINE_Init(&npu_attr);
 #else
         AX_ENGINE_NPU_ATTR_T npu_attr;
         memset(&npu_attr, 0, sizeof(npu_attr));
@@ -56,18 +61,24 @@ namespace ax
         }
 
         // 2. load model
-        std::vector<char> model_buffer;
-        if (!utilities::read_file(model, model_buffer))
+        auto* file_fp = fopen(model.c_str(), "r");
+        if (!file_fp)
         {
-            fprintf(stderr, "Read Run-Joint model(%s) file failed.\n", model.c_str());
+            fprintf(stderr, "Read model(%s) file failed.\n", model.c_str());
             return false;
         }
+        fseek(file_fp, 0, SEEK_END);
+        int model_size = ftell(file_fp);
+        fclose(file_fp);
+        int fd = open(model.c_str(), O_RDWR, 0644);
+        void* mmap_add = mmap(NULL, model_size, PROT_WRITE, MAP_SHARED, fd, 0);
 
         // 3. create handle
         AX_ENGINE_HANDLE handle;
-        ret = AX_ENGINE_CreateHandle(&handle, model_buffer.data(), model_buffer.size());
+        ret = AX_ENGINE_CreateHandle(&handle, mmap_add, model_size);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
         fprintf(stdout, "Engine creating handle is done.\n");
+        munmap(mmap_add, model_size);
 
         // 4. create context
         ret = AX_ENGINE_CreateContext(handle);

@@ -9,6 +9,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv8s](#YOLOv8s)
   - [YOLOX-S](#YOLOX-S)
   - [YOLOv9](#YOLOv9)
+  - [YOLO-World](#YOLO-World)
 - 物体分割
   - YOLOv5-seg
 - 人脸检测
@@ -718,4 +719,33 @@ Repeat 1 times, avg time 24.94 ms, max_time 24.94 ms, min_time 24.94 ms
 there are 1012 points
 --------------------------------------
 ```
-![yolov8-obb](../../docs/ax650/crowdcount_out.jpg)
+![](../../docs/ax650/crowdcount_out.jpg)
+
+### YOLO-World
+```
+/opt/test # ./ax_yolo_world -m yolo_world_s.axmodel -i test.jpg
+--------------------------------------
+model file : yolo_world_s.axmodel
+image file : test.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:3.75 ms
+--------------------------------------
+Repeat 1 times, avg time 25.26 ms, max_time 25.26 ms, min_time 25.26 ms
+--------------------------------------
+detection num: 6
+ 0:  94%, [ 756,  221, 1128, 1151], person
+ 0:  94%, [1350,  338, 1625, 1033], person
+ 0:  92%, [   0,  354,  314, 1106], person
+ 0:  90%, [ 491,  479,  658, 1001], person
+ 0:  64%, [1840,  689, 1905,  812], person
+ 0:  37%, [   0,  431,   92, 1019], person
+--------------------------------------
+```
+![](../../docs/ax650/yolo_world_out.jpg)
