@@ -197,7 +197,31 @@ namespace middleware
         {
             // print shape info,like [batchsize x channel x height x width]
             auto& info = io_info->pInputs[i];
-            printf("    name: \e[1;32m%8s \e[1;34m[%s] [%s]\e[0m\n        \e[1;31m", info.pName, data_type[info.eDataType], color_type[info.pExtraMeta->eColorSpace]);
+            printf("    name: \e[1;32m%8s", info.pName);
+
+            std::string dt = "unknown";
+            if (data_type.find(info.eDataType) != data_type.end())
+            {
+                dt = data_type[info.eDataType];
+                printf(" \e[1;34m[%s] ", dt.c_str());
+            }
+            else
+            {
+                printf(" \e[1;31m[%s] ", dt.c_str());
+            }
+
+            std::string ct = "unknown";
+            if (info.pExtraMeta && color_type.find(info.pExtraMeta->eColorSpace) != color_type.end())
+            {
+                ct = color_type[info.pExtraMeta->eColorSpace];
+                printf("\e[1;34m[%s]", ct.c_str());
+            }
+            else
+            {
+                printf("\e[1;31m[%s]", ct.c_str());
+            }
+            printf(" \n        \e[1;31m");
+
             for (AX_U8 s = 0; s < info.nShapeSize; s++)
             {
                 printf("%d", info.pShape[s]);
