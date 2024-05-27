@@ -3070,4 +3070,54 @@ namespace detection
         }
     } // namespace obb
 
+    static void generate_proposals_yolov10(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
+                                         int letterbox_cols, int letterbox_rows, int cls_num = 80)
+    {
+        int feat_w = letterbox_cols / stride;
+        int feat_h = letterbox_rows / stride;
+        auto feat_ptr = feat;
+        float dis[16];
+        for (int h = 0; h <= feat_h - 1; h++)
+        {
+            for (int w = 0; w <= feat_w - 1; w++)
+            {
+                int c_index = 0;
+		float c_score = 0;
+
+                for (int c = 0; c < cls_num; c++)
+                {
+                    float score = feat_ptr[c];
+                    if (score > c_score)
+                    {
+                        c_index = c;
+                        c_score = score;
+                    } 
+                }
+
+                if(c_score >= prob_threshold)
+                {
+                    float x0 = w + 0.5f - mmyolo::fast_softmax(feat_ptr + cls_num  +  0 * 16,dis, 16);
+                    float y0 = h + 0.5f - mmyolo::fast_softmax(feat_ptr + cls_num  +  1 * 16,dis, 16);
+                    float x1 = w + 0.5f + mmyolo::fast_softmax(feat_ptr + cls_num  +  2 * 16,dis, 16);
+                    float y1 = h + 0.5f + mmyolo::fast_softmax(feat_ptr + cls_num  +  3 * 16,dis, 16);
+
+                    x0 *= stride;
+                    y0 *= stride;
+                    x1 *= stride;
+                    y1 *= stride;
+
+                    Object obj;
+                    obj.rect.x = x0;
+                    obj.rect.y = y0;
+                    obj.rect.width = x1 - x0;;
+                    obj.rect.height = y1 - y0;
+                    obj.label = c_index;
+                    obj.prob = c_score;
+                    objects.push_back(obj);
+                }
+                feat_ptr += (cls_num  +  4 * 16);        
+            }
+        }
+    }
+    
 } // namespace detection
