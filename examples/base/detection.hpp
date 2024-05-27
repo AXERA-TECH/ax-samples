@@ -3081,9 +3081,8 @@ namespace detection
         {
             for (int w = 0; w <= feat_w - 1; w++)
             {
-
                 int c_index = 0;
-			    float c_score = 0;
+		float c_score = 0;
 
                 for (int c = 0; c < cls_num; c++)
                 {
