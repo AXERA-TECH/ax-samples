@@ -72,12 +72,12 @@ make -j6
 make install
 ```
 
-编译完成后，生成的可执行示例存放在 `ax-samples/build/install/ax620e/` 路径下：
+编译完成后，生成的可执行示例存放在 `ax-samples/build/install/ax630c/` 路径下：
 
 ```bash
 ax-samples/build$ tree install
 install
-└── ax620e
+└── ax630c
     ├── ax_classification
     ├── ax_crowdcount
     ├── ax_depth_anything
@@ -153,12 +153,12 @@ make -j6
 make install
 ```
 
-编译完成后，生成的可执行示例存放在 `ax-samples/build/install/ax620e/` 路径下：
+编译完成后，生成的可执行示例存放在 `ax-samples/build/install/ax620q/` 路径下：
 
 ```bash
 ax-samples/build$ tree install
 install
-└── ax620e
+└── ax620q
     ├── ax_classification
     ├── ax_crowdcount
     ├── ax_depth_anything

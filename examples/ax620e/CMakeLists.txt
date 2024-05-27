@@ -18,7 +18,7 @@
 find_package(Threads)
 find_package(OpenCV REQUIRED)
 
-include("${CMAKE_SOURCE_DIR}/cmake/ax650.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/ax620e.cmake")
 
 axera_example(ax_classification ax_classification_steps.cc)
 
