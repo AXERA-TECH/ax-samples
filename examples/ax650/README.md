@@ -9,8 +9,9 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv8s](#YOLOv8s)
   - [YOLOX-S](#YOLOX-S)
   - [YOLOv9](#YOLOv9)
+  - [YOLOv10](#YOLOv10)
 - 物体分割
-  - YOLOv5-seg
+  - [YOLOv5-seg](#YOLOv5-seg)
 - 人脸检测
   - [scrfd](#Scrfd)
   - [YOLOv5-Face](#YOLOv5-Face)([original model](https://github.com/deepcam-cn/yolov5-face))
@@ -718,4 +719,32 @@ Repeat 1 times, avg time 24.94 ms, max_time 24.94 ms, min_time 24.94 ms
 there are 1012 points
 --------------------------------------
 ```
-![yolov8-obb](../../docs/ax650/crowdcount_out.jpg)
+![](../../docs/ax650/crowdcount_out.jpg)
+
+### YOLOv10
+```
+/opt/test # ./ax_yolov10 -r 10 -m yolov10s.axmodel -i ssd_horse.jpg
+--------------------------------------
+model file : yolov10s.axmodel
+image file : ssd_horse.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:3.07 ms
+--------------------------------------
+Repeat 10 times, avg time 3.30 ms, max_time 3.31 ms, min_time 3.29 ms
+--------------------------------------
+13:  42%, [ 468,  149,  499,  178], bench
+ 0:  78%, [ 431,  124,  451,  177], person
+16:  78%, [ 145,  205,  196,  345], dog
+ 0:  88%, [ 272,   13,  349,  235], person
+ 7:  82%, [   0,  106,  132,  196], truck
+17:  94%, [ 216,   70,  422,  370], horse
+--------------------------------------
+```
+![](../../docs/ax650/yolov10s_out.jpg)
