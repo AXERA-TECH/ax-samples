@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: build_620e
+name: build_620a
 
 # Controls when the workflow will run
 on:
@@ -36,13 +36,14 @@ jobs:
         run: |
           mkdir build
           cd build
-          git clone https://github.com/AXERA-TECH/ax620q_bsp_sdk.git
-          export ax_bsp=$PWD/ax620q_bsp_sdk/msp/out/arm_glibc/
+          wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.3/arm_axpi_r1.22.2801.zip
+          unzip arm_axpi_r1.22.2801.zip -d ax_bsp
+          export ax_bsp=$PWD/ax_bsp
           echo $ax_bsp          
           wget http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
           tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
           export PATH=$PATH:gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/
           arm-linux-gnueabihf-gcc -v
-          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax620e ..
+          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax620a ..
           make -j8
           make install

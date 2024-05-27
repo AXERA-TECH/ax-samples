@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: build
+name: build_630c_glibc
 
 # Controls when the workflow will run
 on:
@@ -29,21 +29,20 @@ jobs:
       - name: prepare opencv-library
         run: |
           mkdir -p ./3rdparty
-          wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-arm-linux-gnueabihf-gcc-7.5.0.zip
-          unzip opencv-arm-linux-gnueabihf-gcc-7.5.0.zip -d ./3rdparty
+          wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-aarch64-linux-gnu-gcc-7.5.0.zip
+          unzip opencv-aarch64-linux-gnu-gcc-7.5.0.zip -d ./3rdparty
 
       - name: build
         run: |
           mkdir build
           cd build
-          wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.3/arm_axpi_r1.22.2801.zip
-          unzip arm_axpi_r1.22.2801.zip -d ax_bsp
-          export ax_bsp=$PWD/ax_bsp
+          git clone https://github.com/AXERA-TECH/ax620q_bsp_sdk.git
+          export ax_bsp=$PWD/ax620q_bsp_sdk/msp/out/arm64_glibc/
           echo $ax_bsp          
-          wget http://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
-          tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
-          export PATH=$PATH:gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/
-          arm-linux-gnueabihf-gcc -v
-          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ ..
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+          tar -xf gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+          export PATH=$PATH:gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/
+          aarch64-none-linux-gnu-gcc -v
+          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax630c ..
           make -j8
           make install

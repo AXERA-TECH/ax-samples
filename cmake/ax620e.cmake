@@ -36,8 +36,10 @@ function(axera_example example_name)
     target_link_directories(${example_name} PRIVATE ${BSP_MSP_DIR}/lib)
 
     target_compile_options (${example_name} PUBLIC $<$<COMPILE_LANGUAGE:C,CXX>: -O3>)
-
-    if (AXERA_TARGET_CHIP MATCHES "ax650")
-        install(TARGETS ${example_name} DESTINATION ax650)
+    
+    if (AXERA_TARGET_CHIP MATCHES "ax630c")
+        install(TARGETS ${example_name} DESTINATION ax630c)
+    elseif (AXERA_TARGET_CHIP MATCHES "ax620q")
+        install(TARGETS ${example_name} DESTINATION ax620q)
     endif()
 endfunction()
