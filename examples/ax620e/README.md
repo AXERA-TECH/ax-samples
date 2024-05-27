@@ -9,6 +9,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv8](#YOLOv8)
   - [YOLOX](#YOLOX)
   - [YOLO-World](#YOLO-World)
+  - [YOLOv10](#YOLOv10)
 - 实例分割
   - [YOLOv5-seg](#YOLOv5-Seg)
 - 人脸检测
@@ -334,3 +335,32 @@ detection num: 6
 --------------------------------------
 ```
 ![](../../docs/ax650/yolo_world_out.jpg)
+
+### YOLOv10
+```
+/opt/test # ./ax_yolov10 -i ssd_horse.jpg -m yolov10s.axmodel -r 10
+--------------------------------------
+model file : yolov10s.axmodel
+image file : ssd_horse.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:4.98 ms
+--------------------------------------
+Repeat 10 times, avg time 15.75 ms, max_time 15.75 ms, min_time 15.75 ms
+--------------------------------------
+detection num: 0
+13:  25%, [ 468,  149,  499,  178], bench
+ 0:  78%, [ 431,  124,  451,  178], person
+16:  78%, [ 145,  205,  196,  344], dog
+ 0:  88%, [ 272,   13,  349,  234], person
+ 7:  82%, [   0,  106,  132,  196], truck
+17:  94%, [ 215,   70,  422,  371], horse
+--------------------------------------
+```
+![](../../docs/ax650/yolov10s_out.jpg)
