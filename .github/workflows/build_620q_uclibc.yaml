@@ -40,7 +40,7 @@ jobs:
           export ax_bsp=$PWD/ax620q_bsp_sdk/msp/out/arm_uclibc/
           echo $ax_bsp          
           wget https://github.com/AXERA-TECH/ax620q_bsp_sdk/releases/download/v2.0.0/arm-AX620E-linux-uclibcgnueabihf_V3_20240320.tgz
-          tar -zxvf arm-AX620E-linux-uclibcgnueabihf_V3_20240320.tgz
+          tar -zxf arm-AX620E-linux-uclibcgnueabihf_V3_20240320.tgz
           export PATH=$PATH:arm-AX620E-linux-uclibcgnueabihf/bin/
           arm-AX620E-linux-uclibcgnueabihf-gcc -v
           cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-AX620E-linux-uclibcgnueabihf.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax620q ..
