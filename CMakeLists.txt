@@ -52,10 +52,10 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/check.cmake")
 # one should have a name finally
 project(AXERA-Samples)
 
-# set default chip as as ax620a
+# set default chip as as ax650
 # TODO: set as an option
 if (NOT AXERA_TARGET_CHIP)
-    set (AXERA_TARGET_CHIP "ax620a")
+    set (AXERA_TARGET_CHIP "ax650")
 endif ()
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O1 -Wall -s -fPIC -Wunused-function")
