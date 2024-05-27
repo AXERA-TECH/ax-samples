@@ -3088,7 +3088,7 @@ namespace detection
                 for (int c = 0; c < cls_num; c++)
                 {
                     float score = feat_ptr[c];
-                    if (score > prob_threshold)
+                    if (score > c_score)
                     {
                         c_index = c;
                         c_score = score;
