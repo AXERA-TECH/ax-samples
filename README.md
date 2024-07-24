@@ -39,7 +39,7 @@
 ### 网盘资源
 
 - 提供 **ModelZoo**, **预编译程序**, **测试图片** 等内容:
-  - [百度网盘](https://pan.baidu.com/s/1JYyk0ZNELkJbQVCRlmDS_w?pwd=2xb6)
+  - [百度网盘](https://pan.baidu.com/s/1cnMeqsD-hErlRZlBDDvuoA?pwd=oey4)
   - [Google Drive](https://drive.google.com/drive/folders/1JY59vOFS2qxI8TkVIZ0pHfxHMfKPW5PS?usp=sharing)
 
 ### 速度评估
