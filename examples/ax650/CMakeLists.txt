@@ -39,6 +39,7 @@ axera_example(ax_yolox ax_yolox_steps.cc)
 axera_example(ax_yolov10 ax_yolov10s_steps.cc)
 axera_example(ax_yolo_nas ax_yolo_nas_steps.cc)
 axera_example(ax_yolo_world ax_yolo_world_steps.cc)
+axera_example(ax_yolo_world_open_vocabulary ax_yolo_world_open_vocabulary_steps.cc)
 
 axera_example(ax_ppyoloe ax_ppyoloe_steps.cc)
 axera_example(ax_ppyoloe_obj365 ax_ppyoloe_obj365_steps.cc)
