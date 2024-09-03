@@ -748,3 +748,47 @@ Repeat 10 times, avg time 3.30 ms, max_time 3.31 ms, min_time 3.29 ms
 --------------------------------------
 ```
 ![](../../docs/ax650/yolov10s_out.jpg)
+
+### YOLO-WORLD-OPEN-VOCABULARY
+```
+root@ax650: ~# ./ax_yolo_world_open_vocabulary -m yoloworld.axmodel -t data/person.bin -i ../../images/ssd_horse.jpg 
+--------------------------------------
+model file : yoloworld.axmodel
+image file : ../../images/ssd_horse.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done. 
+
+input size: 2
+    name:   images [UINT8] [RGB] 
+        1 x 640 x 640 x 3
+
+    name: txt_feats [FLOAT32] [FEATUREMAP] 
+        1 x 1 x 512
+
+
+output size: 3
+    name: onnx::Reshape_1206 [FLOAT32]
+        1 x 80 x 80 x 65
+
+    name: onnx::Reshape_1250 [FLOAT32]
+        1 x 40 x 40 x 65
+
+    name: onnx::Reshape_1294 [FLOAT32]
+        1 x 20 x 20 x 65
+
+Engine alloc io is done. 
+Engine push input is done. 
+--------------------------------------
+post process cost time:1.02 ms 
+--------------------------------------
+Repeat 1 times, avg time 13.02 ms, max_time 13.02 ms, min_time 13.02 ms
+--------------------------------------
+detection num: 2
+ 0:  86%, [ 271,   13,  348,  237], person
+ 0:  27%, [ 431,  123,  453,  179], person
+--------------------------------------
+```
+![](../../docs/ax650/yolo_world_open_out.jpg)
