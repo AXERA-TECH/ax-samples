@@ -39,7 +39,7 @@
 ### 网盘资源
 
 - 提供 **ModelZoo**, **预编译程序**, **测试图片** 等内容:
-  - [百度网盘](https://pan.baidu.com/s/1JYyk0ZNELkJbQVCRlmDS_w?pwd=2xb6)
+  - [百度网盘](https://pan.baidu.com/s/1cnMeqsD-hErlRZlBDDvuoA?pwd=oey4)
   - [Google Drive](https://drive.google.com/drive/folders/1JY59vOFS2qxI8TkVIZ0pHfxHMfKPW5PS?usp=sharing)
 
 ### 速度评估
@@ -48,8 +48,9 @@
 
 ## 关联项目
 
-- [Pulsar](https://pulsar-docs.readthedocs.io/zh_CN/latest/)(Support AX630A/AX620A/AX620U)
-- [Pulsar2](https://pulsar2-docs.readthedocs.io/zh_CN/latest/)(Support AX650A/AX650N/AX630C/AX620Q)
+- NPU工具链在线文档，其中提供了NPU工具链相关使用说明和获取方式
+  - [Pulsar](https://pulsar-docs.readthedocs.io/zh_CN/latest/)(Support AX630A/AX620A/AX620U)
+  - [Pulsar2](https://pulsar2-docs.readthedocs.io/zh_CN/latest/)(Support AX650A/AX650N/AX630C/AX620Q)
 
 ## 技术讨论
 
