@@ -14,8 +14,10 @@
 * specific language governing permissions and limitations under the License.
 */
 
+
 /*
-* Author: ZHEQIUSHUI
+* Note: For the YOLOv10 series exported by the ultralytics project.
+* Author: QQC
 */
 
 #include <cstdio>
@@ -39,13 +41,21 @@ const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
 const char* CLASS_NAMES[] = {
-    "class1", "class2", "class3", "class4"};
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
+    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
+    "hair drier", "toothbrush"};
 
-int NUM_CLASS = 4;
+int NUM_CLASS = 80;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-const float PROB_THRESHOLD = 0.25f;
+const float PROB_THRESHOLD = 0.45f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
@@ -75,10 +85,10 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_objects(mat, objects, CLASS_NAMES, "yolo_world_out");
+        detection::draw_objects(mat, objects, CLASS_NAMES, "yolov10_out");
     }
 
-    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const std::vector<uchar>& text_feature, const int& repeat, cv::Mat& mat, int input_h, int input_w)
+    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
     {
         // 1. init engine
 #ifdef AXERA_TARGET_CHIP_AX620E
@@ -118,7 +128,6 @@ namespace ax
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
         fprintf(stdout, "Engine get io info is done. \n");
-        middleware::print_io_info(io_info);
 
         // 6. alloc io
         AX_ENGINE_IO_T io_data;
@@ -127,8 +136,7 @@ namespace ax
         fprintf(stdout, "Engine alloc io is done. \n");
 
         // 7. insert input
-        memcpy(io_data.pInputs[0].pVirAddr, data.data(), data.size());
-        memcpy(io_data.pInputs[1].pVirAddr, text_feature.data(), text_feature.size());
+        ret = middleware::push_input(data, &io_data, io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE_IO
         fprintf(stdout, "Engine push input is done. \n");
         fprintf(stdout, "--------------------------------------\n");
@@ -163,7 +171,6 @@ int main(int argc, char* argv[])
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
     cmd.add<std::string>("image", 'i', "image file", true, "");
-    cmd.add<std::string>("text_feature", 't', "text feature file", true, "");
     cmd.add<std::string>("size", 'g', "input_h, input_w", false, std::to_string(DEFAULT_IMG_H) + "," + std::to_string(DEFAULT_IMG_W));
 
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
@@ -172,13 +179,11 @@ int main(int argc, char* argv[])
     // 0. get app args, can be removed from user's app
     auto model_file = cmd.get<std::string>("model");
     auto image_file = cmd.get<std::string>("image");
-    auto text_feature_file = cmd.get<std::string>("text_feature");
 
     auto model_file_flag = utilities::file_exist(model_file);
     auto image_file_flag = utilities::file_exist(image_file);
-    auto text_feature_file_flag = utilities::file_exist(text_feature_file);
 
-    if (!model_file_flag | !image_file_flag | !text_feature_file_flag)
+    if (!model_file_flag | !image_file_flag)
     {
         auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
@@ -186,7 +191,6 @@ int main(int argc, char* argv[])
 
         if (!model_file_flag) { show_error("model", model_file); }
         if (!image_file_flag) { show_error("image", image_file); }
-        if (!text_feature_file_flag) { show_error("text_feature", text_feature_file); }
 
         return -1;
     }
@@ -225,25 +229,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1], true);
-
-    std::vector<uchar> text_feature;
-    common::read_file(text_feature_file.c_str(), text_feature);
-
-    std::string filename; //filename of text_feature_file
-    if (text_feature_file.find_last_of("/") != std::string::npos)
-    {
-        filename = text_feature_file.substr(text_feature_file.find_last_of("/") + 1);
-    }
-    else
-    {
-        filename = text_feature_file;
-    }
-
-    if (filename.find_last_of(".") != std::string::npos)
-    {
-        filename = filename.substr(0, filename.find_last_of("."));
-    }
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. sys_init
     AX_SYS_Init();
@@ -251,7 +237,7 @@ int main(int argc, char* argv[])
     // 4. -  engine model  -  can only use AX_ENGINE** inside
     {
         // AX_ENGINE_NPUReset(); // todo ??
-        ax::run_model(model_file, image, text_feature, repeat, mat, input_size[0], input_size[1]);
+        ax::run_model(model_file, image, repeat, mat, input_size[0], input_size[1]);
 
         // 4.3 engine de init
         AX_ENGINE_Deinit();
