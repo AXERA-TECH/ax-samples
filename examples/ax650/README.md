@@ -10,6 +10,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOX-S](#YOLOX-S)
   - [YOLOv9](#YOLOv9)
   - [YOLOv10](#YOLOv10)
+  - [YOLO11](#YOLO11)
 - 物体分割
   - [YOLOv5-seg](#YOLOv5-seg)
 - 人脸检测
@@ -748,6 +749,35 @@ Repeat 10 times, avg time 3.30 ms, max_time 3.31 ms, min_time 3.29 ms
 --------------------------------------
 ```
 ![](../../docs/ax650/yolov10s_out.jpg)
+
+### YOLO11
+```
+/opt/test # ./ax_yolo11 -m yolo11s.axmodel -i ssd_horse.jpg -r 10 
+--------------------------------------
+model file : yolo11s.axmodel
+image file : ssd_horse.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:4.04 ms
+--------------------------------------
+Repeat 10 times, avg time 3.20 ms, max_time 3.21 ms, min_time 3.19 ms
+--------------------------------------
+detection num: 6
+17:  96%, [ 216,   74,  421,  373], horse
+ 0:  91%, [ 274,   14,  349,  231], person
+16:  86%, [ 144,  204,  196,  347], dog
+ 0:  81%, [ 431,  124,  450,  178], person
+13:  77%, [ 469,  149,  499,  179], bench
+ 7:  60%, [   1,  106,  132,  197], truck
+--------------------------------------
+```
+![](../../docs/ax650/yolo11_out.jpg)
 
 ### YOLO-WORLD-OPEN-VOCABULARY
 ```
