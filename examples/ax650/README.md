@@ -13,6 +13,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLO11](#YOLO11)
 - 物体分割
   - [YOLOv5-seg](#YOLOv5-seg)
+  - [YOLOv8-seg](#YOLOv8-seg)
+  - [YOLO11-seg](#YOLO11-seg)
 - 人脸检测
   - [scrfd](#Scrfd)
   - [YOLOv5-Face](#YOLOv5-Face)([original model](https://github.com/deepcam-cn/yolov5-face))
@@ -21,6 +23,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv5s_visdrone](#YOLOv5s_visdrone)
 - 人体关键点
   - [HRNet](#HRNet)
+  - [YOLOv8-pose](#YOLOv8-pose)
+  - [YOLO11-pose](#YOLO11-pose)
 - 人体分割
   - [PP-HumanSeg](#PP-HumanSeg)
 
@@ -331,6 +335,87 @@ detection num: 11
 ```
 ![YOLOv8s](../../docs/ax650/yolov8s_out.jpg)
 
+#### YOLOv8-seg
+```
+root@ax650:/# .ax_yolov8_seg -m yolov8s_seg.axmodel -i ssd_car.jpg
+--------------------------------------
+model file : yolov8s_seg.axmodel
+image file : ssd_car.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+
+input size: 1
+    name:   images [UINT8] [BGR]
+        1 x 640 x 640 x 3
+
+
+output size: 7
+    name: /model.22/Concat_1_output_0 [FLOAT32]
+        1 x 80 x 80 x 144
+
+    name: /model.22/Concat_2_output_0 [FLOAT32]
+        1 x 40 x 40 x 144
+
+    name: /model.22/Concat_3_output_0 [FLOAT32]
+        1 x 20 x 20 x 144
+
+    name: /model.22/cv4.0/cv4.0.2/Conv_output_0 [FLOAT32]
+        1 x 80 x 80 x 32
+
+    name: /model.22/cv4.1/cv4.1.2/Conv_output_0 [FLOAT32]
+        1 x 40 x 40 x 32
+
+    name: /model.22/cv4.2/cv4.2.2/Conv_output_0 [FLOAT32]
+        1 x 20 x 20 x 32
+
+    name:  output1 [FLOAT32]
+        1 x 32 x 160 x 160
+
+post process cost time:8.68 ms
+--------------------------------------
+Repeat 1 times, avg time 4.69 ms, max_time 4.69 ms, min_time 4.69 ms
+--------------------------------------
+detection num: 3
+ 2:  96%, [ 330,  202,  499,  326], car
+ 0:  91%, [ 205,  185,  286,  373], person
+ 5:  89%, [ 128,   67,  450,  299], bus
+--------------------------------------
+```
+![YOLOv8-seg](../../docs/ax650/yolov8_seg_out.jpg)
+
+#### YOLOv8-pose
+```
+root@ax650:/# ./ax_yolov8_pose -m yolov8s_pose.axmodel -i pose_test.jpg
+--------------------------------------
+model file : yolov8s_pose.axmodel
+image file : pose_test.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:1.26 ms
+--------------------------------------
+Repeat 1 times, avg time 3.74 ms, max_time 3.74 ms, min_time 3.74 ms
+--------------------------------------
+detection num: 4
+ 0:  93%, [ 756,  212, 1127, 1158], person
+ 0:  91%, [   0,  358,  316, 1105], person
+ 0:  91%, [1349,  338, 1629, 1034], person
+ 0:  87%, [ 489,  474,  656,  996], person
+--------------------------------------
+```
+![YOLOv8-pose](../../docs/ax650/yolov8_pose_out.jpg)
+
 #### YOLOX-S
 ```
 root@AXERA:/home/test# ./ax_yolox -m yolox.axmodel -i test.jpg
@@ -466,35 +551,6 @@ Repeat 100 times, avg time 0.44 ms, max_time 0.45 ms, min_time 0.44 ms
 ```
 ![PFLD](../../docs/ax650/pfld_out.jpg)
 
-### YOLOV8-POSE
-```
-/opt/test # ./ax_yolov8_pose -m yolov8s-pose.axmodel -i test.jpg
---------------------------------------
-model file : yolov8s-pose.axmodel
-image file : test.jpg
-img_h, img_w : 640 640
---------------------------------------
-[Axera version]: libax_sys.so V1.14.0_20230506154237 May  6 2023 15:43:14 JK
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:0.28 ms
---------------------------------------
-Repeat 1 times, avg time 12.77 ms, max_time 12.77 ms, min_time 12.77 ms
---------------------------------------
-detection num: 5
- 0:  92%, [ 497,  291,  673,  804], person
- 0:  90%, [ 175,  306,  365,  804], person
- 0:  86%, [  89,  292,  192,  490], person
- 0:  77%, [ 608,  271,  693,  465], person
- 0:  55%, [ 443,  296,  498,  440], person
---------------------------------------
-```
-![yolov8-pose](../../docs/ax650/yolov8s_pose_out.jpg)
-
 ### DinoV2
 ```
 /opt/test # ./ax_dinov2 -m dinov2_small_518_precision_opt.axmodel -i dog-chai.jpeg
@@ -582,62 +638,6 @@ Repeat 1 times, avg time 56.67 ms, max_time 56.67 ms, min_time 56.67 ms
 
 ```
 <img src="../../docs/ax650/depth_anything_out.png">
-
-### YoloV8-Seg
-```
-/opt/test # ./ax_yolov8_seg -m yolov8n_seg.axmodel -i ssd_horse.jpg
---------------------------------------
-model file : yolov8n_seg.axmodel
-image file : ssd_horse.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-
-input size: 1
-    name:   images [UINT8]
-        1 x 640 x 640 x 3
-
-
-output size: 7
-    name:  output1 [FLOAT32]
-        1 x 32 x 160 x 160
-
-    name: /model.22/cv4.0/cv4.0.2/Conv_output_0 [FLOAT32]
-        1 x 80 x 80 x 32
-
-    name: /model.22/cv4.1/cv4.1.2/Conv_output_0 [FLOAT32]
-        1 x 40 x 40 x 32
-
-    name: /model.22/cv4.2/cv4.2.2/Conv_output_0 [FLOAT32]
-        1 x 20 x 20 x 32
-
-    name: /model.22/Concat_1_output_0 [FLOAT32]
-        1 x 80 x 80 x 144
-
-    name: /model.22/Concat_2_output_0 [FLOAT32]
-        1 x 40 x 40 x 144
-
-    name: /model.22/Concat_3_output_0 [FLOAT32]
-        1 x 20 x 20 x 144
-
-post process cost time:8.62 ms
---------------------------------------
-Repeat 1 times, avg time 5.16 ms, max_time 5.16 ms, min_time 5.16 ms
---------------------------------------
-detection num: 5
-17:  90%, [ 214,   75,  419,  369], horse
- 0:  83%, [ 272,   13,  349,  232], person
- 7:  77%, [   0,  105,  133,  196], truck
- 0:  77%, [ 427,  125,  451,  175], person
-16:  69%, [ 144,  203,  195,  343], dog
---------------------------------------
-```
-<img src="../../docs/ax650/yolov8_seg_out.jpg">
 
 ### YOLOV8-OBB
 ```
@@ -778,6 +778,87 @@ detection num: 6
 --------------------------------------
 ```
 ![](../../docs/ax650/yolo11_out.jpg)
+
+#### YOLO11-seg
+```
+root@ax650:/# ./ax_yolo11_seg -m yolo11s_seg.axmodel -i ssd_car.jpg
+--------------------------------------
+model file : yolo11s_seg.axmodel
+image file : ssd_car.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+
+input size: 1
+    name:   images [UINT8] [BGR]
+        1 x 640 x 640 x 3
+
+
+output size: 7
+    name: /model.22/Concat_1_output_0 [FLOAT32]
+        1 x 80 x 80 x 144
+
+    name: /model.22/Concat_2_output_0 [FLOAT32]
+        1 x 40 x 40 x 144
+
+    name: /model.22/Concat_3_output_0 [FLOAT32]
+        1 x 20 x 20 x 144
+
+    name: /model.22/cv4.0/cv4.0.2/Conv_output_0 [FLOAT32]
+        1 x 80 x 80 x 32
+
+    name: /model.22/cv4.1/cv4.1.2/Conv_output_0 [FLOAT32]
+        1 x 40 x 40 x 32
+
+    name: /model.22/cv4.2/cv4.2.2/Conv_output_0 [FLOAT32]
+        1 x 20 x 20 x 32
+
+    name:  output1 [FLOAT32]
+        1 x 32 x 160 x 160
+
+post process cost time:8.68 ms
+--------------------------------------
+Repeat 1 times, avg time 4.69 ms, max_time 4.69 ms, min_time 4.69 ms
+--------------------------------------
+detection num: 3
+ 2:  96%, [ 330,  202,  499,  326], car
+ 0:  91%, [ 205,  185,  286,  373], person
+ 5:  89%, [ 128,   67,  450,  299], bus
+--------------------------------------
+```
+![YOLO11-seg](../../docs/ax650/yolo11_seg_out.jpg)
+
+#### YOLO11-pose
+```
+root@ax650:/# ./ax_yolo11_pose -m yolo11s_pose.axmodel -i pose_test.jpg
+--------------------------------------
+model file : yolo11s_pose.axmodel
+image file : pose_test.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:1.31 ms
+--------------------------------------
+Repeat 1 times, avg time 3.35 ms, max_time 3.35 ms, min_time 3.35 ms
+--------------------------------------
+detection num: 4
+ 0:  94%, [ 761,  220, 1128, 1153], person
+ 0:  91%, [1352,  343, 1633, 1033], person
+ 0:  89%, [ 488,  477,  661,  996], person
+ 0:  81%, [   0,  357,  317, 1110], person
+--------------------------------------
+```
+![YOLO11-pose](../../docs/ax650/yolo11_pose_out.jpg)
 
 ### YOLO-WORLD-OPEN-VOCABULARY
 ```

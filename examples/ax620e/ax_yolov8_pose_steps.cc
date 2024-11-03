@@ -74,7 +74,7 @@ namespace ax
             int32_t stride = (1 << i) * 8;
             detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
         }
-
+        
         detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
@@ -95,14 +95,11 @@ namespace ax
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
     {
         // 1. init engine
-#ifdef AXERA_TARGET_CHIP_AX620E
-        auto ret = AX_ENGINE_Init();
-#else
         AX_ENGINE_NPU_ATTR_T npu_attr;
         memset(&npu_attr, 0, sizeof(npu_attr));
         npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_DISABLE;
         auto ret = AX_ENGINE_Init(&npu_attr);
-#endif
+
         if (0 != ret)
         {
             return ret;

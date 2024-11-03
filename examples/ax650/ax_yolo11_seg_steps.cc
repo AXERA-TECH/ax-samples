@@ -15,7 +15,9 @@
 */
 
 /*
+* Note: For the YOLO11 series exported by the ultralytics project.
 * Author: ZHEQIUSHUI
+* Author: QQC
 */
 
 #include <cstdio>
@@ -39,43 +41,49 @@ const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
 const char* CLASS_NAMES[] = {
-    "person",
-};
-const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}};
-const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
-const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
-
-int NUM_CLASS = 1;
-int NUM_POINT = 17;
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
+    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
+    "hair drier", "toothbrush"};
+static const std::vector<std::vector<uint8_t> > COCO_COLORS = {
+    {56, 0, 255}, {226, 255, 0}, {0, 94, 255}, {0, 37, 255}, {0, 255, 94}, {255, 226, 0}, {0, 18, 255}, {255, 151, 0}, {170, 0, 255}, {0, 255, 56}, {255, 0, 75}, {0, 75, 255}, {0, 255, 169}, {255, 0, 207}, {75, 255, 0}, {207, 0, 255}, {37, 0, 255}, {0, 207, 255}, {94, 0, 255}, {0, 255, 113}, {255, 18, 0}, {255, 0, 56}, {18, 0, 255}, {0, 255, 226}, {170, 255, 0}, {255, 0, 245}, {151, 255, 0}, {132, 255, 0}, {75, 0, 255}, {151, 0, 255}, {0, 151, 255}, {132, 0, 255}, {0, 255, 245}, {255, 132, 0}, {226, 0, 255}, {255, 37, 0}, {207, 255, 0}, {0, 255, 207}, {94, 255, 0}, {0, 226, 255}, {56, 255, 0}, {255, 94, 0}, {255, 113, 0}, {0, 132, 255}, {255, 0, 132}, {255, 170, 0}, {255, 0, 188}, {113, 255, 0}, {245, 0, 255}, {113, 0, 255}, {255, 188, 0}, {0, 113, 255}, {255, 0, 0}, {0, 56, 255}, {255, 0, 113}, {0, 255, 188}, {255, 0, 94}, {255, 0, 18}, {18, 255, 0}, {0, 255, 132}, {0, 188, 255}, {0, 245, 255}, {0, 169, 255}, {37, 255, 0}, {255, 0, 151}, {188, 0, 255}, {0, 255, 37}, {0, 255, 0}, {255, 0, 170}, {255, 0, 37}, {255, 75, 0}, {0, 0, 255}, {255, 207, 0}, {255, 0, 226}, {255, 245, 0}, {188, 255, 0}, {0, 255, 18}, {0, 255, 75}, {0, 255, 151}, {255, 56, 0}, {245, 255, 0}};
+int NUM_CLASS = 80;
 
 const int DEFAULT_LOOP_COUNT = 1;
-
+const int DEFAULT_MASK_PROTO_DIM = 32;
+const int DEFAULT_MASK_SAMPLE_STRIDE = 4;
 const float PROB_THRESHOLD = 0.45f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
+        middleware::print_io_info(io_info);
         std::vector<detection::Object> proposals;
         std::vector<detection::Object> objects;
         timer timer_postprocess;
-
-        float* output_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,      // 1*80*80*65
-                                (float*)io_data->pOutputs[1].pVirAddr,      // 1*40*40*65
-                                (float*)io_data->pOutputs[2].pVirAddr};     // 1*20*20*65
-        float* output_kps_ptr[3] = {(float*)io_data->pOutputs[3].pVirAddr,  // 1*80*80*51
-                                    (float*)io_data->pOutputs[4].pVirAddr,  // 1*40*40*51
-                                    (float*)io_data->pOutputs[5].pVirAddr}; // 1*20*20*51
-		
+        float* output_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,      // 1*80*80*144
+                                (float*)io_data->pOutputs[1].pVirAddr,      // 1*40*40*144
+                                (float*)io_data->pOutputs[2].pVirAddr};     // 1*20*20*144
+        float* output_seg_ptr[3] = {(float*)io_data->pOutputs[3].pVirAddr,  // 1*80*80*32
+                                    (float*)io_data->pOutputs[4].pVirAddr,  // 1*40*40*32
+                                    (float*)io_data->pOutputs[5].pVirAddr}; // 1*20*20*32
         for (int i = 0; i < 3; ++i)
         {
             auto feat_ptr = output_ptr[i];
-            auto feat_kps_ptr = output_kps_ptr[i];
+            auto feat_seg_ptr = output_seg_ptr[i];
             int32_t stride = (1 << i) * 8;
-            detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
+            detection::generate_proposals_yolov8_seg_native(stride, feat_ptr, feat_seg_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_CLASS);
         }
+        // 1*32*160*160
+        auto mask_proto_ptr = (float*)io_data->pOutputs[6].pVirAddr;
 
-        detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
+        detection::get_out_bbox_mask(proposals, objects, mask_proto_ptr, DEFAULT_MASK_PROTO_DIM, DEFAULT_MASK_SAMPLE_STRIDE, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -89,20 +97,16 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolov8_pose_out");
+        detection::draw_objects_mask(mat, objects, CLASS_NAMES, COCO_COLORS, "yolo11_seg_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
     {
         // 1. init engine
-#ifdef AXERA_TARGET_CHIP_AX620E
-        auto ret = AX_ENGINE_Init();
-#else
         AX_ENGINE_NPU_ATTR_T npu_attr;
         memset(&npu_attr, 0, sizeof(npu_attr));
         npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_DISABLE;
         auto ret = AX_ENGINE_Init(&npu_attr);
-#endif
         if (0 != ret)
         {
             return ret;
