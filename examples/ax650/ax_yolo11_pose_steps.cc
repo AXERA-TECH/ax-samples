@@ -15,7 +15,9 @@
 */
 
 /*
+* Note: For the YOLO11 series exported by the ultralytics project.
 * Author: ZHEQIUSHUI
+* Author: QQC
 */
 
 #include <cstdio>
@@ -59,10 +61,18 @@ namespace ax
         std::vector<detection::Object> proposals;
         std::vector<detection::Object> objects;
         timer timer_postprocess;
+
+        float* output_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,      // 1*80*80*65
+                                (float*)io_data->pOutputs[1].pVirAddr,      // 1*40*40*65
+                                (float*)io_data->pOutputs[2].pVirAddr};     // 1*20*20*65
+        float* output_kps_ptr[3] = {(float*)io_data->pOutputs[3].pVirAddr,  // 1*80*80*51
+                                    (float*)io_data->pOutputs[4].pVirAddr,  // 1*40*40*51
+                                    (float*)io_data->pOutputs[5].pVirAddr}; // 1*20*20*51
+		
         for (int i = 0; i < 3; ++i)
         {
-            auto feat_ptr = (float*)io_data->pOutputs[i + 3].pVirAddr;
-            auto feat_kps_ptr = (float*)io_data->pOutputs[i].pVirAddr;
+            auto feat_ptr = output_ptr[i];
+            auto feat_kps_ptr = output_kps_ptr[i];
             int32_t stride = (1 << i) * 8;
             detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
         }
@@ -81,7 +91,7 @@ namespace ax
         fprintf(stdout, "--------------------------------------\n");
         fprintf(stdout, "detection num: %zu\n", objects.size());
 
-        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolov8s_pose_out");
+        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolo11_pose_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -91,7 +101,6 @@ namespace ax
         memset(&npu_attr, 0, sizeof(npu_attr));
         npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_DISABLE;
         auto ret = AX_ENGINE_Init(&npu_attr);
-
         if (0 != ret)
         {
             return ret;
