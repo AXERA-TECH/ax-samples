@@ -13,7 +13,7 @@ English | [简体中文](./README.md)
 
 ## Intro
 
-**AX-Samples** by **[Axera] (https://www.axera-tech.com/)** dominate the development. The project has implemented the sample code of the most common **deep learning open source algorithm** on the **AI SoC** of **Axera**, which is convenient for community developers to quickly evaluate and adapt.
+**AX-Samples** by **[Axera](https://www.axera-tech.com/)** dominate the development. The project has implemented the sample code of the most common **deep learning open source algorithm** on the **AI SoC** of **Axera**, which is convenient for community developers to quickly evaluate and adapt.
 
 Support SoC
 
