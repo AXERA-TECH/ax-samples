@@ -50,3 +50,4 @@ axera_example(ax_depth_anything ax_depth_anything_steps.cc)
 
 axera_example(ax_imgproc ax_imgproc_steps.cc)
 axera_example(ax_model_info ax_model_info.cc)
+axera_example(ax_yolo11n_classification ax_yolo11n_classification_steps.cc)
