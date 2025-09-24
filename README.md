@@ -41,8 +41,7 @@
 ### 网盘资源
 
 - 提供 **ModelZoo**, **预编译程序**, **测试图片** 等内容:
-  - [百度网盘](https://pan.baidu.com/s/15g2eRHo1LkcMDZk1H2zMmA?pwd=9amz)
-  - [Google Drive](https://drive.google.com/drive/folders/1JY59vOFS2qxI8TkVIZ0pHfxHMfKPW5PS?usp=sharing)
+  - [huggingface](https://huggingface.co/collections/AXERA-TECH/vision-models-67b0bce92ddc61229e8e94ed)
 
 ### 速度评估
 
@@ -50,9 +49,10 @@
 
 ## 关联项目
 
-- NPU工具链在线文档，其中提供了NPU工具链相关使用说明和获取方式
-  - [Pulsar](https://pulsar-docs.readthedocs.io/zh_CN/latest/)(Support AX630A/AX620A/AX620U)
-  - [Pulsar2](https://pulsar2-docs.readthedocs.io/zh_CN/latest/)(Support AX650A/AX650N/AX630C/AX620Q)
+- NPU工具链在线文档，其中提供了NPU工具链相关使用说明和获取方式（更新不及时）
+  - [Pulsar2在线文档](https://pulsar2-docs.readthedocs.io/zh_CN/latest/)(Support AX650A/AX650N/AX630C/AX620Q)
+- 更推荐直接从下面获取最新 Pulsar2 工具链及文档
+ - [Pulsar2 下载](https://huggingface.co/AXERA-TECH/Pulsar2)
 
 ## 技术讨论
 
