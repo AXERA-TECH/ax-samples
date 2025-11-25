@@ -18,6 +18,9 @@
 # check CMake version
 cmake_minimum_required (VERSION 3.13 FATAL_ERROR)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # disable inplace builds to prevent source tree corruption.
 if (" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
     message (FATAL_ERROR "FATAL: Building inplace are not allowed. You should create a separate directory for Building.")

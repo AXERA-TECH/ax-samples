@@ -93,6 +93,7 @@ namespace middleware
         {
             auto meta = info->pInputs[i];
             auto buffer = &io_data->pInputs[i];
+            buffer->nSize = meta.nSize;
             if (strategy.first == AX_ENGINE_ABST_CACHED)
             {
                 ret = AX_SYS_MemAllocCached((AX_U64*)(&buffer->phyAddr), &buffer->pVirAddr, meta.nSize, AX_CMM_ALIGN_SIZE, (const AX_S8*)(AX_CMM_SESSION_NAME));
