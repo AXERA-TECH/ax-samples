@@ -4,20 +4,12 @@ AX-Samples 将不断更新最流行、实用、有趣的 AX637 示例代码。�
 
 - 物体检测
   - [YOLOv5s](#YOLOv5s)
-  - [YOLOv8s](#YOLOv8s)
   - [YOLO11s](#YOLO11s)
 - 实例分割
-  - [YOLOv5-Seg](#YOLOv5-Seg)
-  - [YOLOv8-Seg](#YOLOv8-Seg)
   - [YOLO11-Seg](#YOLO11-Seg)
-- 人脸检测
-  - [YOLOv5-Face](#YOLOv5-Face)
 - 人体关键点
-  - [YOLOv8-Pose](#YOLOv8-Pose)
   - [YOLO11-Pose](#YOLO11-Pose)
-- 分类
-  - [AX-Classification](#AX-Classification)
-  - [YOLO11n-Classification](#YOLO11n-Classification)
+
 
 
 ### 运行示例
