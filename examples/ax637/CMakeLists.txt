@@ -21,7 +21,17 @@ find_package(OpenCV REQUIRED)
 include("${CMAKE_SOURCE_DIR}/cmake/ax637.cmake")
 
 axera_example(ax_classification ax_classification_steps.cc)
+
 axera_example(ax_yolov5s ax_yolov5s_steps.cc)
+axera_example(ax_yolov5s_seg ax_yolov5s_seg_steps.cc)
+axera_example(ax_yolov5_face ax_yolov5_face_steps.cc)
+
 axera_example(ax_yolov8 ax_yolov8_steps.cc)
+axera_example(ax_yolov8_seg ax_yolov8_seg_steps.cc)
+axera_example(ax_yolov8_pose ax_yolov8_pose_steps.cc)
+
 axera_example(ax_yolo11 ax_yolo11_steps.cc)
+axera_example(ax_yolo11_seg ax_yolo11_seg_steps.cc)
+axera_example(ax_yolo11_pose ax_yolo11_pose_steps.cc)
+axera_example(ax_yolo11n_classification ax_yolo11n_classification_steps.cc)
 
