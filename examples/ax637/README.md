@@ -5,12 +5,11 @@ AX-Samples 将不断更新最流行、实用、有趣的 AX637 示例代码。�
 - 物体检测
   - [YOLOv5s](#YOLOv5s)
   - [YOLO11s](#YOLO11s)
+  - [YOLOv8](#YOLOv8)
 - 实例分割
   - [YOLO11-Seg](#YOLO11-Seg)
 - 人体关键点
   - [YOLO11-Pose](#YOLO11-Pose)
-
-
 
 ### 运行示例
 
@@ -158,3 +157,32 @@ detection num: 6
 ```
 ![YOLOv5s](../../docs/ax637/yolov5s_out.jpg)
 
+#### YOLOv8
+```
+root@m57:/mnt/oss/npu-ci/laguna # ./install/ax_yolov8 -m ./models/yolov8/yolov8.axmodel -i ./models/yolov8/football.jpg
+--------------------------------------
+model file : ./models/yolov8/yolov8.axmodel
+image file : ./models/yolov8/football.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:4.89 ms
+--------------------------------------
+Repeat 1 times, avg time 11.33 ms, max_time 11.33 ms, min_time 11.33 ms
+--------------------------------------
+detection num: 7
+ 0:  93%, [ 756,  216, 1126, 1156], person
+ 0:  93%, [1351,  342, 1633, 1032], person
+ 0:  91%, [ 488,  478,  659,  998], person
+ 0:  91%, [   0,  360,  311, 1104], person
+32:  87%, [ 773,  890,  828,  939], sports ball
+32:  77%, [1231,  876, 1280,  923], sports ball
+ 0:  60%, [1839,  688, 1905,  809], person
+--------------------------------------
+```
+![YOLOv8](../../docs/ax637/yolov8_out.jpg)
