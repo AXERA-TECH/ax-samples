@@ -116,7 +116,7 @@ git clone 下载源码，进入 ax-samples 根目录，创建 cmake 编译任务
 ```bash
 git clone https://github.com/AXERA-TECH/ax-samples.git
 cd ax-samples
-mkdir build & cd build
+mkdir build && cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax650 ..
 make -j6
 make install
