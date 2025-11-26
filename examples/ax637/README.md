@@ -4,11 +4,14 @@ AX-Samples 将不断更新最流行、实用、有趣的 AX637 示例代码。�
 
 - 物体检测
   - [YOLOv5s](#YOLOv5s)
+  - [YOLOv5s_seg](#YOLOv5s_seg)
   - [YOLO11s](#YOLO11s)
   - [YOLOv8](#YOLOv8)
 - 实例分割
+  - [YOLOv8-Seg](#YOLOv8-Seg)
   - [YOLO11-Seg](#YOLO11-Seg)
 - 人体关键点
+  - [YOLOv8-Pose](#YOLOv8-Pose)
   - [YOLO11-Pose](#YOLO11-Pose)
 
 ### 运行示例
@@ -186,3 +189,121 @@ detection num: 7
 --------------------------------------
 ```
 ![YOLOv8](../../docs/ax637/yolov8_out.jpg)
+
+#### YOLOv5s_seg
+```
+root@m57:/mnt/oss/npu-ci/laguna # ./install/ax_yolov5s_seg -m ./nmodel/yolov5s_seg/compiled.axmodel -i nmodel/yolov5s_se
+g/football.jpg
+--------------------------------------
+model file : ./nmodel/yolov5s_seg/compiled.axmodel
+image file : nmodel/yolov5s_seg/football.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:38.43 ms
+--------------------------------------
+Repeat 1 times, avg time 10.54 ms, max_time 10.54 ms, min_time 10.54 ms
+--------------------------------------
+detection num: 7
+ 0:  91%, [ 760,  241, 1120, 1139], person
+ 0:  89%, [  11,  361,  299, 1097], person
+ 0:  88%, [1342,  337, 1636, 1035], person
+ 0:  79%, [ 491,  477,  668, 1017], person
+32:  77%, [ 777,  888,  828,  940], sports ball
+ 0:  55%, [1838,  683, 1908,  809], person
+32:  54%, [1235,  876, 1282,  919], sports ball
+--------------------------------------
+```
+![YOLOv5s_seg](../../docs/ax637/yolov5s_seg_out.jpg)
+
+#### YOLOv8_pose
+```
+root@m57:/mnt/oss/npu-ci/laguna # ./install/ax_yolov8_pose -m ./nmodel/yolov8_pose/compiled.axmodel -i nmodel/yolov8_pose/football.jpg
+--------------------------------------
+model file : ./nmodel/yolov8_pose/compiled.axmodel
+image file : nmodel/yolov8_pose/football.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:1.44 ms
+--------------------------------------
+Repeat 1 times, avg time 11.66 ms, max_time 11.66 ms, min_time 11.66 ms
+--------------------------------------
+detection num: 4
+ 0:  93%, [1349,  337, 1633, 1039], person
+ 0:  93%, [ 760,  212, 1125, 1155], person
+ 0:  90%, [   0,  354,  344, 1104], person
+ 0:  88%, [ 485,  471,  660,  999], person
+--------------------------------------
+```
+![YOLOv8_pose](../../docs/ax637/yolov8_pose_out.jpg)
+
+#### YOLOv8_seg
+```
+root@m57:/mnt/oss/npu-ci/laguna # ./install/ax_yolov8_seg -m ./nmodel/yolov8_seg/compiled.axmodel -i nmodel/yolov8_seg/foot
+ball.jpg
+--------------------------------------
+model file : ./nmodel/yolov8_seg/compiled.axmodel
+image file : nmodel/yolov8_seg/football.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+
+input size: 1
+    name:   images [UINT8] [BGR]
+        1 x 640 x 640 x 3
+
+
+output size: 7
+    name: /model.22/Concat_1_output_0 [FLOAT32]
+        1 x 80 x 80 x 144
+
+    name: /model.22/Concat_2_output_0 [FLOAT32]
+        1 x 40 x 40 x 144
+
+    name: /model.22/Concat_3_output_0 [FLOAT32]
+        1 x 20 x 20 x 144
+
+    name: /model.22/cv4.0/cv4.0.2/Conv_output_0 [FLOAT32]
+        1 x 80 x 80 x 32
+
+    name: /model.22/cv4.1/cv4.1.2/Conv_output_0 [FLOAT32]
+        1 x 40 x 40 x 32
+
+    name: /model.22/cv4.2/cv4.2.2/Conv_output_0 [FLOAT32]
+        1 x 20 x 20 x 32
+
+    name:  output1 [FLOAT32]
+        1 x 32 x 160 x 160
+
+post process cost time:80.52 ms
+--------------------------------------
+Repeat 1 times, avg time 14.51 ms, max_time 14.51 ms, min_time 14.51 ms
+--------------------------------------
+detection num: 8
+ 0:  92%, [1354,  340, 1624, 1035], person
+ 0:  92%, [   0,  359,  317, 1104], person
+ 0:  91%, [ 759,  219, 1124, 1144], person
+ 0:  88%, [ 490,  476,  661,  998], person
+32:  74%, [1232,  876, 1280,  922], sports ball
+32:  63%, [ 450,  882,  475,  900], sports ball
+32:  63%, [ 773,  888,  828,  937], sports ball
+ 0:  50%, [1840,  690, 1905,  811], person
+--------------------------------------
+```
+![YOLOv8_seg](../../docs/ax637/yolov8_seg_out.jpg)
