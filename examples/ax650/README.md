@@ -29,6 +29,9 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [PP-HumanSeg](#PP-HumanSeg)
 - 立体视觉
   - [IGEV-plusplus](#IGEV-plusplus)
+- 语义分割
+  - [DeepLabv3+](#DeepLabv3)
+
 
 ### 运行示例
 
@@ -943,3 +946,24 @@ detection num: 2
 --------------------------------------
 ```
 ![](../../docs/ax650/yolo_world_open_out.jpg)
+
+#### DeepLabv3+
+```
+root@ax650:~# ./ax_deep_lab_v3_plus -i 1_image.png -m deeplabv3plus_mobilenet_u16.axmodel
+--------------------------------------
+model file : deeplabv3plus_mobilenet_u16.axmodel
+image file : 1_image.png
+img_h, img_w : 513 513
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:107.25 ms
+--------------------------------------
+Repeat 1 times, avg time 12.53 ms, max_time 12.53 ms, min_time 12.53 ms
+--------------------------------------
+```
+![](../../docs/ax650/deep_lab_v3_plus_out.png)
