@@ -13,6 +13,8 @@ AX-Samples 将不断更新最流行、实用、有趣的 AX637 示例代码。�
 - 人体关键点
   - [YOLOv8-Pose](#YOLOv8-Pose)
   - [YOLO11-Pose](#YOLO11-Pose)
+- 深度估计
+  - [DepthAnything](#DepthAnythingv2)
 
 ### 运行示例
 
@@ -307,3 +309,25 @@ detection num: 8
 --------------------------------------
 ```
 ![YOLOv8_seg](../../docs/ax637/yolov8_seg_out.jpg)
+
+#### DepthAnything
+```
+root@m57:/mnt/oss/npu-ci/laguna # ./install/ax637/ax_depth_anythingv2 -m DepthAnythingv2.axmodel -i football.jpg
+--------------------------------------
+model file : DepthAnythingv2.axmodel
+image file : football.jpg
+img_h, img_w : 518 518
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:29.05 ms
+--------------------------------------
+Repeat 1 times, avg time 68.98 ms, max_time 68.98 ms, min_time 68.98 ms
+--------------------------------------
+--------------------------------------
+```
+![DepthAnything](../../docs/ax637/depth_anything_out.jpg)
