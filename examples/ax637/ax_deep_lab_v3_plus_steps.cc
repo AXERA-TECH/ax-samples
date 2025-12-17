@@ -23,7 +23,6 @@
 #include <cstring>
 #include <limits>
 #include <numeric>
-#include <tuple>
 #include <vector>
 
 #include <opencv2/opencv.hpp>
@@ -45,7 +44,9 @@ const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
 {
-    using ax_RGB = std::tuple<uint8_t, uint8_t, uint8_t>;
+    struct ax_RGB {
+        uint8_t r, g, b;
+    };
 
     static std::vector<ax_RGB> voc_cmap(int N = 256)
     {
@@ -115,9 +116,9 @@ namespace ax
                 int index = ptr_idx[c] >= 256 ? 255 : ptr_idx[c];
 
                 const auto& rgb = palette[index];
-                ptr_color[c][0] = std::get<2>(rgb); // B
-                ptr_color[c][1] = std::get<1>(rgb); // G
-                ptr_color[c][2] = std::get<0>(rgb); // R
+                ptr_color[c][0] = rgb.b;
+                ptr_color[c][1] = rgb.g;
+                ptr_color[c][2] = rgb.r;
             }
         }
 
