@@ -75,3 +75,4 @@ axera_example(ax_palm_detection ax_palm_detection_steps.cc)
 axera_example(ax_imgproc ax_imgproc_steps.cc)
 axera_example(ax_model_info ax_model_info.cc)
 
+axera_example(ax_superpoint ax_superpoint_steps.cc)

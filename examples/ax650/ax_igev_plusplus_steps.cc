@@ -208,7 +208,7 @@ namespace ax
         fprintf(stdout, "Engine push input is done. \n");
         fprintf(stdout, "--------------------------------------\n");
 
-        // 9. warn up
+        // 9. warm up
         for (int i = 0; i < 5; ++i)
         {
             AX_ENGINE_RunSync(handle, &io_data);
