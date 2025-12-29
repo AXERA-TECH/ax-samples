@@ -15,6 +15,8 @@ AX-Samples 将不断更新最流行、实用、有趣的 AX637 示例代码。�
   - [YOLO11-Pose](#YOLO11-Pose)
 - 深度估计
   - [DepthAnything](#DepthAnythingv2)
+- 语义分割
+  - [DeepLabv3+](#DeepLabv3)
 
 ### 运行示例
 
@@ -331,3 +333,25 @@ Repeat 1 times, avg time 68.98 ms, max_time 68.98 ms, min_time 68.98 ms
 --------------------------------------
 ```
 ![DepthAnything](../../docs/ax637/depth_anything_out.jpg)
+
+#### DeepLabv3+
+```
+root@m57:~ # ./ax_deep_lab_v3_plus_ax637 -i 1_image.png -m deeplabv3plus_mobilenet_u16.axmodel
+--------------------------------------
+model file : deeplabv3plus_mobilenet_u16.axmodel
+image file : 1_image.png
+img_h, img_w : 513 513
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:109.38 ms
+--------------------------------------
+Repeat 1 times, avg time 36.94 ms, max_time 36.94 ms, min_time 36.94 ms
+--------------------------------------
+--------------------------------------
+```
+![](../../docs/ax637/deep_lab_v3_plus_out.png)
