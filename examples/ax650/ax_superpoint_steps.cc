@@ -157,7 +157,7 @@ namespace ax
         // Limit keypoints
         if ((int)keypoints.size() > max_points)
         {
-            std::sort.begin(), keypoints.end(), 
+            std::sort(keypoints.begin(), keypoints.end(), 
                      [](const KeyPoint& a, const KeyPoint& b) { return a.score > b.score; });
             keypoints.resize(max_points);
         }
