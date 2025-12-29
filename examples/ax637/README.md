@@ -17,6 +17,8 @@ AX-Samples 将不断更新最流行、实用、有趣的 AX637 示例代码。�
   - [DepthAnything](#DepthAnythingv2)
 - 语义分割
   - [DeepLabv3+](#DeepLabv3)
+- 关键点匹配
+  - [Superpoint](#Superpoint)
 
 ### 运行示例
 
@@ -355,3 +357,52 @@ Repeat 1 times, avg time 36.94 ms, max_time 36.94 ms, min_time 36.94 ms
 --------------------------------------
 ```
 ![](../../docs/ax637/deep_lab_v3_plus_out.png)
+
+#### Superpoint
+```
+root@ax-ubuntu:~/hcw# ./ax_superpoint -m ./compiled.axmodel -1 1.ppm -2 2.ppm
+--------------------------------------
+model file : ./1229/compiled.axmodel
+image1 file : 1.ppm
+image2 file : 2.ppm
+img_h, img_w : 480 640
+threshold : 0.0050
+max_points : 100
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+
+input size: 1
+    name:    image [FLOAT32] [FEATUREMAP]
+        1 x 1 x 480 x 640
+
+
+output size: 2
+    name:   scores [FLOAT32]
+        1 x 480 x 640
+
+    name: descriptors_dense [FLOAT32]
+        1 x 256 x 60 x 80
+
+Engine alloc io is done.
+Engine push input1 is done.
+--------------------------------------
+Processing image 1:
+Found 100 keypoints in image 1
+Extracted 100 descriptors from image 1
+--------------------------------------
+Image 1 - Repeat 1 times, avg time 96.11 ms, max_time 96.11 ms, min_time 96.11 ms
+--------------------------------------
+Engine push input2 is done.
+--------------------------------------
+Processing image 2:
+Found 100 keypoints in image 2
+Extracted 100 descriptors from image 2
+--------------------------------------
+Image 2 - Repeat 1 times, avg time 96.18 ms, max_time 96.18 ms, min_time 96.18 ms
+--------------------------------------
+Found 57 matches
+Match result saved to superpoint_matches.jpg
+```
+![](../../docs/ax637/superpoint_matches.jpg)
