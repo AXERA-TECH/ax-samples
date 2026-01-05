@@ -31,7 +31,8 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [IGEV-plusplus](#IGEV-plusplus)
 - 语义分割
   - [DeepLabv3+](#DeepLabv3)
-
+- 背景移除
+  - [RMBG](#RMBG-1.4)
 
 ### 运行示例
 
@@ -967,3 +968,35 @@ Repeat 1 times, avg time 12.53 ms, max_time 12.53 ms, min_time 12.53 ms
 --------------------------------------
 ```
 ![](../../docs/ax650/deep_lab_v3_plus_out.png)
+
+### RMBG-1.4
+```
+(base) root@ax650:/home/ax650/RMBG-1.4# ./ax_rmbg -m ./axmodel/rmbg1_4_ax650.axmodel -i ./img/3_1920x1080.jpg
+--------------------------------------
+Model file: ./axmodel/rmbg1_4_ax650.axmodel
+Input image: ./img/3_1920x1080.jpg
+Output image: result.png
+Model input size: 1024 x 1024
+Repeat count: 1
+--------------------------------------
+Original image size: 1920 x 1080, channels: 3
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done. 
+Inputs:
+  [0] name: input, shape: [1, 3, 1024, 1024]
+Outputs:
+  [0] name: output, shape: [1, 1, 1024, 1024]
+Engine alloc io is done. 
+Engine push input is done. 
+--------------------------------------
+Postprocess time: 23.82 ms
+post process cost time:23.89 ms 
+--------------------------------------
+Repeat 1 times, avg time 106.16 ms, max_time 106.16 ms, min_time 106.16 ms
+--------------------------------------
+Saved result image: result.png
+Saved mask: mask.png
+--------------------------------------
+```
+![](../../docs/ax650/rmbg_out.jpeg)
