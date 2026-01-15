@@ -1315,7 +1315,7 @@ namespace detection
     }
 
     static void generate_proposals_yolov9(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                                 int letterbox_cols, int letterbox_rows, int cls_num = 80)
+                                          int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
@@ -1379,7 +1379,7 @@ namespace detection
             }
         }
     }
-    
+
     static void generate_proposals_yolov8_native(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
                                                  int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
@@ -1594,7 +1594,7 @@ namespace detection
         }
     }
 
-        static void generate_proposals_yolo_world(int stride, const float* feat_cls, const float* feat_reg, float exp, float bias, float prob_threshold, std::vector<Object>& objects,
+    static void generate_proposals_yolo_world(int stride, const float* feat_cls, const float* feat_reg, float exp, float bias, float prob_threshold, std::vector<Object>& objects,
                                               int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
@@ -2824,16 +2824,16 @@ namespace detection
             return std::max(std::min(v, max), min);
         }
         static inline void get_covariance_matrix(
-            const std::vector<Object>& objects, 
+            const std::vector<Object>& objects,
             std::vector<cv::Point3f>& covar_maxtirx)
         {
             int n = objects.size();
-            for (size_t i = 0; i < n; ++i) {
-
+            for (size_t i = 0; i < n; ++i)
+            {
                 float a = objects[i].rect.width * objects[i].rect.width * 0.0833333333f;
                 float b = objects[i].rect.height * objects[i].rect.height * 0.0833333333f;
                 float c = objects[i].angle;
-                
+
                 float c_sin = std::sin(c);
                 float c_cos = std::cos(c);
 
@@ -2844,15 +2844,16 @@ namespace detection
             }
         }
 
-        static inline float fast_log2 (float x)
+        static inline float fast_log2(float x)
         {
-            union {
-                float f; 
+            union
+            {
+                float f;
                 int i;
             } v;
             v.f = x;
             int* const exp_ptr = &v.i;
-            int m  = *exp_ptr;
+            int m = *exp_ptr;
             const int log_2 = ((m >> 23) & 255) - 128;
             m &= ~(255 << 23);
             m += 127 << 23;
@@ -2860,18 +2861,17 @@ namespace detection
             return (((-1.f / 3) * v.f + 2) * v.f - 2.f / 3 + log_2);
         }
 
-        static inline float fast_log (const float x)
+        static inline float fast_log(const float x)
         {
-            return 0.69314718f * fast_log2 (x);
+            return 0.69314718f * fast_log2(x);
         }
-        
+
         static inline float probiou(
             const Object& obj1,
             const Object& obj2,
             const cv::Point3f& covar1,
             const cv::Point3f& covar2)
         {
-            
             float v_x1_x2 = covar1.x + covar2.x;
             float v_y1_y2 = covar1.y + covar2.y;
             float x1_x2 = obj1.rect.x - obj2.rect.x;
@@ -2879,39 +2879,41 @@ namespace detection
             float dem1 = clamp_(covar1.x * covar1.y - covar1.z * covar1.z);
             float dem2 = clamp_(covar2.x * covar2.y - covar2.z * covar2.z);
             float dem_num = v_x1_x2 * v_y1_y2 - (covar1.z + covar2.z) * (covar1.z + covar2.z);
-            
+
             float t1 = (v_x1_x2 * y1_y2 * y1_y2 + v_y1_y2 * x1_x2 * x1_x2) / (dem_num + 1e-7) * 0.25f;
             float t2 = ((covar1.z + covar2.z) * (-x1_x2) * y1_y2) / (dem_num + 1e-7) * 0.5f;
             float t3 = fast_log(0.25f * dem_num / (std::sqrt(dem1 * dem2) + 1e-7) + 1e-7) * 0.5f;
-           
+
             float bd = t1 + t2 + t3;
             float iou = fast_exp(-clamp_(bd, 1e-7, 100.f));
             return iou;
         }
 
         static inline void nms_rotated_sorted_bboxes(
-            const std::vector<Object>& objects, 
+            const std::vector<Object>& objects,
             std::vector<int>& picked,
             float nms_threshold)
         {
             std::vector<cv::Point3f> covar_maxtrix;
             get_covariance_matrix(objects, covar_maxtrix);
-            
+
             float nms_threshold_ = (1.f - nms_threshold) * (1.f - nms_threshold);
             int n = objects.size();
-            
-            for (size_t i = 0; i < n; ++i) {
+
+            for (size_t i = 0; i < n; ++i)
+            {
                 float max_iou = 0.f;
                 const Object& obj1 = objects[i];
 
-                for (size_t j = 0; j < i; ++j) {
+                for (size_t j = 0; j < i; ++j)
+                {
                     const Object& obj2 = objects[j];
-                    
+
                     float iou = probiou(obj1, obj2, covar_maxtrix[i], covar_maxtrix[j]);
-                    if (iou > max_iou){
+                    if (iou > max_iou)
+                    {
                         max_iou = iou;
                     }
-                    
                 }
                 if (max_iou < nms_threshold_)
                     picked.push_back(i);
@@ -2922,7 +2924,7 @@ namespace detection
             qsort_descent_inplace(proposals);
             std::vector<int> picked;
             obb::nms_rotated_sorted_bboxes(proposals, picked, nms_threshold);
-            
+
             /* yolov5 draw the result */
             float scale_letterbox;
             int resize_rows;
@@ -2948,9 +2950,10 @@ namespace detection
             double pi = M_PI;
             double pi_2 = M_PI_2;
             objects.resize(count);
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 objects[i] = proposals[picked[i]];
-                
+
                 float w_ = objects[i].rect.width > objects[i].rect.height ? objects[i].rect.width : objects[i].rect.height;
                 float h_ = objects[i].rect.width > objects[i].rect.height ? objects[i].rect.height : objects[i].rect.width;
                 float a_ = (float)std::fmod((objects[i].rect.width > objects[i].rect.height ? objects[i].angle : objects[i].angle + pi_2), pi);
@@ -2966,7 +2969,6 @@ namespace detection
                 w = std::max(std::min(w, (float)(src_cols - 1)), 0.f);
                 h = std::max(std::min(h, (float)(src_rows - 1)), 0.f);
 
-
                 objects[i].rect.x = xc;
                 objects[i].rect.y = yc;
                 objects[i].rect.width = w;
@@ -2975,7 +2977,7 @@ namespace detection
             }
         }
         static void generate_proposals_yolov8_obb_native(const std::vector<GridAndStride>& grid_strides, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                                 int letterbox_cols, int letterbox_rows, int cls_num = 15)
+                                                         int letterbox_cols, int letterbox_rows, int cls_num = 15)
         {
             const int num_points = grid_strides.size();
             int reg_max = 16;
@@ -3041,7 +3043,8 @@ namespace detection
                 {128, 56, 0, 255}, {128, 226, 255, 0}, {128, 0, 94, 255}, {128, 0, 37, 255}, {128, 0, 255, 94}, {128, 255, 226, 0}, {128, 0, 18, 255}, {128, 255, 151, 0}, {128, 170, 0, 255}, {128, 0, 255, 56}, {128, 255, 0, 75}, {128, 0, 75, 255}, {128, 0, 255, 169}, {128, 255, 0, 207}, {128, 75, 255, 0}, {128, 207, 0, 255}, {128, 37, 0, 255}, {128, 0, 207, 255}, {128, 94, 0, 255}, {128, 0, 255, 113}, {128, 255, 18, 0}, {128, 255, 0, 56}, {128, 18, 0, 255}, {128, 0, 255, 226}, {128, 170, 255, 0}, {128, 255, 0, 245}, {128, 151, 255, 0}, {128, 132, 255, 0}, {128, 75, 0, 255}, {128, 151, 0, 255}, {128, 0, 151, 255}, {128, 132, 0, 255}, {128, 0, 255, 245}, {128, 255, 132, 0}, {128, 226, 0, 255}, {128, 255, 37, 0}, {128, 207, 255, 0}, {128, 0, 255, 207}, {128, 94, 255, 0}, {128, 0, 226, 255}, {128, 56, 255, 0}, {128, 255, 94, 0}, {128, 255, 113, 0}, {128, 0, 132, 255}, {128, 255, 0, 132}, {128, 255, 170, 0}, {128, 255, 0, 188}, {128, 113, 255, 0}, {128, 245, 0, 255}, {128, 113, 0, 255}, {128, 255, 188, 0}, {128, 0, 113, 255}, {128, 255, 0, 0}, {128, 0, 56, 255}, {128, 255, 0, 113}, {128, 0, 255, 188}, {128, 255, 0, 94}, {128, 255, 0, 18}, {128, 18, 255, 0}, {128, 0, 255, 132}, {128, 0, 188, 255}, {128, 0, 245, 255}, {128, 0, 169, 255}, {128, 37, 255, 0}, {128, 255, 0, 151}, {128, 188, 0, 255}, {128, 0, 255, 37}, {128, 0, 255, 0}, {128, 255, 0, 170}, {128, 255, 0, 37}, {128, 255, 75, 0}, {128, 0, 0, 255}, {128, 255, 207, 0}, {128, 255, 0, 226}, {128, 255, 245, 0}, {128, 188, 255, 0}, {128, 0, 255, 18}, {128, 0, 255, 75}, {128, 0, 255, 151}, {128, 255, 56, 0}, {128, 245, 255, 0}};
             cv::Mat image = bgr.clone();
 
-            for (size_t i = 0; i < objects.size(); i++){
+            for (size_t i = 0; i < objects.size(); i++)
+            {
                 const Object& obj = objects[i];
 
                 fprintf(stdout, "%2d: %3.0f%%, [%4.0f, %4.0f, %4.0f, %4.0f], %s\n", obj.label, obj.prob * 100, obj.rect.x,
@@ -3056,12 +3059,12 @@ namespace detection
                     float wy = w / 2 * std::sin(ag);
                     float hx = -h / 2 * std::sin(ag);
                     float hy = h / 2 * std::cos(ag);
-                    cv::Point2f p1{ xc - wx - hx, yc - wy - hy };
-                    cv::Point2f p2{ xc + wx - hx, yc + wy - hy };
-                    cv::Point2f p3{ xc + wx + hx, yc + wy + hy };
-                    cv::Point2f p4{ xc - wx + hx, yc - wy + hy };
-                    std::vector<cv::Point> points = { p1, p2, p3, p4, p1 };
-                    std::vector<std::vector<cv::Point>> contours= { points };
+                    cv::Point2f p1{xc - wx - hx, yc - wy - hy};
+                    cv::Point2f p2{xc + wx - hx, yc + wy - hy};
+                    cv::Point2f p3{xc + wx + hx, yc + wy + hy};
+                    cv::Point2f p4{xc - wx + hx, yc - wy + hy};
+                    std::vector<cv::Point> points = {p1, p2, p3, p4, p1};
+                    std::vector<std::vector<cv::Point> > contours = {points};
                     cv::polylines(image, contours, true, COCO_COLORS[obj.label], thickness, cv::LINE_AA);
                 }
             }
@@ -3071,7 +3074,7 @@ namespace detection
     } // namespace obb
 
     static void generate_proposals_yolov10(int stride, const float* feat, float prob_threshold, std::vector<Object>& objects,
-                                         int letterbox_cols, int letterbox_rows, int cls_num = 80)
+                                           int letterbox_cols, int letterbox_rows, int cls_num = 80)
     {
         int feat_w = letterbox_cols / stride;
         int feat_h = letterbox_rows / stride;
@@ -3091,15 +3094,15 @@ namespace detection
                     {
                         c_index = c;
                         c_score = score;
-                    } 
+                    }
                 }
 
-                if(c_score >= prob_threshold)
+                if (c_score >= prob_threshold)
                 {
-                    float x0 = w + 0.5f - mmyolo::fast_softmax(feat_ptr + cls_num  +  0 * 16,dis, 16);
-                    float y0 = h + 0.5f - mmyolo::fast_softmax(feat_ptr + cls_num  +  1 * 16,dis, 16);
-                    float x1 = w + 0.5f + mmyolo::fast_softmax(feat_ptr + cls_num  +  2 * 16,dis, 16);
-                    float y1 = h + 0.5f + mmyolo::fast_softmax(feat_ptr + cls_num  +  3 * 16,dis, 16);
+                    float x0 = w + 0.5f - mmyolo::fast_softmax(feat_ptr + cls_num + 0 * 16, dis, 16);
+                    float y0 = h + 0.5f - mmyolo::fast_softmax(feat_ptr + cls_num + 1 * 16, dis, 16);
+                    float x1 = w + 0.5f + mmyolo::fast_softmax(feat_ptr + cls_num + 2 * 16, dis, 16);
+                    float y1 = h + 0.5f + mmyolo::fast_softmax(feat_ptr + cls_num + 3 * 16, dis, 16);
 
                     x0 *= stride;
                     y0 *= stride;
@@ -3109,15 +3112,78 @@ namespace detection
                     Object obj;
                     obj.rect.x = x0;
                     obj.rect.y = y0;
-                    obj.rect.width = x1 - x0;;
+                    obj.rect.width = x1 - x0;
                     obj.rect.height = y1 - y0;
                     obj.label = c_index;
                     obj.prob = c_score;
                     objects.push_back(obj);
                 }
-                feat_ptr += (cls_num  +  4 * 16);        
+                feat_ptr += (cls_num + 4 * 16);
             }
         }
     }
-    
+
+    static void generate_proposals_yolo26(int stride, const float* feat, const float* feat_cls, float prob_threshold, std::vector<Object>& objects,
+                                          int letterbox_cols, int letterbox_rows, int cls_num = 80)
+    {
+        const int feat_w = letterbox_cols / stride;
+        const int feat_h = letterbox_rows / stride;
+
+        const float p = std::min(std::max(prob_threshold, 1e-6f), 1.f - 1e-6f);
+        const float conf_raw = std::log(p / (1.f - p));
+
+        for (int h = 0; h < feat_h; ++h)
+        {
+            for (int w = 0; w < feat_w; ++w)
+            {
+                int best_c = 0;
+                float best_logit = -FLT_MAX;
+                const float* cls_ptr = feat_cls + (h * feat_w + w) * cls_num;
+                for (int c = 0; c < cls_num; ++c)
+                {
+                    float v = cls_ptr[c];
+                    if (v > best_logit)
+                    {
+                        best_logit = v;
+                        best_c = c;
+                    }
+                }
+
+                if (best_logit < conf_raw)
+                {
+                    continue;
+                }
+
+                const float score = sigmoid(best_logit);
+
+                const float* box_ptr = feat + (h * feat_w + w) * 4;
+                const float l = box_ptr[0];
+                const float t = box_ptr[1];
+                const float r = box_ptr[2];
+                const float b = box_ptr[3];
+
+                const float cx = (w + 0.5f) * stride;
+                const float cy = (h + 0.5f) * stride;
+
+                float x0 = (cx - l * stride);
+                float y0 = (cy - t * stride);
+                float x1 = (cx + r * stride);
+                float y1 = (cy + b * stride);
+
+                x0 = std::max(0.f, std::min(x0, (float)(letterbox_cols - 1)));
+                y0 = std::max(0.f, std::min(y0, (float)(letterbox_rows - 1)));
+                x1 = std::max(0.f, std::min(x1, (float)(letterbox_cols - 1)));
+                y1 = std::max(0.f, std::min(y1, (float)(letterbox_rows - 1)));
+
+                Object obj;
+                obj.rect.x = x0;
+                obj.rect.y = y0;
+                obj.rect.width = x1 - x0;
+                obj.rect.height = y1 - y0;
+                obj.label = best_c;
+                obj.prob = score;
+                objects.push_back(obj);
+            }
+        }
+    }
 } // namespace detection
