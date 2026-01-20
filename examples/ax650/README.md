@@ -11,6 +11,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv9](#YOLOv9)
   - [YOLOv10](#YOLOv10)
   - [YOLO11](#YOLO11)
+  - [YOLO26](#YOLO26)
 - 物体分割
   - [YOLOv5-seg](#YOLOv5-seg)
   - [YOLOv8-seg](#YOLOv8-seg)
@@ -822,6 +823,34 @@ detection num: 6
 --------------------------------------
 ```
 ![](../../docs/ax650/yolo11_out.jpg)
+
+### YOLO26
+```
+(base) root@ax650:~# ./ax_yolo26 -m ./ax650/yolo26n.axmodel -i BUS.JPG
+--------------------------------------
+model file : ./ax650/yolo26n.axmodel
+image file : BUS.JPG
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:3.06 ms
+--------------------------------------
+Repeat 1 times, avg time 1.38 ms, max_time 1.38 ms, min_time 1.38 ms
+--------------------------------------
+detection num: 5
+ 5:  94%, [   6,  233,  801,  752], bus
+ 0:  94%, [  51,  396,  241,  904], person
+ 0:  91%, [ 227,  406,  345,  861], person
+ 0:  80%, [ 670,  389,  809,  876], person
+ 0:  50%, [   0,  556,   64,  872], person
+--------------------------------------
+```
+![YOLO26](../../docs/ax650/yolo26_out.jpg)
 
 #### YOLO11-seg
 ```
