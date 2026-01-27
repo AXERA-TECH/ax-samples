@@ -43,7 +43,7 @@ const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
 {
-    int find_max(float *ptr, int len, float &max_val)
+    int find_max(float* ptr, int len, float& max_val)
     {
         max_val = -FLT_MAX;
         int max_idx = -1;
@@ -58,7 +58,7 @@ namespace ax
         return max_idx;
     }
 
-    void post_process(AX_ENGINE_IO_INFO_T *io_info, AX_ENGINE_IO_T *io_data, const cv::Mat &mat, const std::vector<float> &time_costs)
+    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, const std::vector<float>& time_costs)
     {
         // https://github.com/PaddlePaddle/PaddleClas/blob/a89269e5393ad6106277199650e3cc411ddee61c/deploy/python/postprocess.py#L192
 
@@ -68,48 +68,48 @@ namespace ax
         static float glasses_threshold = 0.3;
         static float hold_threshold = 0.6;
 
-        auto &output = io_data->pOutputs[0];
-        auto &info = io_info->pOutputs[0];
-        auto ptr = (float *)output.pVirAddr;
+        auto& output = io_data->pOutputs[0];
+        auto& info = io_info->pOutputs[0];
+        auto ptr = (float*)output.pVirAddr;
 
-        static const char *age_list_en[] = {"AgeLess18", "Age18-60", "AgeOver60"};
-        static const char *direct_list_en[] = {"Front", "Side", "Back"};
-        static const char *bag_list_en[] = {"HandBag", "ShoulderBag", "Backpack"};
-        static const char *sleeve_list_en[] = {"ShortSleeve", "LongSleeve"};
-        static const char *upper_list_en[] = {"UpperStride", "UpperLogo", "UpperPlaid", "UpperSplice"};
-        static const char *lower_list_en[] = {"LowerStripe", "LowerPattern", "LongCoat", "Trousers", "Shorts", "Skirt&Dress"};
+        static const char* age_list_en[] = {"AgeLess18", "Age18-60", "AgeOver60"};
+        static const char* direct_list_en[] = {"Front", "Side", "Back"};
+        static const char* bag_list_en[] = {"HandBag", "ShoulderBag", "Backpack"};
+        static const char* sleeve_list_en[] = {"ShortSleeve", "LongSleeve"};
+        static const char* upper_list_en[] = {"UpperStride", "UpperLogo", "UpperPlaid", "UpperSplice"};
+        static const char* lower_list_en[] = {"LowerStripe", "LowerPattern", "LongCoat", "Trousers", "Shorts", "Skirt&Dress"};
 
-        static const char *age_list_chs[] = {"小于18岁", "18到60岁", "大于60岁"};
-        static const char *direct_list_chs[] = {"前", "侧", "后"};
-        static const char *bag_list_chs[] = {"手包", "肩袋", "背包"};
-        static const char *sleeve_list_chs[] = {"短袖", "长袖"};
-        static const char *upper_list_chs[] = {"条纹", "图案", "格子", "拼接"};
-        static const char *lower_list_chs[] = {"下条纹", "下图案", "长外套", "长裤", "短裤", "短裙&长裙"};
+        static const char* age_list_chs[] = {"小于18岁", "18到60岁", "大于60岁"};
+        static const char* direct_list_chs[] = {"前", "侧", "后"};
+        static const char* bag_list_chs[] = {"手包", "肩袋", "背包"};
+        static const char* sleeve_list_chs[] = {"短袖", "长袖"};
+        static const char* upper_list_chs[] = {"条纹", "图案", "格子", "拼接"};
+        static const char* lower_list_chs[] = {"下条纹", "下图案", "长外套", "长裤", "短裤", "短裙&长裙"};
 
-        const char **age_list = age_list_chs;
-        const char **direct_list = direct_list_chs;
-        const char **bag_list = bag_list_chs;
-        const char **sleeve_list = sleeve_list_chs;
-        const char **upper_list = upper_list_chs;
-        const char **lower_list = lower_list_chs;
+        const char** age_list = age_list_chs;
+        const char** direct_list = direct_list_chs;
+        const char** bag_list = bag_list_chs;
+        const char** sleeve_list = sleeve_list_chs;
+        const char** upper_list = upper_list_chs;
+        const char** lower_list = lower_list_chs;
 
-        const char *hat = "False";
+        const char* hat = "False";
         if (ptr[0] > threshold)
             hat = "True";
 
-        const char *glasses = "False";
+        const char* glasses = "False";
         if (ptr[1] > glasses_threshold)
             glasses = "True";
 
-        const char *shoe = "NoBoots";
+        const char* shoe = "NoBoots";
         if (ptr[4] > threshold)
             shoe = "Boots";
 
-        const char *hold_obj = "False";
+        const char* hold_obj = "False";
         if (ptr[18] > hold_threshold)
             hold_obj = "True";
 
-        const char *gender = "Male";
+        const char* gender = "Male";
         if (ptr[22] > threshold)
             gender = "Female";
 
@@ -118,7 +118,7 @@ namespace ax
         upper_label += sleeve_list[ptr[3] > ptr[2] ? 1 : 0];
         upper_label += " # ";
 
-        float *upper_ptr = ptr + 4;
+        float* upper_ptr = ptr + 4;
         for (size_t i = 0; i < 4; i++)
         {
             if (upper_ptr[i] > threshold)
@@ -129,7 +129,7 @@ namespace ax
         }
 
         std::string lower_label = "";
-        float *lower_ptr = ptr + 8;
+        float* lower_ptr = ptr + 8;
         for (size_t i = 0; i < 6; i++)
         {
             if (lower_ptr[i] > threshold)
@@ -141,7 +141,7 @@ namespace ax
 
         float bag_prob_max_val;
         int bag_idx = find_max(ptr + 15, 3, bag_prob_max_val);
-        const char *bag = bag_list[bag_idx];
+        const char* bag = bag_list[bag_idx];
         if (bag_prob_max_val < threshold)
         {
             bag = "NoBag";
@@ -149,11 +149,11 @@ namespace ax
 
         float age_prob_max_val;
         int age_idx = find_max(ptr + 19, 3, age_prob_max_val);
-        const char *age = age_list[age_idx];
+        const char* age = age_list[age_idx];
 
         float direction_prob_max_val;
         int direction_idx = find_max(ptr + 23, 3, direction_prob_max_val);
-        const char *direction = direct_list[direction_idx];
+        const char* direction = direct_list[direction_idx];
 
         fprintf(stdout, "cost time:%.2f ms \n", timer_postprocess.cost());
 
@@ -181,7 +181,7 @@ namespace ax
                 *min_max_time.first);
     }
 
-    bool run_model(const std::string &model, const std::vector<uint8_t> &data, const int &repeat, cv::Mat &mat)
+    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat)
     {
         // 1. init engine
 #ifdef AXERA_TARGET_CHIP_AX620E
@@ -217,7 +217,7 @@ namespace ax
         fprintf(stdout, "Engine creating context is done.\n");
 
         // 5. set io
-        AX_ENGINE_IO_INFO_T *io_info;
+        AX_ENGINE_IO_INFO_T* io_info;
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
         fprintf(stdout, "Engine get io info is done. \n");
@@ -259,7 +259,7 @@ namespace ax
     }
 } // namespace ax
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
@@ -278,8 +278,7 @@ int main(int argc, char *argv[])
 
     if (!model_file_flag | !image_file_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
@@ -303,8 +302,7 @@ int main(int argc, char *argv[])
 
     if (!input_size_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 

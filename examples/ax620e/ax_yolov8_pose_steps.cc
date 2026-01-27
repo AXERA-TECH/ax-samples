@@ -66,7 +66,7 @@ namespace ax
         float* output_kps_ptr[3] = {(float*)io_data->pOutputs[3].pVirAddr,  // 1*80*80*51
                                     (float*)io_data->pOutputs[4].pVirAddr,  // 1*40*40*51
                                     (float*)io_data->pOutputs[5].pVirAddr}; // 1*20*20*51
-		
+
         for (int i = 0; i < 3; ++i)
         {
             auto feat_ptr = output_ptr[i];
@@ -74,7 +74,7 @@ namespace ax
             int32_t stride = (1 << i) * 8;
             detection::generate_proposals_yolov8_pose_native(stride, feat_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
         }
-        
+
         detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");

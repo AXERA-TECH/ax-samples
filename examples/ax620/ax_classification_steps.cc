@@ -38,19 +38,16 @@
 #include "joint.h"
 #include "joint_adv.h"
 
-
 const int DEFAULT_IMG_H = 224;
 const int DEFAULT_IMG_W = 224;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-
 namespace ax
 {
     namespace cls = classification;
-    namespace mw  = middleware;
+    namespace mw = middleware;
     namespace utl = utilities;
-
 
     bool run_classification(const std::string& model, const std::vector<uint8_t>& data, const int& repeat)
     {
@@ -91,8 +88,7 @@ namespace ax
             return false;
         }
 
-        auto deinit_joint = [&joint_handle]()
-        {
+        auto deinit_joint = [&joint_handle]() {
             AX_JOINT_DestroyHandle(joint_handle);
             AX_JOINT_Adv_Deinit();
             return false;
@@ -131,7 +127,6 @@ namespace ax
             return deinit_joint();
         }
 
-
         // 2. fill input & prepare to inference
         AX_JOINT_IO_T joint_io_arr;
         AX_JOINT_IO_SETTING_T joint_io_setting;
@@ -147,9 +142,7 @@ namespace ax
         }
         joint_io_arr.pIoSetting = &joint_io_setting;
 
-
-        auto clear_and_exit = [&joint_io_arr, &joint_ctx, &joint_handle]()
-        {
+        auto clear_and_exit = [&joint_io_arr, &joint_ctx, &joint_handle]() {
             for (size_t i = 0; i < joint_io_arr.nInputSize; ++i)
             {
                 AX_JOINT_IO_BUFFER_T* pBuf = joint_io_arr.pInputs + i;
@@ -170,7 +163,6 @@ namespace ax
             return false;
         };
 
-
         // 3. get the init profile info.
         AX_JOINT_COMPONENT_T* joint_comps;
         uint32_t joint_comp_size;
@@ -189,21 +181,20 @@ namespace ax
             auto& comp = joint_comps[j];
             switch (comp.eType)
             {
-                case AX_JOINT_COMPONENT_TYPE_T::AX_JOINT_COMPONENT_TYPE_NEU:
-                {
-                    duration_neu_init_us += comp.tProfile.nInitUs;
-                    break;
-                }
-                case AX_JOINT_COMPONENT_TYPE_T::AX_JOINT_COMPONENT_TYPE_AXE:
-                {
-                    duration_axe_init_us += comp.tProfile.nInitUs;
-                    break;
-                }
-                default:
-                    fprintf(stderr, "Unknown component type %d.\n", (int)comp.eType);
+            case AX_JOINT_COMPONENT_TYPE_T::AX_JOINT_COMPONENT_TYPE_NEU:
+            {
+                duration_neu_init_us += comp.tProfile.nInitUs;
+                break;
+            }
+            case AX_JOINT_COMPONENT_TYPE_T::AX_JOINT_COMPONENT_TYPE_AXE:
+            {
+                duration_axe_init_us += comp.tProfile.nInitUs;
+                break;
+            }
+            default:
+                fprintf(stderr, "Unknown component type %d.\n", (int)comp.eType);
             }
         }
-
 
         // 4. run & benchmark
         uint32_t duration_neu_core_us = 0, duration_neu_total_us = 0;
@@ -246,7 +237,6 @@ namespace ax
             }
         }
 
-
         // 5. get top K
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
@@ -266,7 +256,6 @@ namespace ax
             cls::sort_score(result);
             cls::print_score(result, 5);
         }
-
 
         // 6. show time costs
         fprintf(stdout, "--------------------------------------\n");
@@ -291,8 +280,7 @@ namespace ax
         clear_and_exit();
         return true;
     }
-}
-
+} // namespace ax
 
 int main(int argc, char* argv[])
 {
@@ -304,7 +292,6 @@ int main(int argc, char* argv[])
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
     cmd.parse_check(argc, argv);
 
-
     // 0. get app args, can be removed from user's app
     auto model_file = cmd.get<std::string>("model");
     auto image_file = cmd.get<std::string>("image");
@@ -314,8 +301,7 @@ int main(int argc, char* argv[])
 
     if (!model_file_flag | !image_file_flag)
     {
-        auto show_error = [](const std::string& kind, const std::string& value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
@@ -327,14 +313,13 @@ int main(int argc, char* argv[])
 
     auto input_size_string = cmd.get<std::string>("size");
 
-    std::array<int, 2> input_size = { DEFAULT_IMG_H, DEFAULT_IMG_W };
+    std::array<int, 2> input_size = {DEFAULT_IMG_H, DEFAULT_IMG_W};
 
     auto input_size_flag = utilities::parse_string(input_size_string, input_size);
 
     if (!input_size_flag)
     {
-        auto show_error = [](const std::string& kind, const std::string& value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 
@@ -345,14 +330,12 @@ int main(int argc, char* argv[])
 
     auto repeat = cmd.get<int>("repeat");
 
-
     // 1. print args
     fprintf(stdout, "--------------------------------------\n");
 
     fprintf(stdout, "model file : %s\n", model_file.c_str());
     fprintf(stdout, "image file : %s\n", image_file.c_str());
     fprintf(stdout, "img_h, img_w : %d %d\n", input_size[0], input_size[1]);
-
 
     // 2. read image & resize & transpose
     std::vector<uint8_t> image(input_size[1] * input_size[0] * 3);
@@ -365,7 +348,6 @@ int main(int argc, char* argv[])
     cv::Mat img_new(input_size[0], input_size[1], CV_8UC3, image.data());
     cv::resize(mat, img_new, cv::Size(input_size[1], input_size[0]));
 
-    
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.
     //   this init ONLY will be used in demo apps to avoid using a none inited
@@ -380,11 +362,9 @@ int main(int argc, char* argv[])
         return ret;
     }
 
-
     // 4. show the version (optional)
     fprintf(stdout, "Run-Joint Runtime version: %s\n", AX_JOINT_GetVersion());
     fprintf(stdout, "--------------------------------------\n");
-
 
     // 5. run the processing
     auto flag = ax::run_classification(model_file, image, repeat);
@@ -392,7 +372,6 @@ int main(int argc, char* argv[])
     {
         fprintf(stderr, "Run classification failed.\n");
     }
-
 
     // 6. last de-init
     //   as step 1, if the device inited by another app, DO NOT de-init the

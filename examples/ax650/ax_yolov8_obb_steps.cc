@@ -41,8 +41,7 @@ const int DEFAULT_IMG_W = 1024;
 static const char* CLASS_NAMES[] = {
     "plane", "ship", "storage tank", "baseball diamond", "tennis court",
     "basketball court", "ground track field", "harbor", "bridge", "large vehicle",
-    "small vehicle", "helicopter", "roundabout", "soccer ball field", "swimming pool"
-};
+    "small vehicle", "helicopter", "roundabout", "soccer ball field", "swimming pool"};
 
 int NUM_CLASS = 15;
 
@@ -58,7 +57,7 @@ namespace ax
         std::vector<detection::Object> objects;
         timer timer_postprocess;
 
-        std::vector<int> strides = { 8, 16, 32 };
+        std::vector<int> strides = {8, 16, 32};
         std::vector<detection::GridAndStride> grid_strides;
         detection::generate_grids_and_stride(input_w, input_h, strides, grid_strides);
 

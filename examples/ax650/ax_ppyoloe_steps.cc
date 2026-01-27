@@ -38,7 +38,7 @@
 const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 const int num_class = 80;
-const char *CLASS_NAMES[] = {
+const char* CLASS_NAMES[] = {
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
     "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
     "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
@@ -56,7 +56,7 @@ const float PROB_THRESHOLD = 0.45f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
-    static void generate_proposals_ppyoloe(std::vector<detection::Object> &objects, const float *cls_ptr, const float *reg_ptr, float prob_threshold, int num_grid = 8400, int cls_num = 80)
+    static void generate_proposals_ppyoloe(std::vector<detection::Object>& objects, const float* cls_ptr, const float* reg_ptr, float prob_threshold, int num_grid = 8400, int cls_num = 80)
     {
         int stride32_grid = sqrt(num_grid / 21);
         int stride16_grid = stride32_grid * 2;
@@ -128,15 +128,15 @@ namespace ax
         }
     }
 
-    void post_process(AX_ENGINE_IO_INFO_T *io_info, AX_ENGINE_IO_T *io_data, const cv::Mat &mat, int input_w, int input_h, const std::vector<float> &time_costs)
+    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
         std::vector<detection::Object> proposals;
         std::vector<detection::Object> objects;
         float prob_threshold_u_sigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
         timer timer_postprocess;
         int num_grid = io_info->pOutputs[0].pShape[1];
-        const float *cls_ptr = (float *)io_data->pOutputs[0].pVirAddr;
-        const float *reg_ptr = (float *)io_data->pOutputs[1].pVirAddr;
+        const float* cls_ptr = (float*)io_data->pOutputs[0].pVirAddr;
+        const float* reg_ptr = (float*)io_data->pOutputs[1].pVirAddr;
 
         generate_proposals_ppyoloe(proposals, cls_ptr, reg_ptr, PROB_THRESHOLD, num_grid, num_class);
 
@@ -157,7 +157,7 @@ namespace ax
         detection::draw_objects(mat, objects, CLASS_NAMES, "ppyoloe_out", 3, 3);
     }
 
-    bool run_model(const std::string &model, const std::vector<uint8_t> &data, const int &repeat, cv::Mat &mat, int input_h, int input_w)
+    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
     {
         // 1. init engine
 #ifdef AXERA_TARGET_CHIP_AX620E
@@ -193,7 +193,7 @@ namespace ax
         fprintf(stdout, "Engine creating context is done.\n");
 
         // 5. set io
-        AX_ENGINE_IO_INFO_T *io_info;
+        AX_ENGINE_IO_INFO_T* io_info;
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
         fprintf(stdout, "Engine get io info is done. \n");
@@ -235,7 +235,7 @@ namespace ax
     }
 } // namespace ax
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
@@ -254,8 +254,7 @@ int main(int argc, char *argv[])
 
     if (!model_file_flag | !image_file_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
@@ -279,8 +278,7 @@ int main(int argc, char *argv[])
 
     if (!input_size_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 

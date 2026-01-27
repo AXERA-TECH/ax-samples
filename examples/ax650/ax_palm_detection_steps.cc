@@ -66,13 +66,12 @@ namespace ax
         timer timer_postprocess;
 
         auto& bboxes_info = io_data->pOutputs[0];
-        auto bboxes_ptr   = (float*)bboxes_info.pVirAddr;
+        auto bboxes_ptr = (float*)bboxes_info.pVirAddr;
 
         auto& scores_info = io_data->pOutputs[1];
-        auto scores_ptr   = (float*)scores_info.pVirAddr;
+        auto scores_ptr = (float*)scores_info.pVirAddr;
 
-        float prob_threshold_unsigmoid =
-            -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
+        float prob_threshold_unsigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
 
         det::generate_proposals_palm(proposals,
                                      PROB_THRESHOLD,
@@ -98,7 +97,7 @@ namespace ax
         fprintf(stdout, "post process cost time: %.2f ms\n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
 
-        auto total_time   = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
+        auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
         auto min_max_time = std::minmax_element(time_costs.begin(), time_costs.end());
         fprintf(stdout,
                 "Repeat %zu times, avg time %.2f ms, max_time %.2f ms, min_time %.2f ms\n",

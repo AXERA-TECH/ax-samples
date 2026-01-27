@@ -1,9 +1,9 @@
-# Benchmark(AX650N)
+# Benchmark(AX615)
 
 Benchmark 是了解硬件平台网络模型运行速度的最佳途径。以下数据基于 AXera-Pi Pro 测试获取，**仅供社区参考，不代表商业交付最终性能**。
 
 ### 工具链版本
-- Pulsar2 3.2
+- Pulsar2 4.2
 
 ### 数据记录
 

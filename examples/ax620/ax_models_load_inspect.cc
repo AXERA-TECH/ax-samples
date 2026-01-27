@@ -30,7 +30,8 @@
 #include "joint.h"
 
 #define mark(str, arg...)                 \
-    do {                                  \
+    do                                    \
+    {                                     \
         printf("[INFO]" str "\n", ##arg); \
     } while (0)
 

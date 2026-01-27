@@ -80,12 +80,12 @@ namespace ax
         int fd = open(model.c_str(), O_RDWR, 0644);
         void* mmap_add = mmap(NULL, model_size, PROT_WRITE, MAP_SHARED, fd, 0);
 
-//        auto ret = ax::mw::parse_npu_mode_from_joint((const AX_CHAR*)mmap_add, model_size, &joint_attr.eNpuMode);
-//        if (AX_ERR_NPU_JOINT_SUCCESS != ret)
-//        {
-//            fprintf(stderr, "Load Run-Joint model(%s) failed.\n", model.c_str());
-//            return false;
-//        }
+        //        auto ret = ax::mw::parse_npu_mode_from_joint((const AX_CHAR*)mmap_add, model_size, &joint_attr.eNpuMode);
+        //        if (AX_ERR_NPU_JOINT_SUCCESS != ret)
+        //        {
+        //            fprintf(stderr, "Load Run-Joint model(%s) failed.\n", model.c_str());
+        //            return false;
+        //        }
 
         joint_attr.eNpuMode = AX_NPU_SDK_EX_HARD_MODE_T::AX_NPU_VIRTUAL_1_1;
 
@@ -349,13 +349,13 @@ int main(int argc, char* argv[])
     // 2. read image & resize & transpose
     std::vector<uint8_t> image(input_size[1] * input_size[0] * 3);
     cv::Mat mat = cv::imread(image_file);
-//    if (mat.empty())
-//    {
-//        fprintf(stderr, "Read image failed.\n");
-//        return -1;
-//    }
-//    cv::Mat img_new(input_size[0], input_size[1], CV_8UC3, image.data());
-//    cv::resize(mat, img_new, cv::Size(input_size[1], input_size[0]));
+    //    if (mat.empty())
+    //    {
+    //        fprintf(stderr, "Read image failed.\n");
+    //        return -1;
+    //    }
+    //    cv::Mat img_new(input_size[0], input_size[1], CV_8UC3, image.data());
+    //    cv::resize(mat, img_new, cv::Size(input_size[1], input_size[0]));
 
     // 3. init ax system, if NOT INITED in other apps.
     //   if other app init the device, DO NOT INIT DEVICE AGAIN.

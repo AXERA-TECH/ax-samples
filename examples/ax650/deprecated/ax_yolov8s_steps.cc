@@ -84,7 +84,7 @@ namespace ax
         timer timer_postprocess;
         float* output_prob = (float*)io_data->pOutputs[0].pVirAddr;
         float* output_bbox = (float*)io_data->pOutputs[1].pVirAddr;
-        
+
         for (size_t i = 0; i < num_grid; i++)
         {
             int maxid = -1;

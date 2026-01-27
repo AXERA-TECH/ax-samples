@@ -43,7 +43,7 @@ const int DEFAULT_IMG_W = 1280;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
-#define THRESHOLD     0.25
+#define THRESHOLD 0.25
 
 float kitti_P2[3][4] = {
     {721.5377, 0, 609.5593, 44.85728},
@@ -71,7 +71,6 @@ namespace ax
 
     namespace mono_process
     {
-
         struct Calibrate
         {
             float P2[3][4]{};

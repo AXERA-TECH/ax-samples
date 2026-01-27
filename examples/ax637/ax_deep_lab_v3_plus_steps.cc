@@ -44,7 +44,8 @@ const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
 {
-    struct ax_RGB {
+    struct ax_RGB
+    {
         uint8_t r, g, b;
     };
 
@@ -110,7 +111,7 @@ namespace ax
         for (int r = 0; r < height; ++r)
         {
             uint8_t* ptr_idx = prob_matrix.ptr<uint8_t>(r);
-            cv::Vec3b* ptr_color = dst.ptr<cv::Vec3b>(r);  // bgr
+            cv::Vec3b* ptr_color = dst.ptr<cv::Vec3b>(r); // bgr
             for (int c = 0; c < width; ++c)
             {
                 int index = ptr_idx[c] >= 256 ? 255 : ptr_idx[c];

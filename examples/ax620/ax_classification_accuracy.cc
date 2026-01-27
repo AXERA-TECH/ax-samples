@@ -324,12 +324,12 @@ namespace ax
             //            fprintf(stderr, "top5 [分类号]:%d : [置信度]:%f\n", result[4].id, result[4].score);
 
             total++;
-            float acc_top1 = ((float )top_1 / (float )total);
-            float acc_top5 = ((float )top_5 / (float )total);
+            float acc_top1 = ((float)top_1 / (float)total);
+            float acc_top5 = ((float)top_5 / (float)total);
 
             if (total % 100 == 0)
             {
-                fprintf(stdout, "gt_id %5d, total %5d, top1 %5d(%4.2f %%), top5 %5d(%4.2f %%) \t", gt_index_1, total, top_1, acc_top1*100, top_5, acc_top5*100);   
+                fprintf(stdout, "gt_id %5d, total %5d, top1 %5d(%4.2f %%), top5 %5d(%4.2f %%) \t", gt_index_1, total, top_1, acc_top1 * 100, top_5, acc_top5 * 100);
                 fprintf(stdout, "[INFO] predict:%s top5:[%3d,%3d,%3d,%3d,%3d] gt:[%3s] \n", file_name.c_str(), result[0].id, result[1].id, result[2].id, result[3].id, result[4].id, gt_index.c_str());
             }
 

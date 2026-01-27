@@ -62,7 +62,6 @@ const float PROB_THRESHOLD = 0.45f;
 const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
-
     bool rgb2nv12(cv::Mat mat, int cropresize_width, int cropresize_height, std::vector<uint8_t>& image_nv12)
     {
         // resolution align 16

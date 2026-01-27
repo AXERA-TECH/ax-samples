@@ -44,25 +44,25 @@ const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
 {
-    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, 
+    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data,
                       const cv::Mat& left_mat, const cv::Mat& right_mat,
                       const std::vector<float>& time_costs)
     {
         timer timer_postprocess;
-        
+
         // Get output disparity map
         auto& output = io_data->pOutputs[0];
         auto& info = io_info->pOutputs[0];
-        
+
         // Create disparity map from output
-        int disp_h = info.pShape[2];  // height
-        int disp_w = info.pShape[3];   // width
+        int disp_h = info.pShape[2]; // height
+        int disp_w = info.pShape[3]; // width
         cv::Mat disparity_map(disp_h, disp_w, CV_32FC1, output.pVirAddr);
-        
+
         // Normalize disparity for visualization
         double minVal, maxVal;
         cv::minMaxLoc(disparity_map, &minVal, &maxVal);
-        
+
         cv::Mat disparity_normalized;
         if (maxVal > minVal)
         {
@@ -72,15 +72,15 @@ namespace ax
         {
             disparity_map.convertTo(disparity_normalized, CV_8UC1);
         }
-        
+
         // Apply color map (JET colormap similar to Python's 'jet')
         cv::Mat disparity_color;
         cv::applyColorMap(disparity_normalized, disparity_color, cv::ColormapTypes::COLORMAP_JET);
-        
+
         // Resize to original image size if needed
         cv::Mat disparity_resized;
         cv::resize(disparity_color, disparity_resized, cv::Size(left_mat.cols, left_mat.rows));
-        
+
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -93,24 +93,24 @@ namespace ax
                 *min_max_time.first);
         fprintf(stdout, "Disparity range: [%.2f, %.2f]\n", minVal, maxVal);
         fprintf(stdout, "--------------------------------------\n");
-        
+
         // Save results
         cv::imwrite("igev_plusplus_disparity.jpg", disparity_resized);
-        
+
         // Create side-by-side visualization
         cv::Mat combined;
         cv::hconcat(std::vector<cv::Mat>{left_mat, disparity_resized}, combined);
         cv::imwrite("igev_plusplus_result.jpg", combined);
-        
+
         fprintf(stdout, "Saved disparity map: igev_plusplus_disparity.jpg\n");
         fprintf(stdout, "Saved combined result: igev_plusplus_result.jpg\n");
     }
 
-    bool run_model(const std::string& model, 
-                   const std::vector<uint8_t>& left_data, 
+    bool run_model(const std::string& model,
+                   const std::vector<uint8_t>& left_data,
                    const std::vector<uint8_t>& right_data,
-                   const int& repeat, 
-                   cv::Mat& left_mat, 
+                   const int& repeat,
+                   cv::Mat& left_mat,
                    cv::Mat& right_mat)
     {
         // 1. init engine
@@ -173,7 +173,7 @@ namespace ax
                 right_input_idx = i;
             }
         }
-        
+
         if (left_input_idx < 0 || right_input_idx < 0)
         {
             fprintf(stderr, "Failed to find 'left' or 'right' input in model. Available inputs:\n");
@@ -188,23 +188,23 @@ namespace ax
         // 8. insert input
         if (left_data.size() != io_info->pInputs[left_input_idx].nSize)
         {
-            fprintf(stderr, "Left input size mismatch: expected %d, got %zu\n", 
+            fprintf(stderr, "Left input size mismatch: expected %d, got %zu\n",
                     io_info->pInputs[left_input_idx].nSize, left_data.size());
             middleware::free_io(&io_data);
             return AX_ENGINE_DestroyHandle(handle);
         }
-        
+
         if (right_data.size() != io_info->pInputs[right_input_idx].nSize)
         {
-            fprintf(stderr, "Right input size mismatch: expected %d, got %zu\n", 
+            fprintf(stderr, "Right input size mismatch: expected %d, got %zu\n",
                     io_info->pInputs[right_input_idx].nSize, right_data.size());
             middleware::free_io(&io_data);
             return AX_ENGINE_DestroyHandle(handle);
         }
-        
+
         memcpy(io_data.pInputs[left_input_idx].pVirAddr, left_data.data(), left_data.size());
         memcpy(io_data.pInputs[right_input_idx].pVirAddr, right_data.data(), right_data.size());
-        
+
         fprintf(stdout, "Engine push input is done. \n");
         fprintf(stdout, "--------------------------------------\n");
 
@@ -296,22 +296,22 @@ int main(int argc, char* argv[])
     // 2. read images & resize & convert to RGB
     std::vector<uint8_t> left_image(input_size[0] * input_size[1] * 3, 0);
     std::vector<uint8_t> right_image(input_size[0] * input_size[1] * 3, 0);
-    
+
     cv::Mat left_mat = cv::imread(left_image_file);
     cv::Mat right_mat = cv::imread(right_image_file);
-    
+
     if (left_mat.empty())
     {
         fprintf(stderr, "Read left image failed.\n");
         return -1;
     }
-    
+
     if (right_mat.empty())
     {
         fprintf(stderr, "Read right image failed.\n");
         return -1;
     }
-    
+
     // Resize and convert BGR to RGB (matching Python implementation)
     common::get_input_data_no_letterbox(left_mat, left_image, input_size[0], input_size[1], true);
     common::get_input_data_no_letterbox(right_mat, right_image, input_size[0], input_size[1], true);
@@ -333,4 +333,3 @@ int main(int argc, char* argv[])
     AX_SYS_Deinit();
     return 0;
 }
-

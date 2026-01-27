@@ -46,7 +46,7 @@ const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
 {
-    namespace mw  = middleware;
+    namespace mw = middleware;
     namespace utl = utilities;
 
     void post_process(AX_ENGINE_IO_INFO_T* io_info,
@@ -70,7 +70,7 @@ namespace ax
         fprintf(stdout, "post process cost time: %.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
 
-        auto total_time   = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
+        auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
         auto min_max_time = std::minmax_element(time_costs.begin(), time_costs.end());
         fprintf(stdout,
                 "Repeat %d times, avg time %.2f ms, max_time %.2f ms, min_time %.2f ms\n",
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
     cmd.add<std::string>("image", 'i', "image file", true, "");
-    cmd.add<std::string>("size",  'g', "input_h, input_w", false,
+    cmd.add<std::string>("size", 'g', "input_h, input_w", false,
                          std::to_string(IMG_H) + "," + std::to_string(IMG_W));
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
     cmd.parse_check(argc, argv);
