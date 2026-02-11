@@ -15,7 +15,7 @@
 */
 
 /*
-* Note: For DepthAnything depth estimation model.
+* Note: For the YOLO26-Seg series exported by the ultralytics project.
 * Author: GUOFANGMING
 */
 
@@ -25,6 +25,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "base/common.hpp"
+#include "base/detection.hpp"
 #include "middleware/io.hpp"
 
 #include "utilities/args.hpp"
@@ -35,34 +36,65 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 518;
-const int DEFAULT_IMG_W = 518;
+const int DEFAULT_IMG_H = 640;
+const int DEFAULT_IMG_W = 640;
+
+const char* CLASS_NAMES[] = {
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
+    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
+    "hair drier", "toothbrush"};
+
+static const std::vector<std::vector<uint8_t> > COCO_COLORS = {
+    {4, 42, 255}, {11, 219, 235}, {243, 243, 243}, {0, 223, 183}, {17, 31, 104}, {255, 111, 221}, {255, 68, 79}, {204, 237, 0}, {0, 243, 68}, {189, 0, 255}, {0, 180, 255}, {221, 0, 186}, {0, 255, 255}, {38, 192, 0}, {1, 255, 179}, {125, 36, 255}, {123, 0, 104}, {255, 27, 108}, {252, 109, 47}, {162, 255, 11}, {4, 42, 255}, {11, 219, 235}, {243, 243, 243}, {0, 223, 183}, {17, 31, 104}, {255, 111, 221}, {255, 68, 79}, {204, 237, 0}, {0, 243, 68}, {189, 0, 255}, {0, 180, 255}, {221, 0, 186}, {0, 255, 255}, {38, 192, 0}, {1, 255, 179}, {125, 36, 255}, {123, 0, 104}, {255, 27, 108}, {252, 109, 47}, {162, 255, 11}, {4, 42, 255}, {11, 219, 235}, {243, 243, 243}, {0, 223, 183}, {17, 31, 104}, {255, 111, 221}, {255, 68, 79}, {204, 237, 0}, {0, 243, 68}, {189, 0, 255}, {0, 180, 255}, {221, 0, 186}, {0, 255, 255}, {38, 192, 0}, {1, 255, 179}, {125, 36, 255}, {123, 0, 104}, {255, 27, 108}, {252, 109, 47}, {162, 255, 11}, {4, 42, 255}, {11, 219, 235}, {243, 243, 243}, {0, 223, 183}, {17, 31, 104}, {255, 111, 221}, {255, 68, 79}, {204, 237, 0}, {0, 243, 68}, {189, 0, 255}, {0, 180, 255}, {221, 0, 186}, {0, 255, 255}, {38, 192, 0}, {1, 255, 179}, {125, 36, 255}, {123, 0, 104}, {255, 27, 108}, {252, 109, 47}, {162, 255, 11}};
+int NUM_CLASS = 80;
 
 const int DEFAULT_LOOP_COUNT = 1;
-
+const int DEFAULT_MASK_PROTO_DIM = 32;
+const int DEFAULT_MASK_SAMPLE_STRIDE = 4;
+const float PROB_THRESHOLD = 0.45f;
+const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
+        std::vector<detection::Object> proposals;
+        std::vector<detection::Object> objects;
         timer timer_postprocess;
-        auto& output = io_data->pOutputs[0];
-        auto& info = io_info->pOutputs[0];
 
-        cv::Mat feature(info.pShape[2], info.pShape[3], CV_32FC1, output.pVirAddr);
+        // YOLO26-Seg outputs: 10 outputs (3 scales x 3 outputs per scale + 1 proto)
+        // Scale 0 (stride 8):  box[0], cls[1], mask[2]
+        // Scale 1 (stride 16): box[3], cls[4], mask[5]
+        // Scale 2 (stride 32): box[6], cls[7], mask[8]
+        // Proto: [9] (1*32*160*160 or 32*160*160)
+        float* output_box_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,   // 1*80*80*4
+                                    (float*)io_data->pOutputs[3].pVirAddr,   // 1*40*40*4
+                                    (float*)io_data->pOutputs[6].pVirAddr};  // 1*20*20*4
+        float* output_cls_ptr[3] = {(float*)io_data->pOutputs[1].pVirAddr,   // 1*80*80*80
+                                    (float*)io_data->pOutputs[4].pVirAddr,   // 1*40*40*80
+                                    (float*)io_data->pOutputs[7].pVirAddr};  // 1*20*20*80
+        float* output_mask_ptr[3] = {(float*)io_data->pOutputs[2].pVirAddr,  // 1*80*80*32
+                                     (float*)io_data->pOutputs[5].pVirAddr,  // 1*40*40*32
+                                     (float*)io_data->pOutputs[8].pVirAddr}; // 1*20*20*32
 
-        double minVal, maxVal;
-        cv::minMaxLoc(feature, &minVal, &maxVal);
+        for (int i = 0; i < 3; ++i)
+        {
+            auto feat_box_ptr = output_box_ptr[i];
+            auto feat_cls_ptr = output_cls_ptr[i];
+            auto feat_mask_ptr = output_mask_ptr[i];
+            int32_t stride = (1 << i) * 8;
+            detection::generate_proposals_yolo26_seg(stride, feat_box_ptr, feat_cls_ptr, feat_mask_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_CLASS);
+        }
 
-        feature -= minVal;
-        feature /= (maxVal - minVal);
-        feature *= 255;
+        // Proto output: 1*32*160*160 or 32*160*160
+        auto mask_proto_ptr = (float*)io_data->pOutputs[9].pVirAddr;
 
-        feature.convertTo(feature, CV_8UC1);
-
-        cv::Mat dst(info.pShape[2], info.pShape[3], CV_8UC3);
-        cv::applyColorMap(feature, dst, cv::ColormapTypes::COLORMAP_INFERNO);
-        cv::resize(dst, dst, cv::Size(mat.cols, mat.rows));
-
+        detection::get_out_bbox_mask(proposals, objects, mask_proto_ptr, DEFAULT_MASK_PROTO_DIM, DEFAULT_MASK_SAMPLE_STRIDE, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -74,8 +106,9 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        cv::hconcat(std::vector<cv::Mat>{mat, dst}, dst);
-        cv::imwrite("depth_anything_out.jpg", dst);
+        fprintf(stdout, "detection num: %zu\n", objects.size());
+
+        detection::draw_objects_mask(mat, objects, CLASS_NAMES, COCO_COLORS, "yolo26_seg_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -113,18 +146,18 @@ namespace ax
         AX_ENGINE_IO_INFO_T* io_info;
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
-        fprintf(stdout, "Engine get io info is done. \n");
+        fprintf(stdout, "Engine get io info is done.\n");
 
         // 6. alloc io
         AX_ENGINE_IO_T io_data;
         ret = middleware::prepare_io(io_info, &io_data, std::make_pair(AX_ENGINE_ABST_DEFAULT, AX_ENGINE_ABST_CACHED));
         SAMPLE_AX_ENGINE_DEAL_HANDLE
-        fprintf(stdout, "Engine alloc io is done. \n");
+        fprintf(stdout, "Engine alloc io is done.\n");
 
         // 7. insert input
         ret = middleware::push_input(data, &io_data, io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE_IO
-        fprintf(stdout, "Engine push input is done. \n");
+        fprintf(stdout, "Engine push input is done.\n");
         fprintf(stdout, "--------------------------------------\n");
 
         // 8. warm up
@@ -215,8 +248,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    // Use BGR2RGB conversion and no letterbox resize, matching Python implementation
-    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. sys_init
     AX_SYS_Init();

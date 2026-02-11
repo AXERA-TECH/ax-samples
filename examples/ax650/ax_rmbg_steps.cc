@@ -49,89 +49,103 @@ namespace ax
     {
         cv::Mat resized;
         cv::resize(src, resized, cv::Size(MODEL_INPUT_W, MODEL_INPUT_H), 0, 0, cv::INTER_LINEAR);
-        
-        if (resized.channels() == 1) {
+
+        if (resized.channels() == 1)
+        {
             cv::cvtColor(resized, resized, cv::COLOR_GRAY2BGR);
-        } else if (resized.channels() == 4) {
+        }
+        else if (resized.channels() == 4)
+        {
             cv::cvtColor(resized, resized, cv::COLOR_BGRA2BGR);
         }
         cv::Mat dst;
         cv::cvtColor(resized, dst, cv::COLOR_BGR2RGB);
         std::vector<cv::Mat> split_channels(3);
         cv::split(dst, split_channels);
-    
-        int channel_size = MODEL_INPUT_H * MODEL_INPUT_W;
-        for (int i = 0; i < 3; i++) {
-            memcpy(image_data.data() + i * channel_size, 
-                split_channels[i].data, 
-                channel_size * sizeof(uint8_t));
-        }
 
+        int channel_size = MODEL_INPUT_H * MODEL_INPUT_W;
+        for (int i = 0; i < 3; i++)
+        {
+            memcpy(image_data.data() + i * channel_size,
+                   split_channels[i].data,
+                   channel_size * sizeof(uint8_t));
+        }
     }
 
-    void postprocess_mask(float* mask_data, int mask_h, int mask_w, 
-                     const cv::Mat& original_image, cv::Mat& output_mask, cv::Mat& result_image)
+    void postprocess_mask(float* mask_data, int mask_h, int mask_w,
+                          const cv::Mat& original_image, cv::Mat& output_mask, cv::Mat& result_image)
     {
         timer timer_postprocess;
-        
+
         cv::Mat mask(mask_h, mask_w, CV_32FC1, mask_data);
-        cv::resize(mask, output_mask, cv::Size(original_image.cols, original_image.rows), 
-                0, 0, cv::INTER_NEAREST);  
-        
+        cv::resize(mask, output_mask, cv::Size(original_image.cols, original_image.rows),
+                   0, 0, cv::INTER_NEAREST);
+
         cv::Mat mask_normalized;
         double minVal, maxVal;
         cv::minMaxLoc(output_mask, &minVal, &maxVal);
-        
-        if (maxVal - minVal < 1e-6) {
+
+        if (maxVal - minVal < 1e-6)
+        {
             mask_normalized = cv::Mat::ones(output_mask.size(), CV_8UC1) * 255;
-        } else {
-            output_mask.convertTo(mask_normalized, CV_8UC1, 
-                                255.0 / (maxVal - minVal), 
-                                -minVal * 255.0 / (maxVal - minVal));
         }
-        
-        if (original_image.channels() == 1) {
+        else
+        {
+            output_mask.convertTo(mask_normalized, CV_8UC1,
+                                  255.0 / (maxVal - minVal),
+                                  -minVal * 255.0 / (maxVal - minVal));
+        }
+
+        if (original_image.channels() == 1)
+        {
             cv::cvtColor(original_image, result_image, cv::COLOR_GRAY2BGRA);
-        } else if (original_image.channels() == 3) {
-            cv::cvtColor(original_image, result_image, cv::COLOR_BGR2BGRA);
-        } else if (original_image.channels() == 4) {
-            original_image.copyTo(result_image);
-        } else {
+        }
+        else if (original_image.channels() == 3)
+        {
             cv::cvtColor(original_image, result_image, cv::COLOR_BGR2BGRA);
         }
-        
+        else if (original_image.channels() == 4)
+        {
+            original_image.copyTo(result_image);
+        }
+        else
+        {
+            cv::cvtColor(original_image, result_image, cv::COLOR_BGR2BGRA);
+        }
+
         int total_pixels = result_image.rows * result_image.cols;
-        uchar* alpha_ptr = result_image.data + 3;  
+        uchar* alpha_ptr = result_image.data + 3;
         uchar* mask_ptr = mask_normalized.data;
 
-        for (int i = 0; i < total_pixels; ++i) {
+        for (int i = 0; i < total_pixels; ++i)
+        {
             *alpha_ptr = *mask_ptr;
-            alpha_ptr += 4;  // 移动到下一个像素的alpha通道
-            mask_ptr += 1;   // 移动到下一个mask值
+            alpha_ptr += 4; // 移动到下一个像素的alpha通道
+            mask_ptr += 1;  // 移动到下一个mask值
         }
-        
+
         mask_normalized.copyTo(output_mask);
     }
 
-    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, 
+    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data,
                       const cv::Mat& original_image, const std::vector<float>& time_costs,
                       const std::string& output_path)
     {
         timer timer_postprocess;
-        
+
         auto& output = io_data->pOutputs[0];
         auto& info = io_info->pOutputs[0];
-        
-        int mask_h = info.pShape[2];  // height
-        int mask_w = info.pShape[3];  // width
-        
+
+        int mask_h = info.pShape[2]; // height
+        int mask_w = info.pShape[3]; // width
+
         cv::Mat output_mask, result_image;
-        postprocess_mask((float*)output.pVirAddr, mask_h, mask_w, 
-                        original_image, output_mask, result_image);
-        
+        postprocess_mask((float*)output.pVirAddr, mask_h, mask_w,
+                         original_image, output_mask, result_image);
+
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
-        
+
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
         auto min_max_time = std::minmax_element(time_costs.begin(), time_costs.end());
         fprintf(stdout,
@@ -141,21 +155,21 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        
+
         std::vector<int> compression_params;
         compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
-        compression_params.push_back(9);  
-        
+        compression_params.push_back(9);
+
         cv::imwrite(output_path, result_image, compression_params);
         cv::imwrite("mask.png", output_mask);
-        
+
         fprintf(stdout, "Saved result image: %s\n", output_path.c_str());
         fprintf(stdout, "Saved mask: mask.png\n");
     }
 
-    bool run_model(const std::string& model, 
+    bool run_model(const std::string& model,
                    const std::vector<uint8_t>& image_data,
-                   const int& repeat, 
+                   const int& repeat,
                    cv::Mat& original_image,
                    const std::string& output_path)
     {
@@ -197,7 +211,7 @@ namespace ax
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
         fprintf(stdout, "Engine get io info is done. \n");
-        
+
         // print
         fprintf(stdout, "Inputs:\n");
         for (uint32_t i = 0; i < io_info->nInputSize; ++i)
@@ -210,7 +224,7 @@ namespace ax
             }
             fprintf(stdout, "]\n");
         }
-        
+
         fprintf(stdout, "Outputs:\n");
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {
@@ -230,18 +244,18 @@ namespace ax
         fprintf(stdout, "Engine alloc io is done. \n");
 
         // 7. push input
-        int input_idx = 0;  
+        int input_idx = 0;
         if (image_data.size() != io_info->pInputs[input_idx].nSize)
         {
-            fprintf(stderr, "Input size mismatch: expected %d, got %zu\n", 
+            fprintf(stderr, "Input size mismatch: expected %d, got %zu\n",
                     io_info->pInputs[input_idx].nSize, image_data.size());
             middleware::free_io(&io_data);
             AX_ENGINE_DestroyHandle(handle);
             return false;
         }
-        
+
         memcpy(io_data.pInputs[input_idx].pVirAddr, image_data.data(), image_data.size());
-        
+
         fprintf(stdout, "Engine push input is done. \n");
         fprintf(stdout, "--------------------------------------\n");
 
@@ -277,7 +291,7 @@ int main(int argc, char* argv[])
     cmd.add<std::string>("image", 'i', "input image file", true, "");
     cmd.add<std::string>("output", 'o', "output image file", false, "result.png");
     cmd.add<int>("repeat", 'r', "repeat count", false, DEFAULT_LOOP_COUNT);
-    
+
     cmd.parse_check(argc, argv);
 
     auto model_file = cmd.get<std::string>("model");
@@ -314,15 +328,15 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed: %s\n", image_file.c_str());
         return -1;
     }
-    
-    fprintf(stdout, "Original image size: %d x %d, channels: %d\n", 
+
+    fprintf(stdout, "Original image size: %d x %d, channels: %d\n",
             original_image.cols, original_image.rows, original_image.channels());
-    
+
     int input_size = MODEL_INPUT_H * MODEL_INPUT_W * 3;
     std::vector<uint8_t> image_data(input_size, 0);
 
     ax::preprocess_image(original_image, image_data);
-    
+
     AX_SYS_Init();
 
     {
@@ -331,6 +345,6 @@ int main(int argc, char* argv[])
     }
 
     AX_SYS_Deinit();
-    
+
     return 0;
 }

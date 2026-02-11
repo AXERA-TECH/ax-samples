@@ -43,7 +43,7 @@ const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
 {
-    std::vector<std::string> ReadDict(const std::string &path)
+    std::vector<std::string> ReadDict(const std::string& path)
     {
         std::ifstream in(path);
         std::string line;
@@ -64,7 +64,7 @@ namespace ax
         return m_vec;
     }
 
-    template <class ForwardIterator>
+    template<class ForwardIterator>
     inline static size_t argmax(ForwardIterator first, ForwardIterator last, ForwardIterator val)
     {
         ForwardIterator max_val = std::max_element(first, last);
@@ -72,13 +72,13 @@ namespace ax
         return std::distance(first, max_val);
     }
 
-    void post_process(AX_ENGINE_IO_INFO_T *io_info, AX_ENGINE_IO_T *io_data, const cv::Mat &mat, std::vector<std::string> &label_list_, const std::vector<float> &time_costs)
+    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, std::vector<std::string>& label_list_, const std::vector<float>& time_costs)
     {
         timer timer_postprocess;
 
-        auto &output = io_data->pOutputs[0];
-        auto &info = io_info->pOutputs[0];
-        auto ptr = (float *)output.pVirAddr;
+        auto& output = io_data->pOutputs[0];
+        auto& info = io_info->pOutputs[0];
+        auto ptr = (float*)output.pVirAddr;
 
         int cnt = info.pShape[1];
         int width = info.pShape[2];
@@ -92,7 +92,7 @@ namespace ax
 
         for (int n = 0; n < info.pShape[1]; n++)
         {
-            printf("%f\n",ptr[0]);
+            printf("%f\n", ptr[0]);
             // get idx
             argmax_idx = int(argmax(
                 &ptr[(1 * info.pShape[1] + n) * info.pShape[2]],
@@ -127,7 +127,7 @@ namespace ax
                 *min_max_time.first);
     }
 
-    bool run_model(const std::string &model, const std::vector<uint8_t> &data, const int &repeat, cv::Mat &mat, std::vector<std::string> &label_list_)
+    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, std::vector<std::string>& label_list_)
     {
         // 1. init engine
 #ifdef AXERA_TARGET_CHIP_AX620E
@@ -163,7 +163,7 @@ namespace ax
         fprintf(stdout, "Engine creating context is done.\n");
 
         // 5. set io
-        AX_ENGINE_IO_INFO_T *io_info;
+        AX_ENGINE_IO_INFO_T* io_info;
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
         fprintf(stdout, "Engine get io info is done. \n");
@@ -205,7 +205,7 @@ namespace ax
     }
 } // namespace ax
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
@@ -226,8 +226,7 @@ int main(int argc, char *argv[])
 
     if (!model_file_flag | !image_file_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
@@ -251,8 +250,7 @@ int main(int argc, char *argv[])
 
     if (!input_size_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 

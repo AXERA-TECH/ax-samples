@@ -15,7 +15,7 @@
 */
 
 /*
-* Note: For DepthAnything depth estimation model.
+* Note: For the YOLO26-Pose series exported by the ultralytics project.
 * Author: GUOFANGMING
 */
 
@@ -25,6 +25,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "base/common.hpp"
+#include "base/detection.hpp"
 #include "middleware/io.hpp"
 
 #include "utilities/args.hpp"
@@ -35,34 +36,55 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 518;
-const int DEFAULT_IMG_W = 518;
+const int DEFAULT_IMG_H = 640;
+const int DEFAULT_IMG_W = 640;
+
+const char* CLASS_NAMES[] = {
+    "person",
+};
+const std::vector<std::vector<uint8_t> > KPS_COLORS = {{0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}};
+const std::vector<std::vector<uint8_t> > LIMB_COLORS = {{51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {51, 153, 255}, {255, 51, 255}, {255, 51, 255}, {255, 51, 255}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {255, 128, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}, {0, 255, 0}};
+const std::vector<std::vector<uint8_t> > SKELETON = {{16, 14}, {14, 12}, {17, 15}, {15, 13}, {12, 13}, {6, 12}, {7, 13}, {6, 7}, {6, 8}, {7, 9}, {8, 10}, {9, 11}, {2, 3}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 7}};
+
+int NUM_CLASS = 1;
+int NUM_POINT = 17;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
+const float PROB_THRESHOLD = 0.25f;
+const float NMS_THRESHOLD = 0.7f;
 namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
+        std::vector<detection::Object> proposals;
+        std::vector<detection::Object> objects;
         timer timer_postprocess;
-        auto& output = io_data->pOutputs[0];
-        auto& info = io_info->pOutputs[0];
 
-        cv::Mat feature(info.pShape[2], info.pShape[3], CV_32FC1, output.pVirAddr);
+        // YOLO26-Pose outputs: 9 outputs (3 scales x 3 outputs per scale)
+        // Scale 0 (stride 8):  box[0], cls[1], kpt[2]
+        // Scale 1 (stride 16): box[3], cls[4], kpt[5]
+        // Scale 2 (stride 32): box[6], cls[7], kpt[8]
+        float* output_box_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,  // 1*80*80*4
+                                    (float*)io_data->pOutputs[3].pVirAddr,  // 1*40*40*4
+                                    (float*)io_data->pOutputs[6].pVirAddr}; // 1*20*20*4
+        float* output_cls_ptr[3] = {(float*)io_data->pOutputs[1].pVirAddr,  // 1*80*80*1
+                                    (float*)io_data->pOutputs[4].pVirAddr,  // 1*40*40*1
+                                    (float*)io_data->pOutputs[7].pVirAddr}; // 1*20*20*1
+        float* output_kps_ptr[3] = {(float*)io_data->pOutputs[2].pVirAddr,  // 1*80*80*51
+                                    (float*)io_data->pOutputs[5].pVirAddr,  // 1*40*40*51
+                                    (float*)io_data->pOutputs[8].pVirAddr}; // 1*20*20*51
 
-        double minVal, maxVal;
-        cv::minMaxLoc(feature, &minVal, &maxVal);
+        for (int i = 0; i < 3; ++i)
+        {
+            auto feat_box_ptr = output_box_ptr[i];
+            auto feat_cls_ptr = output_cls_ptr[i];
+            auto feat_kps_ptr = output_kps_ptr[i];
+            int32_t stride = (1 << i) * 8;
+            detection::generate_proposals_yolo26_pose(stride, feat_box_ptr, feat_cls_ptr, feat_kps_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_POINT, NUM_CLASS);
+        }
 
-        feature -= minVal;
-        feature /= (maxVal - minVal);
-        feature *= 255;
-
-        feature.convertTo(feature, CV_8UC1);
-
-        cv::Mat dst(info.pShape[2], info.pShape[3], CV_8UC3);
-        cv::applyColorMap(feature, dst, cv::ColormapTypes::COLORMAP_INFERNO);
-        cv::resize(dst, dst, cv::Size(mat.cols, mat.rows));
-
+        detection::get_out_bbox_kps(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -74,8 +96,9 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        cv::hconcat(std::vector<cv::Mat>{mat, dst}, dst);
-        cv::imwrite("depth_anything_out.jpg", dst);
+        fprintf(stdout, "detection num: %zu\n", objects.size());
+
+        detection::draw_keypoints(mat, objects, KPS_COLORS, LIMB_COLORS, SKELETON, "yolo26_pose_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -113,18 +136,18 @@ namespace ax
         AX_ENGINE_IO_INFO_T* io_info;
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
-        fprintf(stdout, "Engine get io info is done. \n");
+        fprintf(stdout, "Engine get io info is done.\n");
 
         // 6. alloc io
         AX_ENGINE_IO_T io_data;
         ret = middleware::prepare_io(io_info, &io_data, std::make_pair(AX_ENGINE_ABST_DEFAULT, AX_ENGINE_ABST_CACHED));
         SAMPLE_AX_ENGINE_DEAL_HANDLE
-        fprintf(stdout, "Engine alloc io is done. \n");
+        fprintf(stdout, "Engine alloc io is done.\n");
 
         // 7. insert input
         ret = middleware::push_input(data, &io_data, io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE_IO
-        fprintf(stdout, "Engine push input is done. \n");
+        fprintf(stdout, "Engine push input is done.\n");
         fprintf(stdout, "--------------------------------------\n");
 
         // 8. warm up
@@ -215,8 +238,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    // Use BGR2RGB conversion and no letterbox resize, matching Python implementation
-    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. sys_init
     AX_SYS_Init();

@@ -14,7 +14,6 @@
 * specific language governing permissions and limitations under the License.
 */
 
-
 /*
 * Note: For the YOLOv9 series exported by the ultralytics project.
 * Author: QQC

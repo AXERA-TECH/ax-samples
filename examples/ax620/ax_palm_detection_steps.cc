@@ -56,8 +56,7 @@ namespace ax
     namespace det = detection;
     namespace mw = middleware;
     namespace utl = utilities;
-    
-    
+
     bool run_detection(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, uint32_t input_h, uint32_t input_w)
     {
         // 1. create a runtime handle and load the model

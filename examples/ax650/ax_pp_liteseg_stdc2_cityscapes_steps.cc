@@ -40,13 +40,13 @@ const int DEFAULT_LOOP_COUNT = 1;
 
 namespace ax
 {
-    void post_process(AX_ENGINE_IO_INFO_T *io_info, AX_ENGINE_IO_T *io_data, const cv::Mat &mat, const std::vector<float> &time_costs)
+    void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, const std::vector<float>& time_costs)
     {
         timer timer_postprocess;
 
-        auto &output = io_data->pOutputs[0];
-        auto &info = io_info->pOutputs[0];
-        auto ptr = (float *)output.pVirAddr;
+        auto& output = io_data->pOutputs[0];
+        auto& info = io_info->pOutputs[0];
+        auto ptr = (float*)output.pVirAddr;
 
         int height = info.pShape[1];
         int width = info.pShape[2];
@@ -102,7 +102,7 @@ namespace ax
                 *min_max_time.first);
     }
 
-    bool run_model(const std::string &model, const std::vector<uint8_t> &data, const int &repeat, cv::Mat &mat)
+    bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat)
     {
         // 1. init engine
 #ifdef AXERA_TARGET_CHIP_AX620E
@@ -138,7 +138,7 @@ namespace ax
         fprintf(stdout, "Engine creating context is done.\n");
 
         // 5. set io
-        AX_ENGINE_IO_INFO_T *io_info;
+        AX_ENGINE_IO_INFO_T* io_info;
         ret = AX_ENGINE_GetIOInfo(handle, &io_info);
         SAMPLE_AX_ENGINE_DEAL_HANDLE
         fprintf(stdout, "Engine get io info is done. \n");
@@ -180,7 +180,7 @@ namespace ax
     }
 } // namespace ax
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     cmdline::parser cmd;
     cmd.add<std::string>("model", 'm', "joint file(a.k.a. joint model)", true, "");
@@ -199,8 +199,7 @@ int main(int argc, char *argv[])
 
     if (!model_file_flag | !image_file_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input file %s(%s) is not exist, please check it.\n", kind.c_str(), value.c_str());
         };
 
@@ -224,8 +223,7 @@ int main(int argc, char *argv[])
 
     if (!input_size_flag)
     {
-        auto show_error = [](const std::string &kind, const std::string &value)
-        {
+        auto show_error = [](const std::string& kind, const std::string& value) {
             fprintf(stderr, "Input %s(%s) is not allowed, please check it.\n", kind.c_str(), value.c_str());
         };
 

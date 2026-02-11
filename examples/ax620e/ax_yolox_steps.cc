@@ -59,7 +59,7 @@ namespace ax
     {
         std::vector<detection::Object> proposals;
         std::vector<detection::Object> objects;
-        
+
         timer timer_postprocess;
         for (uint32_t i = 0; i < io_info->nOutputSize; ++i)
         {

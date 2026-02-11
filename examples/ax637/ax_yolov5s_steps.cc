@@ -245,4 +245,3 @@ int main(int argc, char* argv[])
     AX_SYS_Deinit();
     return 0;
 }
-

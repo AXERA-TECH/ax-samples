@@ -39,10 +39,10 @@ const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
 const char* CLASS_NAMES[] = {"face"};
-const float ANCHORS[18] = {4,5,  8,10,  13,16,              //# P3/8
-                           23,29,  43,55,  73,105,          //# P4/16
-                           146,217,  231,300,  335,433 };   //# P5/32
-                           
+const float ANCHORS[18] = {4, 5, 8, 10, 13, 16,           //# P3/8
+                           23, 29, 43, 55, 73, 105,       //# P4/16
+                           146, 217, 231, 300, 335, 433}; //# P5/32
+
 const int DEFAULT_LOOP_COUNT = 1;
 
 const float PROB_THRESHOLD = 0.45f;
@@ -238,4 +238,3 @@ int main(int argc, char* argv[])
     AX_SYS_Deinit();
     return 0;
 }
-

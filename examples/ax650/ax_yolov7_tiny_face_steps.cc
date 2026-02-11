@@ -39,9 +39,9 @@ const int DEFAULT_IMG_H = 640;
 const int DEFAULT_IMG_W = 640;
 
 const char* CLASS_NAMES[] = {"face"};
-const float ANCHORS[18] = {4,5,  6,8,  10,12,              //# P3/8
-                           15,19,  23,30,  39,52,          //# P4/16
-                           72,97,  123,164,  209,297 };   //# P5/32
+const float ANCHORS[18] = {4, 5, 6, 8, 10, 12,          //# P3/8
+                           15, 19, 23, 30, 39, 52,      //# P4/16
+                           72, 97, 123, 164, 209, 297}; //# P5/32
 
 const int DEFAULT_LOOP_COUNT = 1;
 

@@ -244,7 +244,7 @@ namespace ax
         fprintf(stdout, "run over: output len %d\n", io_info->nOutputSize);
 
         // 5. get bbox
-                std::map<std::string, float*> output_map;
+        std::map<std::string, float*> output_map;
         for (uint32_t i = 0; i < io_info->nOutputSize; i++)
         {
             auto& output = io_info->pOutputs[i];

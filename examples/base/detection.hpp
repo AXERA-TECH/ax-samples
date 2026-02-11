@@ -3186,4 +3186,169 @@ namespace detection
             }
         }
     }
+
+    static void generate_proposals_yolo26_pose(int stride, const float* feat_box, const float* feat_cls, const float* feat_kps,
+                                               float prob_threshold, std::vector<Object>& objects,
+                                               int letterbox_cols, int letterbox_rows, const int num_point = 17, int cls_num = 1)
+    {
+        const int feat_w = letterbox_cols / stride;
+        const int feat_h = letterbox_rows / stride;
+
+        const float p = std::min(std::max(prob_threshold, 1e-6f), 1.f - 1e-6f);
+        const float conf_raw = std::log(p / (1.f - p));
+
+        for (int h = 0; h < feat_h; ++h)
+        {
+            for (int w = 0; w < feat_w; ++w)
+            {
+                const int idx = h * feat_w + w;
+
+                // Find best class score
+                int best_c = 0;
+                float best_logit = -FLT_MAX;
+                const float* cls_ptr = feat_cls + idx * cls_num;
+                for (int c = 0; c < cls_num; ++c)
+                {
+                    float v = cls_ptr[c];
+                    if (v > best_logit)
+                    {
+                        best_logit = v;
+                        best_c = c;
+                    }
+                }
+
+                if (best_logit < conf_raw)
+                {
+                    continue;
+                }
+
+                const float score = sigmoid(best_logit);
+
+                // Decode box (ltrb format)
+                const float* box_ptr = feat_box + idx * 4;
+                const float l = box_ptr[0];
+                const float t = box_ptr[1];
+                const float r = box_ptr[2];
+                const float b = box_ptr[3];
+
+                const float cx = (w + 0.5f) * stride;
+                const float cy = (h + 0.5f) * stride;
+
+                float x0 = cx - l * stride;
+                float y0 = cy - t * stride;
+                float x1 = cx + r * stride;
+                float y1 = cy + b * stride;
+
+                x0 = std::max(0.f, std::min(x0, (float)(letterbox_cols - 1)));
+                y0 = std::max(0.f, std::min(y0, (float)(letterbox_rows - 1)));
+                x1 = std::max(0.f, std::min(x1, (float)(letterbox_cols - 1)));
+                y1 = std::max(0.f, std::min(y1, (float)(letterbox_rows - 1)));
+
+                Object obj;
+                obj.rect.x = x0;
+                obj.rect.y = y0;
+                obj.rect.width = x1 - x0;
+                obj.rect.height = y1 - y0;
+                obj.label = best_c;
+                obj.prob = score;
+
+                // Decode keypoints using YOLO26-Pose formula:
+                // kpts_decoded[:, :, 0] = (kpts[:, :, 0] + anchor_x) * stride
+                // kpts_decoded[:, :, 1] = (kpts[:, :, 1] + anchor_y) * stride
+                // kpts_decoded[:, :, 2] = sigmoid(kpts[:, :, 2])
+                const float* kps_ptr = feat_kps + idx * num_point * 3;
+                const float anchor_x = w + 0.5f;
+                const float anchor_y = h + 0.5f;
+
+                obj.kps_feat.clear();
+                for (int k = 0; k < num_point; ++k)
+                {
+                    float kps_x = (kps_ptr[k * 3 + 0] + anchor_x) * stride;
+                    float kps_y = (kps_ptr[k * 3 + 1] + anchor_y) * stride;
+                    float kps_s = sigmoid(kps_ptr[k * 3 + 2]);
+
+                    obj.kps_feat.push_back(kps_x);
+                    obj.kps_feat.push_back(kps_y);
+                    obj.kps_feat.push_back(kps_s);
+                }
+
+                objects.push_back(obj);
+            }
+        }
+    }
+
+    static void generate_proposals_yolo26_seg(int stride, const float* feat_box, const float* feat_cls, const float* feat_mask,
+                                              float prob_threshold, std::vector<Object>& objects,
+                                              int letterbox_cols, int letterbox_rows, int cls_num = 80, int mask_proto_dim = 32)
+    {
+        const int feat_w = letterbox_cols / stride;
+        const int feat_h = letterbox_rows / stride;
+
+        const float p = std::min(std::max(prob_threshold, 1e-6f), 1.f - 1e-6f);
+        const float conf_raw = std::log(p / (1.f - p));
+
+        for (int h = 0; h < feat_h; ++h)
+        {
+            for (int w = 0; w < feat_w; ++w)
+            {
+                const int idx = h * feat_w + w;
+
+                // Find best class score
+                int best_c = 0;
+                float best_logit = -FLT_MAX;
+                const float* cls_ptr = feat_cls + idx * cls_num;
+                for (int c = 0; c < cls_num; ++c)
+                {
+                    float v = cls_ptr[c];
+                    if (v > best_logit)
+                    {
+                        best_logit = v;
+                        best_c = c;
+                    }
+                }
+
+                if (best_logit < conf_raw)
+                {
+                    continue;
+                }
+
+                const float score = sigmoid(best_logit);
+
+                // Decode box (ltrb format)
+                const float* box_ptr = feat_box + idx * 4;
+                const float l = box_ptr[0];
+                const float t = box_ptr[1];
+                const float r = box_ptr[2];
+                const float b = box_ptr[3];
+
+                const float cx = (w + 0.5f) * stride;
+                const float cy = (h + 0.5f) * stride;
+
+                float x0 = cx - l * stride;
+                float y0 = cy - t * stride;
+                float x1 = cx + r * stride;
+                float y1 = cy + b * stride;
+
+                x0 = std::max(0.f, std::min(x0, (float)(letterbox_cols - 1)));
+                y0 = std::max(0.f, std::min(y0, (float)(letterbox_rows - 1)));
+                x1 = std::max(0.f, std::min(x1, (float)(letterbox_cols - 1)));
+                y1 = std::max(0.f, std::min(y1, (float)(letterbox_rows - 1)));
+
+                Object obj;
+                obj.rect.x = x0;
+                obj.rect.y = y0;
+                obj.rect.width = x1 - x0;
+                obj.rect.height = y1 - y0;
+                obj.label = best_c;
+                obj.prob = score;
+
+                // Copy mask coefficients
+                const float* mask_ptr = feat_mask + idx * mask_proto_dim;
+                obj.mask_feat.resize(mask_proto_dim);
+                memcpy(obj.mask_feat.data(), mask_ptr, sizeof(float) * mask_proto_dim);
+
+                objects.push_back(obj);
+            }
+        }
+    }
 } // namespace detection

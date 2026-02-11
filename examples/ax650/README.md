@@ -16,6 +16,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [YOLOv5-seg](#YOLOv5-seg)
   - [YOLOv8-seg](#YOLOv8-seg)
   - [YOLO11-seg](#YOLO11-seg)
+  - [YOLO26-seg](#YOLO26-seg)
 - 人脸检测
   - [scrfd](#Scrfd)
   - [YOLOv5-Face](#YOLOv5-Face)([original model](https://github.com/deepcam-cn/yolov5-face))
@@ -26,6 +27,7 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
   - [HRNet](#HRNet)
   - [YOLOv8-pose](#YOLOv8-pose)
   - [YOLO11-pose](#YOLO11-pose)
+  - [YOLO26-pose](#YOLO26-pose)
 - 人体分割
   - [PP-HumanSeg](#PP-HumanSeg)
 - 立体视觉
@@ -851,6 +853,59 @@ detection num: 5
 --------------------------------------
 ```
 ![YOLO26](../../docs/ax650/yolo26_out.jpg)
+
+### YOLO26-pose
+```
+root@ax650:~# ./ax_yolo26_pose -m yolo26n-pose.axmodel -i bus.jpg
+--------------------------------------
+model file : yolo26n-pose.axmodel
+image file : bus.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.21 ms
+--------------------------------------
+Repeat 1 times, avg time 1.52 ms, max_time 1.52 ms, min_time 1.52 ms
+--------------------------------------
+detection num: 3
+ 0:  86%, [  49,  399,  235,  907], person
+ 0:  86%, [ 226,  412,  345,  865], person
+ 0:  84%, [ 669,  408,  809,  881], person
+--------------------------------------
+```
+![YOLO26-pose](../../docs/ax650/yolo26_pose_out.jpg)
+
+### YOLO26-seg
+```
+root@ax650:~# ./ax_yolo26_seg -m yolo26n-seg.axmodel -i bus.jpg
+--------------------------------------
+model file : yolo26n-seg.axmodel
+image file : bus.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:10.78 ms
+--------------------------------------
+Repeat 1 times, avg time 2.00 ms, max_time 2.00 ms, min_time 2.00 ms
+--------------------------------------
+detection num: 4
+ 0:  93%, [ 224,  410,  347,  860], person
+ 0:  87%, [  50,  394,  243,  902], person
+ 5:  82%, [  32,  232,  797,  728], bus
+ 0:  76%, [ 664,  414,  809,  875], person
+--------------------------------------
+```
+![YOLO26-seg](../../docs/ax650/yolo26_seg_out.jpg)
 
 #### YOLO11-seg
 ```

@@ -1,7 +1,7 @@
 /*
 * AXERA is pleased to support the open source community by making ax-samples available.
 *
-* Copyright (c) 2025, AXERA Semiconductor Co., Ltd. All rights reserved.
+* Copyright (c) 2024, AXERA Semiconductor Co., Ltd. All rights reserved.
 *
 * Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 */
 
 /*
-* Note: For DepthAnything depth estimation model.
-* Author: GUOFANGMING
+* Note: For the YOLO26 series exported by the ultralytics project.
+* Author: LittleMouse
 */
 
 #include <cstdio>
@@ -25,6 +25,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "base/common.hpp"
+#include "base/detection.hpp"
 #include "middleware/io.hpp"
 
 #include "utilities/args.hpp"
@@ -35,34 +36,49 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 518;
-const int DEFAULT_IMG_W = 518;
+const int DEFAULT_IMG_H = 640;
+const int DEFAULT_IMG_W = 640;
+
+const char* CLASS_NAMES[] = {
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
+    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
+    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
+    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
+    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
+    "hair drier", "toothbrush"};
+
+int NUM_CLASS = 80;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
+const float PROB_THRESHOLD = 0.45f;
+const float NMS_THRESHOLD = 0.45f;
 namespace ax
 {
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const cv::Mat& mat, int input_w, int input_h, const std::vector<float>& time_costs)
     {
+        std::vector<detection::Object> proposals;
+        std::vector<detection::Object> objects;
         timer timer_postprocess;
-        auto& output = io_data->pOutputs[0];
-        auto& info = io_info->pOutputs[0];
 
-        cv::Mat feature(info.pShape[2], info.pShape[3], CV_32FC1, output.pVirAddr);
+        float* output_ptr[3] = {(float*)io_data->pOutputs[0].pVirAddr,      // 1*80*80*4
+                                (float*)io_data->pOutputs[2].pVirAddr,      // 1*40*40*4
+                                (float*)io_data->pOutputs[4].pVirAddr};     // 1*20*20*4
+        float* output_cls_ptr[3] = {(float*)io_data->pOutputs[1].pVirAddr,  // 1*80*80*80
+                                    (float*)io_data->pOutputs[3].pVirAddr,  // 1*40*40*80
+                                    (float*)io_data->pOutputs[5].pVirAddr}; // 1*20*20*80
+        for (int i = 0; i < 3; ++i)
+        {
+            auto feat_ptr = output_ptr[i];
+            auto feat_cls_ptr = output_cls_ptr[i];
+            int32_t stride = (1 << i) * 8;
+            detection::generate_proposals_yolo26(stride, feat_ptr, feat_cls_ptr, PROB_THRESHOLD, proposals, input_w, input_h, NUM_CLASS);
+        }
 
-        double minVal, maxVal;
-        cv::minMaxLoc(feature, &minVal, &maxVal);
-
-        feature -= minVal;
-        feature /= (maxVal - minVal);
-        feature *= 255;
-
-        feature.convertTo(feature, CV_8UC1);
-
-        cv::Mat dst(info.pShape[2], info.pShape[3], CV_8UC3);
-        cv::applyColorMap(feature, dst, cv::ColormapTypes::COLORMAP_INFERNO);
-        cv::resize(dst, dst, cv::Size(mat.cols, mat.rows));
-
+        detection::get_out_bbox(proposals, objects, NMS_THRESHOLD, input_h, input_w, mat.rows, mat.cols);
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
         fprintf(stdout, "--------------------------------------\n");
         auto total_time = std::accumulate(time_costs.begin(), time_costs.end(), 0.f);
@@ -74,8 +90,9 @@ namespace ax
                 *min_max_time.second,
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
-        cv::hconcat(std::vector<cv::Mat>{mat, dst}, dst);
-        cv::imwrite("depth_anything_out.jpg", dst);
+        fprintf(stdout, "detection num: %zu\n", objects.size());
+
+        detection::draw_objects(mat, objects, CLASS_NAMES, "yolo26_out");
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
@@ -215,8 +232,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Read image failed.\n");
         return -1;
     }
-    // Use BGR2RGB conversion and no letterbox resize, matching Python implementation
-    common::get_input_data_no_letterbox(mat, image, input_size[0], input_size[1], true);
+    common::get_input_data_letterbox(mat, image, input_size[0], input_size[1]);
 
     // 3. sys_init
     AX_SYS_Init();
