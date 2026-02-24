@@ -27,8 +27,7 @@ English | [简体中文](./README.md)
 | Board | Image | SoC | Vendor | Link |
 | ----- | ----- | --- | ------ | ---- |
 | AXera-Pi Pro | <img src="docs/boards/Axera-Pi_pro.jpg" width="200"> | AX650N | Sipeed | [Wiki](https://wiki.sipeed.com/m4ndock) |
-| AXera-Pi Zero | <img src="docs/boards/Axera-Pi_zero.jpg" width="200"> | AX620Q | Sipeed | [Docs](https://axera-pi-zero-docs-cn.readthedocs.io/zh-cn/latest/index.html) |
-| LLM-8850 Card | <img src="docs/boards/AI-001_LLM-8850-main-pictures_01.jpg" width="200"> | AX650N / AX8850 | M5Stack | [Docs](https://docs.m5stack.com/en/ai_hardware/LLM-8850_Card) |
+| AI Pyramid | <img src="docs/boards/AI_Pyramid.jpg" width="200"> | AX8850 | M5Stack | [Docs](https://docs.m5stack.com/en/ai_hardware/AI_Pyramid) |
 | LLM630 Compute Kit | <img src="docs/boards/LLM630_Compute_kit.jpg" width="200"> | AX630C | M5Stack | [Docs](https://docs.m5stack.com/en/core/LLM630%20Compute%20Kit) |
 | Module LLM | <img src="docs/boards/module_LLM.jpg" width="200"> | AX630C | M5Stack | [Docs](https://docs.m5stack.com/en/module/Module-LLM) |
 
@@ -50,7 +49,7 @@ English | [简体中文](./README.md)
 
 ### Benchmark
 
-- [Benchmark](benchmark/) — Inference time statistics for common open-source models, measured on *AXera-Pi Pro* and *AXera-Pi Zero*.
+- [Benchmark](benchmark/) — Inference time statistics for common open-source models, measured on *AXera-Pi Pro*.
 
 ## Related Projects
 

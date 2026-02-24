@@ -27,8 +27,7 @@
 | 开发板 | 图片 | 芯片 | 厂商 | 链接 |
 | ------ | ---- | ---- | ---- | ---- |
 | AXera-Pi Pro | <img src="docs/boards/Axera-Pi_pro.jpg" width="200"> | AX650N | Sipeed | [Wiki](https://wiki.sipeed.com/m4ndock) |
-| AXera-Pi Zero | <img src="docs/boards/Axera-Pi_zero.jpg" width="200"> | AX620Q | Sipeed | [文档](https://axera-pi-zero-docs-cn.readthedocs.io/zh-cn/latest/index.html) |
-| LLM-8850 Card | <img src="docs/boards/AI-001_LLM-8850-main-pictures_01.jpg" width="200"> | AX650N / AX8850 | M5Stack | [文档](https://docs.m5stack.com/en/ai_hardware/LLM-8850_Card) |
+| AI Pyramid | <img src="docs/boards/AI_Pyramid.jpg" width="200"> | AX8850 | M5Stack | [文档](https://docs.m5stack.com/zh_CN/ai_hardware/AI_Pyramid) |
 | LLM630 Compute Kit | <img src="docs/boards/LLM630_Compute_kit.jpg" width="200"> | AX630C | M5Stack | [文档](https://docs.m5stack.com/zh_CN/core/LLM630%20Compute%20Kit) |
 | Module LLM | <img src="docs/boards/module_LLM.jpg" width="200"> | AX630C | M5Stack | [文档](https://docs.m5stack.com/zh_CN/module/Module-LLM) |
 
@@ -50,7 +49,7 @@
 
 ### 速度评估
 
-- [Benchmark](benchmark/) 常见开源模型推理耗时统计，基于 *AXera-Pi Pro* 、*AXera-Pi Zero* 实测。
+- [Benchmark](benchmark/) 常见开源模型推理耗时统计，基于 *AXera-Pi Pro* 实测。
 
 ## 关联项目
 
