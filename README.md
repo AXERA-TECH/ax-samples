@@ -27,7 +27,7 @@
 - [M57](https://www.axera-tech.com/zh-hans/product/2826.html)
 
 **边缘计算芯片**
-- [AX8850](https://www.axera-tech.com/zh-hans/product/2896.html)
+- [AX8850N](https://www.axera-tech.com/zh-hans/product/2897.html)/[AX8850](https://www.axera-tech.com/zh-hans/product/2896.html)
 
 ### 已支持开发板
 
