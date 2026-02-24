@@ -17,10 +17,17 @@ English | [简体中文](./README.md)
 
 ### Supported SoCs
 
+**Edge Computing SoCs**
 - [AX650A](https://www.axera-tech.com/zh-hans/product/2929.html) / [AX650N](https://www.axera-tech.com/zh-hans/product/2929.html)
-- [AX8850](https://www.axera-tech.com/zh-hans/product/2896.html)
-- [AX637](https://www.axera-tech.com/zh-hans/product/2826.html)
+- AX637
 - [AX630C](https://www.axera-tech.com/zh-hans/product/2931.html) / [AX620Q](https://www.axera-tech.com/zh-hans/product/2932.html)
+- [AX615](https://www.axera-tech.com/zh-hans/product/2956.html)
+
+**Automotive SoCs**
+- [M57](https://www.axera-tech.com/zh-hans/product/2826.html)
+
+**Edge AI SoCs**
+- [AX8850](https://www.axera-tech.com/zh-hans/product/2896.html)
 
 ### Supported Boards
 

@@ -17,10 +17,17 @@
 
 ### 已支持芯片
 
+**终端计算芯片**
 - [AX650A](https://www.axera-tech.com/zh-hans/product/2929.html) / [AX650N](https://www.axera-tech.com/zh-hans/product/2929.html)
-- [AX8850](https://www.axera-tech.com/zh-hans/product/2896.html)
-- [AX637](https://www.axera-tech.com/zh-hans/product/2826.html)
+- AX637
 - [AX630C](https://www.axera-tech.com/zh-hans/product/2931.html) / [AX620Q](https://www.axera-tech.com/zh-hans/product/2932.html)
+- [AX615](https://www.axera-tech.com/zh-hans/product/2956.html)
+
+**车载芯片**
+- [M57](https://www.axera-tech.com/zh-hans/product/2826.html)
+
+**边缘计算芯片**
+- [AX8850](https://www.axera-tech.com/zh-hans/product/2896.html)
 
 ### 已支持开发板
 
