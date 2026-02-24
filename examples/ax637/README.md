@@ -19,6 +19,8 @@ AX-Samples 将不断更新最流行、实用、有趣的 AX637 示例代码。�
   - [DeepLabv3+](#DeepLabv3)
 - 关键点匹配
   - [Superpoint](#Superpoint)
+- 立体视觉
+  - [IGEV-plusplus](#IGEV-plusplus)
 
 ### 运行示例
 
@@ -406,3 +408,42 @@ Found 57 matches
 Match result saved to superpoint_matches.jpg
 ```
 ![](../../docs/ax637/superpoint_matches.jpg)
+
+### IGEV-plusplus
+```
+(base) root@ax650:/home/axera/637# ./ax_igev_plusplus -m AX637_RTIGEV.axmodel -l im0.png -R im1.png -r 10
+--------------------------------------
+model file : AX637_RTIGEV.axmodel
+left image file : im0.png
+right image file : im1.png
+img_h, img_w : 384 512
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+
+input size: 2
+    name:     left [UINT8] [FEATUREMAP]
+        1 x 384 x 512 x 3
+
+    name:    right [UINT8] [FEATUREMAP]
+        1 x 384 x 512 x 3
+
+
+output size: 1
+    name: pred_disp [FLOAT32]
+        1 x 1 x 384 x 512
+
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:50.27 ms
+--------------------------------------
+Repeat 1 times, avg time 385.46 ms, max_time 385.46 ms, min_time 385.46 ms
+Disparity range: [6.96, 36.44]
+--------------------------------------
+Saved disparity map: igev_plusplus_disparity.jpg
+Saved combined result: igev_plusplus_result.jpg
+--------------------------------------
+```
+<img src="../../docs/ax637/igev_plusplus_result.jpg">

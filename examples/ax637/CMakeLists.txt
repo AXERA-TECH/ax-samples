@@ -43,3 +43,4 @@ axera_example(ax_depth_anything ax_depth_anythingv2_steps.cc)
 axera_example(ax_deep_lab_v3_plus ax_deep_lab_v3_plus_steps.cc)
 
 axera_example(ax_superpoint ax_superpoint_steps.cc)
+axera_example(ax_igev_plusplus ax_igev_plusplus_steps.cc)
