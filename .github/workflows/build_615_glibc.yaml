@@ -30,7 +30,7 @@ jobs:
           arm-linux-gnueabihf-gcc -v
           cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake \
             -DBSP_MSP_DIR=${ax_bsp} \
-            -DOpenCV_DIR=../3rdparty/opencv-arm-uclibc-linux/lib/cmake/opencv4 \
+            -DOpenCV_DIR=${GITHUB_WORKSPACE}/3rdparty/opencv-arm-uclibc-linux/lib/cmake/opencv4 \
             -DAXERA_TARGET_CHIP=ax615 ..
           make -j8
           make install
