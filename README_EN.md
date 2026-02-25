@@ -7,9 +7,10 @@ English | [简体中文](./README.md)
 | Platform | Build Status |
 | -------- | ------------ |
 | AX650N   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_650.yml)|
-| AX637    | ![Build](https://img.shields.io/badge/build-passing-brightgreen)|
+| AX637    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/GuoFM/ax-samples/build_637.yml)|
 | AX630C   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_630c_glibc.yaml)|
 | AX620Q   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_620q_uclibc.yaml)|
+| AX615    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/GuoFM/ax-samples/build_615_glibc.yaml)|
 
 ## Introduction
 
