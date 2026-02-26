@@ -16,7 +16,6 @@
 #
 
 find_package(Threads)
-find_package(OpenCV REQUIRED)
 
 include("${CMAKE_SOURCE_DIR}/cmake/ax615.cmake")
 

@@ -101,7 +101,7 @@ namespace ax
         // 1. init engine
         AX_ENGINE_NPU_ATTR_T npu_attr;
         memset(&npu_attr, 0, sizeof(npu_attr));
-        npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_ENABLE;
+        npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_DISABLE;
         auto ret = AX_ENGINE_Init(&npu_attr);
 
         if (0 != ret)

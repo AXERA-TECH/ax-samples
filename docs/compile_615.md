@@ -35,8 +35,17 @@ export AX615_BSP=$(pwd)/msp/out/arm_glibc
 ### 编译环境
 
 - cmake ≥ 3.13；
-- 已安装 `arm-linux-gnueabihf-gcc/g++`（可通过 `apt install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf` 安装）；
+- 已将 `arm-linux-gnueabihf-gcc/g++` 添加到 `PATH`；
 - host 为常规 x86_64 Ubuntu / Debian 即可。
+
+#### 工具链获取
+
+```bash
+mkdir -p ~/toolchains && cd ~/toolchains
+wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+export PATH=$PWD/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin:$PATH
+```
 
 ### 源码编译
 

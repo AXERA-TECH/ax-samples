@@ -26,7 +26,9 @@ jobs:
           wget https://github.com/GuoFM/ax-samples/releases/download/v0.1/ax615_bsp_sdk.tar.gz
           tar -zxf ax615_bsp_sdk.tar.gz
           export ax_bsp=$PWD/msp/out/arm_glibc/
-          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+          tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+          export PATH=$PATH:$PWD/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/
           arm-linux-gnueabihf-gcc -v
           cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake \
             -DBSP_MSP_DIR=${ax_bsp} \
