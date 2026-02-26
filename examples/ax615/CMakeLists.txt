@@ -40,7 +40,3 @@ axera_example(ax_yolo26_seg ax_yolo26_seg_steps.cc)
 axera_example(ax_yolo11n_classification ax_yolo11n_classification_steps.cc)
 
 axera_example(ax_depth_anything ax_depth_anythingv2_steps.cc)
-axera_example(ax_deep_lab_v3_plus ax_deep_lab_v3_plus_steps.cc)
-
-axera_example(ax_superpoint ax_superpoint_steps.cc)
-axera_example(ax_igev_plusplus ax_igev_plusplus_steps.cc)
