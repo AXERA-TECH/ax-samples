@@ -48,12 +48,10 @@ ax-samples$ tree -L 2 3rdparty
     └── share
 ```
 
-3. AX637 BSP/SDK 请联系FAE获取，获取后执行：
+3. AX637 BSP/SDK 从 [Releases](https://github.com/AXERA-TECH/ax-samples/releases) 下载 `ax637_bsp_sdk.tar.gz`，解压后：
 
 ```bash
-tar -zxvf AX637_SDK_XXX.tgz
-cd AX637_SDK_XXX/package
-tar -zxvf msp.tgz
+tar -zxf ax637_bsp_sdk.tar.gz
 export AX637_BSP=$(pwd)/msp/out
 ```
 

@@ -1,0 +1,36 @@
+name: build_615_glibc
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: prepare opencv-library
+        run: |
+          mkdir -p ./3rdparty
+          wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.6/opencv-arm-uclibc-linux.zip
+          unzip opencv-arm-uclibc-linux.zip -d ./3rdparty
+
+      - name: build
+        run: |
+          mkdir build && cd build
+          wget https://github.com/GuoFM/ax-samples/releases/download/v0.1/ax615_bsp_sdk.tar.gz
+          tar -zxf ax615_bsp_sdk.tar.gz
+          export ax_bsp=$PWD/msp/out/arm_glibc/
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          arm-linux-gnueabihf-gcc -v
+          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake \
+            -DBSP_MSP_DIR=${ax_bsp} \
+            -DOpenCV_DIR=${GITHUB_WORKSPACE}/3rdparty/opencv-arm-uclibc-linux/lib/cmake/opencv4 \
+            -DAXERA_TARGET_CHIP=ax615 ..
+          make -j8
+          make install

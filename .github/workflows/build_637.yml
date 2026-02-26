@@ -1,0 +1,35 @@
+name: build_637
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: prepare opencv-library
+        run: |
+          mkdir -p ./3rdparty
+          wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-aarch64-linux-gnu-gcc-7.5.0.zip
+          unzip opencv-aarch64-linux-gnu-gcc-7.5.0.zip -d ./3rdparty
+
+      - name: build
+        run: |
+          mkdir build && cd build
+          wget https://github.com/GuoFM/ax-samples/releases/download/v0.1/ax637_bsp_sdk.tar.gz
+          tar -zxf ax637_bsp_sdk.tar.gz
+          export ax_bsp=$PWD/msp/out/
+          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+          tar -xf gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+          export PATH=$PATH:$PWD/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/
+          aarch64-none-linux-gnu-gcc -v
+          cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp} -DAXERA_TARGET_CHIP=ax637 ..
+          make -j8
+          make install
