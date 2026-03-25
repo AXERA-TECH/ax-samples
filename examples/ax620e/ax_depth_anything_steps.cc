@@ -35,8 +35,8 @@
 #include <ax_sys_api.h>
 #include <ax_engine_api.h>
 
-const int DEFAULT_IMG_H = 256;
-const int DEFAULT_IMG_W = 384;
+const int DEFAULT_IMG_H = 518;
+const int DEFAULT_IMG_W = 518;
 
 const int DEFAULT_LOOP_COUNT = 1;
 
@@ -61,7 +61,7 @@ namespace ax
         feature.convertTo(feature, CV_8UC1);
 
         cv::Mat dst(info.pShape[2], info.pShape[3], CV_8UC3);
-        cv::applyColorMap(feature, dst, cv::ColormapTypes::COLORMAP_MAGMA);
+        cv::applyColorMap(feature, dst, cv::ColormapTypes::COLORMAP_INFERNO);
         cv::resize(dst, dst, cv::Size(mat.cols, mat.rows));
 
         fprintf(stdout, "post process cost time:%.2f ms \n", timer_postprocess.cost());
@@ -76,7 +76,7 @@ namespace ax
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
         cv::hconcat(std::vector<cv::Mat>{mat, dst}, dst);
-        cv::imwrite("depth_anything_out.png", dst);
+        cv::imwrite("output-ax.png", dst);
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)

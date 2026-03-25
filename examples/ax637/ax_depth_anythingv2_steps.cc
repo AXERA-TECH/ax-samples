@@ -75,7 +75,7 @@ namespace ax
                 *min_max_time.first);
         fprintf(stdout, "--------------------------------------\n");
         cv::hconcat(std::vector<cv::Mat>{mat, dst}, dst);
-        cv::imwrite("depth_anything_out.jpg", dst);
+        cv::imwrite("output-ax.png", dst);
     }
 
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
