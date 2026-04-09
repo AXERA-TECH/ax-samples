@@ -32,16 +32,19 @@ rse.jpg
 model file : ./models/yolo11/compiled.axmodel
 image file : ./model/yolo11/ssd_horse.jpg
 img_h, img_w : 640 640
+model file : yolo11s.axmodel
+image file : ssd_horse.jpg
+img_h, img_w : 640 640
 --------------------------------------
 Engine creating handle is done.
 Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
+Engine get io info is done. 
+Engine alloc io is done. 
+Engine push input is done. 
 --------------------------------------
-post process cost time:23.75 ms
+post process cost time:4.85 ms 
 --------------------------------------
-Repeat 1 times, avg time 10.38 ms, max_time 10.38 ms, min_time 10.38 ms
+Repeat 1 times, avg time 10.29 ms, max_time 10.29 ms, min_time 10.29 ms
 --------------------------------------
 detection num: 6
 17:  95%, [ 216,   73,  421,  373], horse
@@ -96,9 +99,9 @@ output size: 7
     name:  output1 [FLOAT32]
         1 x 32 x 160 x 160
 
-post process cost time:36.42 ms
+post process cost time:13.92 ms 
 --------------------------------------
-Repeat 1 times, avg time 13.76 ms, max_time 13.76 ms, min_time 13.76 ms
+Repeat 1 times, avg time 13.72 ms, max_time 13.72 ms, min_time 13.72 ms
 --------------------------------------
 detection num: 6
  0:  92%, [1350,  339, 1628, 1036], person
@@ -213,9 +216,9 @@ Engine get io info is done.
 Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
-post process cost time:38.43 ms
+post process cost time:9.77 ms 
 --------------------------------------
-Repeat 1 times, avg time 10.54 ms, max_time 10.54 ms, min_time 10.54 ms
+Repeat 1 times, avg time 10.51 ms, max_time 10.51 ms, min_time 10.51 ms
 --------------------------------------
 detection num: 7
  0:  91%, [ 760,  241, 1120, 1139], person
@@ -299,9 +302,9 @@ output size: 7
     name:  output1 [FLOAT32]
         1 x 32 x 160 x 160
 
-post process cost time:80.52 ms
+post process cost time:12.63 ms 
 --------------------------------------
-Repeat 1 times, avg time 14.51 ms, max_time 14.51 ms, min_time 14.51 ms
+Repeat 1 times, avg time 14.54 ms, max_time 14.54 ms, min_time 14.54 ms
 --------------------------------------
 detection num: 8
  0:  92%, [1354,  340, 1624, 1035], person
