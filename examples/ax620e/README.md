@@ -4,19 +4,13 @@ AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 
 - 物体检测
   - [YOLOv5](#YOLOv5)
-  - [YOLOv6](#YOLOv6)
-  - [YOLOv7-Tiny](#YOLOv7-Tiny)
   - [YOLOv8](#YOLOv8)
-  - [YOLOX](#YOLOX)
   - [YOLO-World](#YOLO-World)
-  - [YOLOv10](#YOLOv10)
 - 实例分割
   - [YOLOv5-seg](#YOLOv5-Seg)
 - 人脸检测
-  - [YOLOv5-Face](#YOLOv5-Face)
   - [YOLOv7-Face](#YOLOv7-Face)
 - 人体关键点
-  - [RTMPose](#RTMPose)
   - [YOLOv8-Pose](#YOLOv8-Pose)
 - 深度估计
   - [Depth-Anything](#Depth-Anything) 
@@ -51,86 +45,6 @@ detection num: 6
 --------------------------------------
 ```
 ![YOLOv5s](../../docs/ax620e/yolov5s_out.jpg)
-
-#### YOLOv7-Tiny
-```
-root@AXERA:/home/test# ./ax_yolov7 -m yolov7-tiny.axmodel -i ssd_horse.jpg
---------------------------------------
-model file : yolov7-tiny.axmodel
-image file : ssd_horse.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:4.14 ms
---------------------------------------
-Repeat 1 times, avg time 20.02 ms, max_time 20.02 ms, min_time 20.02 ms
---------------------------------------
-detection num: 5
-17:  90%, [ 218,   62,  417,  374], horse
- 0:  84%, [ 269,   13,  353,  224], person
- 0:  82%, [ 431,  121,  448,  180], person
- 7:  81%, [   2,  106,  133,  197], truck
-16:  76%, [ 143,  201,  196,  349], dog
---------------------------------------
-```
-![YOLOv7-Tiny](../../docs/ax620e/yolov7_out.jpg)
-
-#### YOLOX
-```
-/tmp/samples # ./ax_yoloxs -m yolox.axmodel -i ssd_horse.jpg
---------------------------------------
-model file : yolox.axmodel
-image file : ssd_horse.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:1.51 ms
---------------------------------------
-Repeat 1 times, avg time 24.70 ms, max_time 24.70 ms, min_time 24.70 ms
---------------------------------------
-detection num: 6
-17:  94%, [ 220,   71,  421,  370], horse
-16:  90%, [ 144,  204,  196,  347], dog
- 0:  88%, [ 273,   15,  349,  228], person
- 2:  83%, [   1,  104,  134,  198], car
- 0:  83%, [ 430,  124,  451,  178], person
- 0:  46%, [ 402,  131,  410,  149], person
---------------------------------------
-```
-![YOLOX](../../docs/ax620e/yolox_out.jpg)
-
-
-#### YOLOv5-Face
-```
-root@AXERA:/home/test# ./ax_yolov5_face -m yolov5s-face.axmodel -i selfie.jpg
---------------------------------------
-model file : yolov5s-face.axmodel
-image file : selfie.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:6.37 ms
---------------------------------------
-Repeat 1 times, avg time 18.35 ms, max_time 18.35 ms, min_time 18.35 ms
---------------------------------------
-detection num: 108
-```
-![yolov5s-face](../../docs/ax620e/yolov5_face_out.jpg)
 
 
 #### YOLOv5-Seg
@@ -184,34 +98,6 @@ detection num: 103
 ```
 ![yolov7s-face](../../docs/ax620e/yolov7_face_out.jpg)
 
-#### YOLOv6
-```
-root@AXERA:/home/test# ./ax_yolov6 -m yolov6s.axmodel -i ssd_horse.jpg
---------------------------------------
-model file : yolov6s.axmodel
-image file : ssd_horse.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:4.24 ms
---------------------------------------
-Repeat 1 times, avg time 6.94 ms, max_time 6.94 ms, min_time 6.94 ms
---------------------------------------
-detection num: 6
-17:  95%, [ 214,   72,  421,  372], horse
- 0:  87%, [ 271,   13,  350,  224], person
- 0:  81%, [ 429,  123,  452,  178], person
- 7:  80%, [   1,  105,  131,  196], truck
-17:  57%, [ 144,  203,  194,  344], horse
- 0:  46%, [ 403,  131,  411,  149], person
---------------------------------------
-```
-![YOLOv6s](../../docs/ax620e/yolov6_out.jpg)
 
 #### YOLOv8
 ```
@@ -265,27 +151,6 @@ detection num: 1
 ```
 ![yolov8-pose](../../docs/ax620e/yolov8s_pose_out.jpg)
 
-### RTMPose
-```
-/opt/test # ./ax_simcc_pose -m rtmpose.axmodel -i songyi.jpeg
---------------------------------------
-model file : rtmpose.axmodel
-image file : songyi.jpeg
-img_h, img_w : 256 192
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:0.10 ms
---------------------------------------
-Repeat 1 times, avg time 4.29 ms, max_time 4.29 ms, min_time 4.29 ms
---------------------------------------
-```
-<img src="../../docs/ax620e/simcc_out.jpg" width="300" height="450">
-
 ### Depth-Anything
 ```
 /opt/test # ./ax_depth_anything -m depth_anything.axmodel -i /opt/data/npu/images/dog.jpg
@@ -336,31 +201,3 @@ detection num: 6
 ```
 ![](../../docs/ax650/yolo_world_out.jpg)
 
-### YOLOv10
-```
-/opt/test # ./ax_yolov10 -i ssd_horse.jpg -m yolov10s.axmodel -r 10
---------------------------------------
-model file : yolov10s.axmodel
-image file : ssd_horse.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:4.98 ms
---------------------------------------
-Repeat 10 times, avg time 15.75 ms, max_time 15.75 ms, min_time 15.75 ms
---------------------------------------
-detection num: 0
-13:  25%, [ 468,  149,  499,  178], bench
- 0:  78%, [ 431,  124,  451,  178], person
-16:  78%, [ 145,  205,  196,  344], dog
- 0:  88%, [ 272,   13,  349,  234], person
- 7:  82%, [   0,  106,  132,  196], truck
-17:  94%, [ 215,   70,  422,  371], horse
---------------------------------------
-```
-![](../../docs/ax650/yolov10s_out.jpg)

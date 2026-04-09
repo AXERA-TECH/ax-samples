@@ -62,7 +62,6 @@ struct image_data_t
 };
 namespace ax
 {
-
     void post_process(AX_ENGINE_IO_INFO_T* io_info, AX_ENGINE_IO_T* io_data, const std::vector<image_data_t>& batchdata, int input_w, int input_h, const std::vector<float>& time_costs)
     {
         float prob_threshold_u_sigmoid = -1.0f * (float)std::log((1.0f / PROB_THRESHOLD) - 1.0f);
@@ -165,7 +164,7 @@ namespace ax
         fprintf(stdout, "Engine push input is done. \n");
         fprintf(stdout, "--------------------------------------\n");
 
-        // 8. warn up
+        // 8. warm up
         for (int i = 0; i < 5; ++i)
         {
             AX_ENGINE_RunSync(handle, &io_data);

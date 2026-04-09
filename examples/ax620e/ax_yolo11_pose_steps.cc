@@ -68,7 +68,7 @@ namespace ax
         float* output_kps_ptr[3] = {(float*)io_data->pOutputs[3].pVirAddr,  // 1*80*80*51
                                     (float*)io_data->pOutputs[4].pVirAddr,  // 1*40*40*51
                                     (float*)io_data->pOutputs[5].pVirAddr}; // 1*20*20*51
-		
+
         for (int i = 0; i < 3; ++i)
         {
             auto feat_ptr = output_ptr[i];
@@ -143,7 +143,7 @@ namespace ax
         fprintf(stdout, "Engine push input is done. \n");
         fprintf(stdout, "--------------------------------------\n");
 
-        // 8. warn up
+        // 8. warm up
         for (int i = 0; i < 5; ++i)
         {
             AX_ENGINE_RunSync(handle, &io_data);

@@ -3,31 +3,28 @@
 AX-Samples 将不断更新最流行的、实用的、有趣的示例代码。
 
 - 物体检测
-  - [PP-YOLOv3](#yolov3paddle)
   - [YOLOv5s](#YOLOv5s)
   - [YOLOv7-Tiny](#YOLOv7-Tiny)
   - [YOLOv8s](#YOLOv8s)
-  - [YOLOX-S](#YOLOX-S)
-  - [YOLOv9](#YOLOv9)
-  - [YOLOv10](#YOLOv10)
   - [YOLO11](#YOLO11)
+  - [YOLO26](#YOLO26)
 - 物体分割
   - [YOLOv5-seg](#YOLOv5-seg)
   - [YOLOv8-seg](#YOLOv8-seg)
   - [YOLO11-seg](#YOLO11-seg)
+  - [YOLO26-seg](#YOLO26-seg)
 - 人脸检测
-  - [scrfd](#Scrfd)
-  - [YOLOv5-Face](#YOLOv5-Face)([original model](https://github.com/deepcam-cn/yolov5-face))
   - [YOLOv7-Face](#YOLOv7-Face)
-- 无人机视角物体检测
-  - [YOLOv5s_visdrone](#YOLOv5s_visdrone)
 - 人体关键点
-  - [HRNet](#HRNet)
   - [YOLOv8-pose](#YOLOv8-pose)
   - [YOLO11-pose](#YOLO11-pose)
-- 人体分割
-  - [PP-HumanSeg](#PP-HumanSeg)
-
+  - [YOLO26-pose](#YOLO26-pose)
+- 立体视觉
+  - [IGEV-plusplus](#IGEV-plusplus)
+- 语义分割
+  - [DeepLabv3+](#DeepLabv3)
+- 背景移除
+  - [RMBG](#RMBG-1.4)
 
 ### 运行示例
 
@@ -65,144 +62,6 @@ detection num: 11
 --------------------------------------
 ```
 ![YOLOv5s](../../docs/ax650/yolov5s_out.jpg)
-
-#### YOLOv7-Tiny
-```
-root@AXERA:/home/test# ./ax_yolov7 -m yolov7-tiny.axmodel -i test.jpg
---------------------------------------
-model file : yolov7-tiny.axmodel
-image file : test.jpg
-img_h, img_w : 640 640
---------------------------------------
-[Axera version]: libax_sys.so V1.13.0 Apr 26 2023 16:24:35
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:1.89 ms
---------------------------------------
-Repeat 1 times, avg time 7.03 ms, max_time 7.03 ms, min_time 7.03 ms
---------------------------------------
-detection num: 12
- 0:  92%, [ 177,  314,  360,  803], person
- 0:  89%, [ 503,  282,  669,  807], person
- 0:  86%, [  89,  297,  195,  491], person
-14:  82%, [ 746,  607,  801,  652], bird
- 0:  76%, [ 444,  294,  494,  440], person
- 5:  74%, [ 868,  125, 1272,  502], bus
-26:  66%, [ 515,  369,  628,  547], handbag
- 0:  65%, [ 602,  278,  696,  470], person
- 0:  64%, [ 734,  301,  767,  384], person
- 0:  61%, [ 326,  557,  466,  826], person
- 0:  57%, [ 841,  308,  879,  439], person
- 2:  57%, [ 812,  276,  867,  334], car
---------------------------------------
-```
-![YOLOv7-Tiny](../../docs/ax650/yolov7_out.jpg)
-
-#### YOLOX-S
-```
-/tmp/samples # ./ax_yoloxs -m yolox_s_cut.joint -i dog.jpg -r 10
---------------------------------------
-model file : yolox_s_cut.joint
-image file : dog.jpg
-img_h, img_w : 640 640
-Run-Joint Runtime version: 0.5.8
---------------------------------------
-[INFO]: Virtual npu mode is 1_1
-
-Tools version: 0.6.0.32
-8a011dfa
-run over: output len 3
---------------------------------------
-Create handle took 497.16 ms (neu 23.64 ms, axe 0.00 ms, overhead 473.52 ms)
---------------------------------------
-Repeat 10 times, avg time 41.65 ms, max_time 42.37 ms, min_time 41.55 ms
---------------------------------------
-detection num: 4
- 1:  97%, [ 123,  119,  569,  417], bicycle
-16:  95%, [ 136,  222,  307,  540], dog
- 7:  72%, [ 470,   75,  688,  171], truck
-58:  53%, [ 685,  111,  716,  154], potted plant
-```
-
-#### YOLOv9
-```
-/opt/test # ./ax_yolov9 -i ssd_horse.jpg -m yolov9c.axmodel
---------------------------------------
-model file : yolov9c.axmodel
-image file : ssd_horse.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:3.94 ms
---------------------------------------
-Repeat 1 times, avg time 26.22 ms, max_time 26.22 ms, min_time 26.22 ms
---------------------------------------
-detection num: 6
-17:  94%, [ 214,   70,  423,  371], horse
-16:  88%, [ 144,  203,  196,  345], dog
- 0:  87%, [ 273,   14,  349,  230], person
- 0:  79%, [ 431,  125,  451,  178], person
- 7:  76%, [   1,  105,  132,  197], truck
-13:  47%, [ 468,  149,  499,  179], bench
---------------------------------------
-```
-![YOLOv5s](../../docs/ax650/yolov9_out.jpg)
-
-#### Scrfd
-```
-root@AXERA:/home/test# ./ax_scrfd -m scrfd_500m_bnkps_shape640x640.axmodel -i selfie.jpg
---------------------------------------
-model file : scrfd_500m_bnkps_shape640x640.axmodel
-image file : selfie.jpg
-img_h, img_w : 640 640
---------------------------------------
-[Axera version]: libax_sys.so V1.13.0 Apr 26 2023 16:24:35
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:2.46 ms
---------------------------------------
-Repeat 1 times, avg time 1.44 ms, max_time 1.44 ms, min_time 1.44 ms
---------------------------------------
-detection num: 117
---------------------------------------
-```
-![Scrfd](../../docs/ax650/scrfd_out.jpg)
-
-#### YOLOv5-Face
-```
-root@AXERA:/home/test# ./ax_yolov5_face -m yolov5s-face.axmodel -i selfie.jpg
---------------------------------------
-model file : yolov5s-face.axmodel
-image file : selfie.jpg
-img_h, img_w : 640 640
---------------------------------------
-[Axera version]: libax_sys.so V1.13.0 Apr 26 2023 16:24:35
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:4.58 ms
---------------------------------------
-Repeat 1 times, avg time 7.76 ms, max_time 7.76 ms, min_time 7.76 ms
---------------------------------------
-detection num: 117
-```
-![yolov5s-face](../../docs/ax650/yolov5_face_out.jpg)
 
 
 #### YOLOv5-Seg
@@ -484,28 +343,6 @@ detection num: 6
 ```
 ![HRNet](../../docs/ax650/yolo_nas_out.jpg)
 
-#### HRNet
-```
-root@AXERA:/home/test# ./ax_hrnet -m hrnet_256x192.axmodel -i apic33179.jpg
---------------------------------------
-model file : hrnet_256x192.axmodel
-image file : apic33179.jpg
-img_h, img_w : 256 192
---------------------------------------
-[Axera version]: libax_sys.so V1.13.0 Apr 26 2023 16:24:35
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:0.23 ms
---------------------------------------
-Repeat 1 times, avg time 5.16 ms, max_time 5.16 ms, min_time 5.16 ms
---------------------------------------
-```
-![HRNet](../../docs/ax650/hrnet_out.jpg)
-
 ### SegFormer
 ```
 /opt/test # ./ax_segformer -m segformer-b0-finetuned-cityscapes-640-1280.axmodel
@@ -639,6 +476,45 @@ Repeat 1 times, avg time 56.67 ms, max_time 56.67 ms, min_time 56.67 ms
 ```
 <img src="../../docs/ax650/depth_anything_out.png">
 
+### IGEV-plusplus
+```
+(base) root@ax650:/home/axera/650# ./ax_igev_plusplus -m rt_sceneflow.axmodel -l im0.png -R im1.png -r 10
+--------------------------------------
+model file : rt_sceneflow.axmodel
+left image file : im0.png
+right image file : im1.png
+img_h, img_w : 384 512
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+
+input size: 2
+    name:     left [UINT8] [FEATUREMAP]
+        1 x 384 x 512 x 3
+
+    name:    right [UINT8] [FEATUREMAP]
+        1 x 384 x 512 x 3
+
+
+output size: 1
+    name: pred_disp [FLOAT32]
+        1 x 1 x 384 x 512
+
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:12.30 ms
+--------------------------------------
+Repeat 10 times, avg time 202.86 ms, max_time 204.20 ms, min_time 202.04 ms
+Disparity range: [7.82, 46.75]
+--------------------------------------
+Saved disparity map: igev_plusplus_disparity.jpg
+Saved combined result: igev_plusplus_result.jpg
+--------------------------------------
+```
+<img src="../../docs/ax650/igev_plusplus_result.jpg">
+
 ### YOLOV8-OBB
 ```
 /opt/test # ./ax_yolov8_obb -m ./yolov8s-obb.axmodel -i ./dota_demo.jpg -r 10
@@ -722,33 +598,6 @@ there are 1012 points
 ```
 ![](../../docs/ax650/crowdcount_out.jpg)
 
-### YOLOv10
-```
-/opt/test # ./ax_yolov10 -r 10 -m yolov10s.axmodel -i ssd_horse.jpg
---------------------------------------
-model file : yolov10s.axmodel
-image file : ssd_horse.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:3.07 ms
---------------------------------------
-Repeat 10 times, avg time 3.30 ms, max_time 3.31 ms, min_time 3.29 ms
---------------------------------------
-13:  42%, [ 468,  149,  499,  178], bench
- 0:  78%, [ 431,  124,  451,  177], person
-16:  78%, [ 145,  205,  196,  345], dog
- 0:  88%, [ 272,   13,  349,  235], person
- 7:  82%, [   0,  106,  132,  196], truck
-17:  94%, [ 216,   70,  422,  370], horse
---------------------------------------
-```
-![](../../docs/ax650/yolov10s_out.jpg)
 
 ### YOLO11
 ```
@@ -778,6 +627,87 @@ detection num: 6
 --------------------------------------
 ```
 ![](../../docs/ax650/yolo11_out.jpg)
+
+### YOLO26
+```
+(base) root@ax650:~# ./ax_yolo26 -m ./ax650/yolo26n.axmodel -i BUS.JPG
+--------------------------------------
+model file : ./ax650/yolo26n.axmodel
+image file : BUS.JPG
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:3.06 ms
+--------------------------------------
+Repeat 1 times, avg time 1.38 ms, max_time 1.38 ms, min_time 1.38 ms
+--------------------------------------
+detection num: 5
+ 5:  94%, [   6,  233,  801,  752], bus
+ 0:  94%, [  51,  396,  241,  904], person
+ 0:  91%, [ 227,  406,  345,  861], person
+ 0:  80%, [ 670,  389,  809,  876], person
+ 0:  50%, [   0,  556,   64,  872], person
+--------------------------------------
+```
+![YOLO26](../../docs/ax650/yolo26_out.jpg)
+
+### YOLO26-pose
+```
+root@ax650:~# ./ax_yolo26_pose -m yolo26n-pose.axmodel -i bus.jpg
+--------------------------------------
+model file : yolo26n-pose.axmodel
+image file : bus.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:0.21 ms
+--------------------------------------
+Repeat 1 times, avg time 1.52 ms, max_time 1.52 ms, min_time 1.52 ms
+--------------------------------------
+detection num: 3
+ 0:  86%, [  49,  399,  235,  907], person
+ 0:  86%, [ 226,  412,  345,  865], person
+ 0:  84%, [ 669,  408,  809,  881], person
+--------------------------------------
+```
+![YOLO26-pose](../../docs/ax650/yolo26_pose_out.jpg)
+
+### YOLO26-seg
+```
+root@ax650:~# ./ax_yolo26_seg -m yolo26n-seg.axmodel -i bus.jpg
+--------------------------------------
+model file : yolo26n-seg.axmodel
+image file : bus.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:10.78 ms
+--------------------------------------
+Repeat 1 times, avg time 2.00 ms, max_time 2.00 ms, min_time 2.00 ms
+--------------------------------------
+detection num: 4
+ 0:  93%, [ 224,  410,  347,  860], person
+ 0:  87%, [  50,  394,  243,  902], person
+ 5:  82%, [  32,  232,  797,  728], bus
+ 0:  76%, [ 664,  414,  809,  875], person
+--------------------------------------
+```
+![YOLO26-seg](../../docs/ax650/yolo26_seg_out.jpg)
 
 #### YOLO11-seg
 ```
@@ -903,3 +833,56 @@ detection num: 2
 --------------------------------------
 ```
 ![](../../docs/ax650/yolo_world_open_out.jpg)
+
+#### DeepLabv3+
+```
+root@ax650:~# ./ax_deep_lab_v3_plus -i 1_image.png -m deeplabv3plus_mobilenet_u16.axmodel
+--------------------------------------
+model file : deeplabv3plus_mobilenet_u16.axmodel
+image file : 1_image.png
+img_h, img_w : 513 513
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:107.25 ms
+--------------------------------------
+Repeat 1 times, avg time 12.53 ms, max_time 12.53 ms, min_time 12.53 ms
+--------------------------------------
+```
+![](../../docs/ax650/deep_lab_v3_plus_out.png)
+
+### RMBG-1.4
+```
+(base) root@ax650:/home/ax650/RMBG-1.4# ./ax_rmbg -m ./axmodel/rmbg1_4_ax650.axmodel -i ./img/3_1920x1080.jpg
+--------------------------------------
+Model file: ./axmodel/rmbg1_4_ax650.axmodel
+Input image: ./img/3_1920x1080.jpg
+Output image: result.png
+Model input size: 1024 x 1024
+Repeat count: 1
+--------------------------------------
+Original image size: 1920 x 1080, channels: 3
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done. 
+Inputs:
+  [0] name: input, shape: [1, 3, 1024, 1024]
+Outputs:
+  [0] name: output, shape: [1, 1, 1024, 1024]
+Engine alloc io is done. 
+Engine push input is done. 
+--------------------------------------
+Postprocess time: 23.82 ms
+post process cost time:23.89 ms 
+--------------------------------------
+Repeat 1 times, avg time 106.16 ms, max_time 106.16 ms, min_time 106.16 ms
+--------------------------------------
+Saved result image: result.png
+Saved mask: mask.png
+--------------------------------------
+```
+![](../../docs/ax650/rmbg_out.jpeg)

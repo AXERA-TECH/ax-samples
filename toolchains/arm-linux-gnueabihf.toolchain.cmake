@@ -2,7 +2,7 @@
 SET (CMAKE_SYSTEM_NAME Linux)
 SET (CMAKE_SYSTEM_PROCESSOR arm)
 
-# gcc-arm-linux-gnueabi DO NOT need to be installed, so make sure arm-linux-gnueabihf-gcc and arm-linux-gnueabihf-g++ can be found in $PATH:
+# arm-linux-gnueabihf-gcc DO NOT need to be installed, so make sure arm-linux-gnueabihf-gcc and arm-linux-gnueabihf-g++ can be found in $PATH:
 SET (CMAKE_C_COMPILER   "arm-linux-gnueabihf-gcc")
 SET (CMAKE_CXX_COMPILER "arm-linux-gnueabihf-g++")
 

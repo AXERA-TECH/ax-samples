@@ -7,54 +7,66 @@ English | [简体中文](./README.md)
 | Platform | Build Status |
 | -------- | ------------ |
 | AX650N   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_650.yml)|
+| AX637    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_637.yml)|
 | AX630C   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_630c_glibc.yaml)|
 | AX620Q   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_620q_uclibc.yaml)|
-| AX620A   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_620a.yml)|
+| AX615    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_615_glibc.yaml)|
 
-## Intro
+## Introduction
 
-**AX-Samples** by **[Axera](https://www.axera-tech.com/)** dominate the development. The project has implemented the sample code of the most common **deep learning open source algorithm** on the **AI SoC** of **Axera**, which is convenient for community developers to quickly evaluate and adapt.
+**AX-Samples** is developed by **[AXERA](https://www.axera-tech.com/)**. This project provides sample code for common **deep learning open-source algorithms** running on **AXERA AI SoCs**, enabling community developers to quickly evaluate and adapt.
 
-Support SoC
+### Supported SoCs
 
-- [AX630C](docs/AX630C.md)/[AX620Q](docs/AX620Q.md)
-- [AX650A](docs/AX650A.md)/[AX650N](docs/AX650N.md)
-- [AX620A](docs/AX620A.md)/[AX620U](docs/AX620U.md)
-- [AX630A](docs/AX630A.md)
+**Edge Computing SoCs**
+- [AX650A](https://www.axera-tech.com/zh-hans/product/2929.html) / [AX650N](https://www.axera-tech.com/zh-hans/product/2929.html)
+- AX637
+- [AX630C](https://www.axera-tech.com/zh-hans/product/2931.html) / [AX620Q](https://www.axera-tech.com/zh-hans/product/2932.html)
+- [AX615](https://www.axera-tech.com/zh-hans/product/2956.html)
 
-Support Board
+**Automotive SoCs**
+- [M57](https://www.axera-tech.com/zh-hans/product/2826.html)
 
-- [AXera-Pi](https://wiki.sipeed.com/m3axpi)(AX620A)
-- [AXera-Pi Pro](https://wiki.sipeed.com/m4ndock)(AX650N)
-- [AXera-Pi Zero](https://axera-pi-zero-docs-cn.readthedocs.io/zh-cn/latest/index.html)(AX620Q)
+**Edge AI SoCs**
+- [AX8850N](https://www.axera-tech.com/zh-hans/product/2897.html)/[AX8850](https://www.axera-tech.com/zh-hans/product/2896.html)
+
+### Supported Boards
+
+| Board | Image | SoC | Vendor | Link |
+| ----- | ----- | --- | ------ | ---- |
+| AXera-Pi Pro | <img src="docs/boards/Axera-Pi_pro.jpg" width="200"> | AX650N | Sipeed | [Wiki](https://wiki.sipeed.com/m4ndock) |
+| AI Pyramid | <img src="docs/boards/AI_Pyramid.jpg" width="200"> | AX8850 | M5Stack | [Docs](https://docs.m5stack.com/en/ai_hardware/AI_Pyramid) |
+| LLM630 Compute Kit | <img src="docs/boards/LLM630_Compute_kit.jpg" width="200"> | AX630C | M5Stack | [Docs](https://docs.m5stack.com/en/core/LLM630%20Compute%20Kit) |
+| Module LLM | <img src="docs/boards/module_LLM.jpg" width="200"> | AX630C | M5Stack | [Docs](https://docs.m5stack.com/en/module/Module-LLM) |
 
 ## Quick Start
 
 ### Compile
 
-- [easy compile](docs/compile.md) Simple cross-platform compilation based on **cmake**.
+- [Compilation Guide](docs/compile.md) — Simple cross-platform compilation based on **cmake**.
 
 ### Samples
 
-- [examples](examples/) It provides open source deep learning algorithms such as common classification, detection, posture and traditional CV operation use cases, which are continuously updated according to the needs of the issue.
+- [examples](examples/) — Common deep learning open-source algorithms including classification, detection, pose estimation, and traditional CV operations. Continuously updated based on community feedback.
 
-### Online Disk
+### Resources
 
-- Provide **ModelZoo**, **pre-compiler bin**, **test pictures** and so on:
-  - [BaiDu Disk](https://pan.baidu.com/s/1cnMeqsD-hErlRZlBDDvuoA?pwd=oey4)
-  - [Google Drive](https://drive.google.com/drive/folders/1JY59vOFS2qxI8TkVIZ0pHfxHMfKPW5PS?usp=sharing)
+- **ModelZoo**, **pre-compiled binaries**, **test images** and more:
+  - [Huggingface](https://huggingface.co/collections/AXERA-TECH/vision-models-67b0bce92ddc61229e8e94ed)
+  - [Modelscope](https://modelscope.cn/organization/AXERA-TECH)
 
 ### Benchmark
 
-- [Benchmark](benchmark/) Common open source model inference time statistics, based on *AXera-Pi*, *AXera-Pi Pro*, *AXera-Pi Zero* measured.
+- [Benchmark](benchmark/) — Inference time statistics for common open-source models, measured on *AXera-Pi Pro*.
 
-## Related project
+## Related Projects
 
-- NPU Tool Chain Online document, which provides instructions for using the NPU tool chain and how to obtain it.
-  - [Pulsar](https://pulsar-docs.readthedocs.io/zh_CN/latest/)(Support AX630A/AX620A/AX620U)
-  - [Pulsar2](https://pulsar2-docs.readthedocs.io/zh_CN/latest/)(Support AX650A/AX650N/AX630C/AX620Q)
+- NPU toolchain online documentation with usage instructions and download links:
+  - [Pulsar2 Online Docs](https://pulsar2-docs.readthedocs.io/zh_CN/latest/) (Supports AX650A/AX650N/AX630C/AX620Q)
+- Recommended: download the latest Pulsar2 toolchain and documentation directly:
+  - [Pulsar2 Download](https://huggingface.co/AXERA-TECH/Pulsar2)
 
-## Technical discussion
+## Technical Discussion
 
 - Github issues
 - QQ Group: 139953715

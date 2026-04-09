@@ -84,7 +84,7 @@ namespace ax
         timer timer_postprocess;
         float* output_prob = (float*)io_data->pOutputs[0].pVirAddr;
         float* output_bbox = (float*)io_data->pOutputs[1].pVirAddr;
-        
+
         for (size_t i = 0; i < num_grid; i++)
         {
             int maxid = -1;
@@ -194,7 +194,7 @@ namespace ax
         fprintf(stdout, "Engine push input is done. \n");
         fprintf(stdout, "--------------------------------------\n");
 
-        // 8. warn up
+        // 8. warm up
         for (int i = 0; i < 5; ++i)
         {
             AX_ENGINE_RunSync(handle, &io_data);
