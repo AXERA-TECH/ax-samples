@@ -45,3 +45,4 @@ axera_example(ax_deep_lab_v3_plus ax_deep_lab_v3_plus_steps.cc)
 
 axera_example(ax_superpoint ax_superpoint_steps.cc)
 axera_example(ax_igev_plusplus ax_igev_plusplus_steps.cc)
+axera_example(ax_bin_infer ax_bin_infer_steps.cc)
