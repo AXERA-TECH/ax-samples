@@ -48,7 +48,7 @@ ax-samples$ tree -L 2 3rdparty
     └── share
 ```
 
-3. AX637 BSP/SDK 从 [Releases](https://github.com/AXERA-TECH/ax-samples/releases) 下载 `ax637_bsp_sdk.tar.gz`，解压后：
+3. AX637 BSP/SDK 从 [Releases](https://github.com/GuoFM/ax-samples/releases/download/v0.1/ax637_bsp_sdk.tar.gz) 下载 `ax637_bsp_sdk.tar.gz`，解压后：
 
 ```bash
 tar -zxf ax637_bsp_sdk.tar.gz
