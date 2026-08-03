@@ -86,14 +86,10 @@ namespace ax
     bool run_model(const std::string& model, const std::vector<uint8_t>& data, const int& repeat, cv::Mat& mat, int input_h, int input_w)
     {
         // 1. init engine
-#ifdef AXERA_TARGET_CHIP_AX620E
-        auto ret = AX_ENGINE_Init();
-#else
         AX_ENGINE_NPU_ATTR_T npu_attr;
         memset(&npu_attr, 0, sizeof(npu_attr));
         npu_attr.eHardMode = AX_ENGINE_VIRTUAL_NPU_DISABLE;
         auto ret = AX_ENGINE_Init(&npu_attr);
-#endif
         if (0 != ret)
         {
             return ret;
@@ -231,14 +227,9 @@ int main(int argc, char* argv[])
 
     // 4. -  engine model  -  can only use AX_ENGINE** inside
     {
-        // AX_ENGINE_NPUReset(); // todo ??
         ax::run_model(model_file, image, repeat, mat, input_size[0], input_size[1]);
-
-        // 4.3 engine de init
         AX_ENGINE_Deinit();
-        // AX_ENGINE_NPUReset();
     }
-    // 4. -  engine model  -
 
     AX_SYS_Deinit();
     return 0;
