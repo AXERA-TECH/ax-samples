@@ -20,15 +20,29 @@ jobs:
           wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.6/opencv-arm-uclibc-linux.zip
           unzip opencv-arm-uclibc-linux.zip -d ./3rdparty
 
+      - name: cache ARM GNU toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ci/toolchains/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf
+          key: ${{ runner.os }}-gcc-linaro-7.5.0-2019.12-arm-linux-gnueabihf-v1
+
       - name: build
         run: |
           mkdir build && cd build
           wget https://github.com/GuoFM/ax-samples/releases/download/v0.1/ax615_bsp_sdk.tar.gz
           tar -zxf ax615_bsp_sdk.tar.gz
           export ax_bsp=$PWD/msp/out/arm_glibc/
-          wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
-          tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
-          export PATH=$PATH:$PWD/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/
+          toolchain_root=${GITHUB_WORKSPACE}/.ci/toolchains
+          toolchain_dir=${toolchain_root}/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf
+          if [ ! -x "${toolchain_dir}/bin/arm-linux-gnueabihf-gcc" ]; then
+            mkdir -p "${toolchain_root}"
+            wget --tries=3 --retry-on-http-error=429 -O "${RUNNER_TEMP}/gcc-linaro-7.5.0.tar" \
+              https://github.com/ZHEQIUSHUI/assets/releases/download/arm-gcc/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar
+            echo "abf877f021c5f094d396bac4d842ed6f13aecbf4c477fc5825cf2d8b1fe3ef22  ${RUNNER_TEMP}/gcc-linaro-7.5.0.tar" | sha256sum --check
+            tar -tf "${RUNNER_TEMP}/gcc-linaro-7.5.0.tar" >/dev/null
+            tar -xf "${RUNNER_TEMP}/gcc-linaro-7.5.0.tar" -C "${toolchain_root}"
+          fi
+          export PATH=${toolchain_dir}/bin:$PATH
           arm-linux-gnueabihf-gcc -v
           cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm-linux-gnueabihf.toolchain.cmake \
             -DBSP_MSP_DIR=${ax_bsp} \

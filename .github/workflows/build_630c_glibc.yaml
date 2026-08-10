@@ -32,6 +32,12 @@ jobs:
           wget https://github.com/AXERA-TECH/ax-samples/releases/download/v0.1/opencv-aarch64-linux-gnu-gcc-7.5.0.zip
           unzip opencv-aarch64-linux-gnu-gcc-7.5.0.zip -d ./3rdparty
 
+      - name: cache ARM64 GNU toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ci/toolchains/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+          key: ${{ runner.os }}-gcc-arm-9.2-2019.12-aarch64-none-linux-gnu-v1
+
       - name: build
         run: |
           mkdir build
@@ -39,9 +45,16 @@ jobs:
           git clone https://github.com/AXERA-TECH/ax620q_bsp_sdk.git
           export ax_bsp=$PWD/ax620q_bsp_sdk/msp/out/arm64_glibc/
           echo $ax_bsp          
-          wget https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
-          tar -xf gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
-          export PATH=$PATH:gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/
+          toolchain_root=${GITHUB_WORKSPACE}/.ci/toolchains
+          toolchain_dir=${toolchain_root}/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+          if [ ! -x "${toolchain_dir}/bin/aarch64-none-linux-gnu-gcc" ]; then
+            mkdir -p "${toolchain_root}"
+            wget --tries=3 --retry-on-http-error=429 -O "${RUNNER_TEMP}/gcc-arm-9.2.tar.xz" \
+              https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+            tar -tf "${RUNNER_TEMP}/gcc-arm-9.2.tar.xz" >/dev/null
+            tar -xf "${RUNNER_TEMP}/gcc-arm-9.2.tar.xz" -C "${toolchain_root}"
+          fi
+          export PATH=${toolchain_dir}/bin:$PATH
           aarch64-none-linux-gnu-gcc -v
           cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/aarch64-none-linux-gnu.toolchain.cmake -DBSP_MSP_DIR=${ax_bsp}/ -DAXERA_TARGET_CHIP=ax630c ..
           make -j8
