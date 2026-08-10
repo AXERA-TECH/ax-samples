@@ -42,8 +42,9 @@ export AX615_BSP=$(pwd)/msp/out/arm_glibc
 
 ```bash
 mkdir -p ~/toolchains && cd ~/toolchains
-wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
-tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
+wget https://github.com/ZHEQIUSHUI/assets/releases/download/arm-gcc/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar
+echo "abf877f021c5f094d396bac4d842ed6f13aecbf4c477fc5825cf2d8b1fe3ef22  gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar" | sha256sum --check
+tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar
 export PATH=$PWD/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin:$PATH
 ```
 
