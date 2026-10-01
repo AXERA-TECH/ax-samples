@@ -6,8 +6,8 @@
 
 | Platform | Build Status |
 | -------- | ------------ |
-| AX650N   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_650.yml)|
-| AX637    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_637.yml)|
+| AX650/AX8850   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_650.yml)|
+| AX637/AX8910    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_637.yml)|
 | AX630C   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_630c_glibc.yaml)|
 | AX620Q   | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_620q_uclibc.yaml)|
 | AX615    | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AXERA-TECH/ax-samples/build_615_glibc.yaml)|
@@ -34,7 +34,7 @@
 
 | 开发板 | 图片 | 芯片 | 厂商 | 链接 |
 | ------ | ---- | ---- | ---- | ---- |
-| AXera-Pi Pro | <img src="docs/boards/Axera-Pi_pro.jpg" width="200"> | AX650N | Sipeed | [Wiki](https://wiki.sipeed.com/m4cdock) |
+| AXera-Pi Pro | <img src="docs/boards/Axera-Pi_pro.jpg" width="200"> | AX8850 | Sipeed | [Wiki](https://wiki.sipeed.com/m4cdock) |
 | AI Pyramid | <img src="docs/boards/AI_Pyramid.jpg" width="200"> | AX8850 | M5Stack | [文档](https://docs.m5stack.com/zh_CN/ai_hardware/AI_Pyramid) |
 | LLM630 Compute Kit | <img src="docs/boards/LLM630_Compute_kit.jpg" width="200"> | AX630C | M5Stack | [文档](https://docs.m5stack.com/zh_CN/core/LLM630%20Compute%20Kit) |
 | Module LLM | <img src="docs/boards/module_LLM.jpg" width="200"> | AX630C | M5Stack | [文档](https://docs.m5stack.com/zh_CN/module/Module-LLM) |
