@@ -61,7 +61,16 @@ build_ax8860$ tree install
 install
 └── ax8860
     ├── ax_classification
-    └── ax_yolov5s
+    ├── ax_yolo11
+    ├── ax_yolo11_pose
+    ├── ax_yolo11_seg
+    ├── ax_yolo26
+    ├── ax_yolo26_pose
+    ├── ax_yolo26_seg
+    ├── ax_yolov5s
+    ├── ax_yolov8
+    ├── ax_yolov8_pose
+    └── ax_yolov8_seg
 ```
 
 ## 3. 运行
