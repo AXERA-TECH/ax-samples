@@ -38,15 +38,17 @@ pulsar2 build --config config.json --target_hardware AX8860 --npu_mode NPU4
   - YOLOv8s-seg：3 x (1 x H x W x 144)，3 x (1 x H x W x 32)，1 x 32 x 160 x 160
   - YOLOv8s-pose：3 x (1 x H x W x 65)，3 x (1 x H x W x 51)
 
-以下 YOLO 示例统一使用 [bus.jpg](https://ultralytics.com/images/bus.jpg) 测试，模型均为 NPU4 模式。
+- YOLOv5s 使用 [AXERA-TECH/YOLOv5](https://huggingface.co/AXERA-TECH/YOLOv5) 中已裁剪检测头的 `yolov5s-cut.onnx`；MobileNetv2 使用 Pulsar2 quick start 中的 `mobilenetv2-sim.onnx`。
+
+以下示例模型均为 NPU4 模式，检测、分割、关键点示例统一使用 [bus.jpg](https://ultralytics.com/images/bus.jpg) 测试。
 
 ### 运行示例
 
 #### MobileNetv2
 ```
-# ./ax_classification -m models/mobilenetv2.axmodel -i images/cat.jpg -r 10
+# ./ax_classification -m models/mobilenetv2_npu4.axmodel -i images/cat.jpg -r 10
 --------------------------------------
-model file : models/mobilenetv2.axmodel
+model file : models/mobilenetv2_npu4.axmodel
 image file : images/cat.jpg
 img_h, img_w : 224 224
 --------------------------------------
@@ -57,46 +59,21 @@ Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
 topk cost time:0.07 ms
-9.2452, 285
-9.1132, 282
-9.1132, 281
-8.4528, 283
-7.3962, 463
+10.1433, 285
+9.4579, 282
+9.3208, 281
+8.9096, 283
+8.2243, 287
 --------------------------------------
-Repeat 10 times, avg time 0.36 ms, max_time 0.38 ms, min_time 0.35 ms
+Repeat 10 times, avg time 0.32 ms, max_time 0.33 ms, min_time 0.32 ms
 --------------------------------------
 ```
 
 #### YOLOv5s
 ```
-# ./ax_yolov5s -m models/yolov5s.axmodel -i images/dog.jpg -r 10
+# ./ax_yolov5s -m models/yolov5s_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolov5s.axmodel
-image file : images/dog.jpg
-img_h, img_w : 640 640
---------------------------------------
-Engine creating handle is done.
-Engine creating context is done.
-Engine get io info is done.
-Engine alloc io is done.
-Engine push input is done.
---------------------------------------
-post process cost time:3.41 ms
---------------------------------------
-Repeat 10 times, avg time 1.87 ms, max_time 1.89 ms, min_time 1.87 ms
---------------------------------------
-detection num: 3
-16:  91%, [ 134,  215,  310,  543], dog
- 2:  67%, [ 469,   76,  689,  173], car
- 1:  56%, [ 159,  117,  570,  417], bicycle
---------------------------------------
-```
-
-#### YOLOv8s
-```
-# ./ax_yolov8 -m models/yolov8s.axmodel -i images/bus.jpg -r 10
---------------------------------------
-model file : models/yolov8s.axmodel
+model file : models/yolov5s_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -106,9 +83,37 @@ Engine get io info is done.
 Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
-post process cost time:4.00 ms
+post process cost time:4.89 ms
 --------------------------------------
-Repeat 10 times, avg time 0.98 ms, max_time 0.99 ms, min_time 0.97 ms
+Repeat 10 times, avg time 0.81 ms, max_time 0.82 ms, min_time 0.80 ms
+--------------------------------------
+detection num: 5
+ 0:  85%, [  60,  408,  204,  909], person
+ 0:  79%, [ 666,  424,  808,  889], person
+ 0:  78%, [ 219,  408,  345,  872], person
+ 5:  72%, [   1,  210,  809,  811], bus
+ 0:  64%, [   1,  563,   66,  871], person
+--------------------------------------
+```
+![YOLOv5s](../../docs/ax8860/yolov5s_out.jpg)
+
+#### YOLOv8s
+```
+# ./ax_yolov8 -m models/yolov8s_npu4.axmodel -i images/bus.jpg -r 10
+--------------------------------------
+model file : models/yolov8s_npu4.axmodel
+image file : images/bus.jpg
+img_h, img_w : 640 640
+--------------------------------------
+Engine creating handle is done.
+Engine creating context is done.
+Engine get io info is done.
+Engine alloc io is done.
+Engine push input is done.
+--------------------------------------
+post process cost time:4.14 ms
+--------------------------------------
+Repeat 10 times, avg time 0.96 ms, max_time 0.98 ms, min_time 0.94 ms
 --------------------------------------
 detection num: 5
  5:  89%, [  20,  229,  801,  740], bus
@@ -122,9 +127,9 @@ detection num: 5
 
 #### YOLO11s
 ```
-# ./ax_yolo11 -m models/yolo11s.axmodel -i images/bus.jpg -r 10
+# ./ax_yolo11 -m models/yolo11s_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolo11s.axmodel
+model file : models/yolo11s_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -134,9 +139,9 @@ Engine get io info is done.
 Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
-post process cost time:3.94 ms
+post process cost time:3.92 ms
 --------------------------------------
-Repeat 10 times, avg time 0.97 ms, max_time 1.01 ms, min_time 0.95 ms
+Repeat 10 times, avg time 0.94 ms, max_time 0.96 ms, min_time 0.93 ms
 --------------------------------------
 detection num: 5
  5:  94%, [  32,  226,  796,  738], bus
@@ -150,9 +155,9 @@ detection num: 5
 
 #### YOLO26s
 ```
-# ./ax_yolo26 -m models/yolo26s.axmodel -i images/bus.jpg -r 10
+# ./ax_yolo26 -m models/yolo26s_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolo26s.axmodel
+model file : models/yolo26s_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -162,9 +167,9 @@ Engine get io info is done.
 Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
-post process cost time:3.00 ms
+post process cost time:2.94 ms
 --------------------------------------
-Repeat 10 times, avg time 1.01 ms, max_time 1.02 ms, min_time 0.99 ms
+Repeat 10 times, avg time 0.98 ms, max_time 1.00 ms, min_time 0.98 ms
 --------------------------------------
 detection num: 5
  5:  96%, [   6,  230,  806,  739], bus
@@ -178,9 +183,9 @@ detection num: 5
 
 #### YOLOv8s-seg
 ```
-# ./ax_yolov8_seg -m models/yolov8s-seg.axmodel -i images/bus.jpg -r 10
+# ./ax_yolov8_seg -m models/yolov8s-seg_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolov8s-seg.axmodel
+model file : models/yolov8s-seg_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -192,34 +197,35 @@ Engine push input is done.
 --------------------------------------
 
 input size: 1
-    name:   images [UINT8] [unknown]
-        1 x 640 x 640 x 3
+    name: [1;32m  images [1;34m[UINT8] [1;31m[unknown]
+        [1;31m1 x 640 x 640 x 3[0m
+
 
 output size: 7
-    name:  stride8 [FLOAT32]
-        1 x 80 x 80 x 144
+    name: [1;32m stride8 [1;34m[FLOAT32][0m
+        [1;31m1 x 80 x 80 x 144[0m
 
-    name: stride16 [FLOAT32]
-        1 x 40 x 40 x 144
+    name: [1;32mstride16 [1;34m[FLOAT32][0m
+        [1;31m1 x 40 x 40 x 144[0m
 
-    name: stride32 [FLOAT32]
-        1 x 20 x 20 x 144
+    name: [1;32mstride32 [1;34m[FLOAT32][0m
+        [1;31m1 x 20 x 20 x 144[0m
 
-    name:      402 [FLOAT32]
-        1 x 80 x 80 x 32
+    name: [1;32m     402 [1;34m[FLOAT32][0m
+        [1;31m1 x 80 x 80 x 32[0m
 
-    name:      468 [FLOAT32]
-        1 x 40 x 40 x 32
+    name: [1;32m     468 [1;34m[FLOAT32][0m
+        [1;31m1 x 40 x 40 x 32[0m
 
-    name:      534 [FLOAT32]
-        1 x 20 x 20 x 32
+    name: [1;32m     534 [1;34m[FLOAT32][0m
+        [1;31m1 x 20 x 20 x 32[0m
 
-    name:      564 [FLOAT32]
-        1 x 32 x 160 x 160
+    name: [1;32m     564 [1;34m[FLOAT32][0m
+        [1;31m1 x 32 x 160 x 160[0m
 
-post process cost time:22.86 ms
+post process cost time:14.76 ms
 --------------------------------------
-Repeat 10 times, avg time 1.27 ms, max_time 1.28 ms, min_time 1.26 ms
+Repeat 10 times, avg time 1.20 ms, max_time 1.22 ms, min_time 1.20 ms
 --------------------------------------
 detection num: 5
  0:  91%, [  51,  400,  248,  906], person
@@ -233,9 +239,9 @@ detection num: 5
 
 #### YOLO11s-seg
 ```
-# ./ax_yolo11_seg -m models/yolo11s-seg.axmodel -i images/bus.jpg -r 10
+# ./ax_yolo11_seg -m models/yolo11s-seg_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolo11s-seg.axmodel
+model file : models/yolo11s-seg_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -247,34 +253,35 @@ Engine push input is done.
 --------------------------------------
 
 input size: 1
-    name:   images [UINT8] [unknown]
-        1 x 640 x 640 x 3
+    name: [1;32m  images [1;34m[UINT8] [1;31m[unknown]
+        [1;31m1 x 640 x 640 x 3[0m
+
 
 output size: 7
-    name: /model.23/Concat_1_output_0 [FLOAT32]
-        1 x 80 x 80 x 144
+    name: [1;32m/model.23/Concat_1_output_0 [1;34m[FLOAT32][0m
+        [1;31m1 x 80 x 80 x 144[0m
 
-    name: /model.23/Concat_2_output_0 [FLOAT32]
-        1 x 40 x 40 x 144
+    name: [1;32m/model.23/Concat_2_output_0 [1;34m[FLOAT32][0m
+        [1;31m1 x 40 x 40 x 144[0m
 
-    name: /model.23/Concat_3_output_0 [FLOAT32]
-        1 x 20 x 20 x 144
+    name: [1;32m/model.23/Concat_3_output_0 [1;34m[FLOAT32][0m
+        [1;31m1 x 20 x 20 x 144[0m
 
-    name: /model.23/cv4.0/cv4.0.2/Conv_output_0 [FLOAT32]
-        1 x 80 x 80 x 32
+    name: [1;32m/model.23/cv4.0/cv4.0.2/Conv_output_0 [1;34m[FLOAT32][0m
+        [1;31m1 x 80 x 80 x 32[0m
 
-    name: /model.23/cv4.1/cv4.1.2/Conv_output_0 [FLOAT32]
-        1 x 40 x 40 x 32
+    name: [1;32m/model.23/cv4.1/cv4.1.2/Conv_output_0 [1;34m[FLOAT32][0m
+        [1;31m1 x 40 x 40 x 32[0m
 
-    name: /model.23/cv4.2/cv4.2.2/Conv_output_0 [FLOAT32]
-        1 x 20 x 20 x 32
+    name: [1;32m/model.23/cv4.2/cv4.2.2/Conv_output_0 [1;34m[FLOAT32][0m
+        [1;31m1 x 20 x 20 x 32[0m
 
-    name:  output1 [FLOAT32]
-        1 x 32 x 160 x 160
+    name: [1;32m output1 [1;34m[FLOAT32][0m
+        [1;31m1 x 32 x 160 x 160[0m
 
-post process cost time:23.48 ms
+post process cost time:15.75 ms
 --------------------------------------
-Repeat 10 times, avg time 1.25 ms, max_time 1.28 ms, min_time 1.23 ms
+Repeat 10 times, avg time 1.23 ms, max_time 1.27 ms, min_time 1.22 ms
 --------------------------------------
 detection num: 5
  0:  91%, [  50,  398,  249,  907], person
@@ -288,9 +295,9 @@ detection num: 5
 
 #### YOLO26s-seg
 ```
-# ./ax_yolo26_seg -m models/yolo26s-seg.axmodel -i images/bus.jpg -r 10
+# ./ax_yolo26_seg -m models/yolo26s-seg_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolo26s-seg.axmodel
+model file : models/yolo26s-seg_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -300,9 +307,9 @@ Engine get io info is done.
 Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
-post process cost time:22.56 ms
+post process cost time:14.10 ms
 --------------------------------------
-Repeat 10 times, avg time 1.33 ms, max_time 1.34 ms, min_time 1.31 ms
+Repeat 10 times, avg time 1.36 ms, max_time 1.40 ms, min_time 1.35 ms
 --------------------------------------
 detection num: 4
  0:  96%, [  50,  410,  242,  904], person
@@ -315,9 +322,9 @@ detection num: 4
 
 #### YOLOv8s-pose
 ```
-# ./ax_yolov8_pose -m models/yolov8s-pose.axmodel -i images/bus.jpg -r 10
+# ./ax_yolov8_pose -m models/yolov8s-pose_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolov8s-pose.axmodel
+model file : models/yolov8s-pose_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -327,9 +334,9 @@ Engine get io info is done.
 Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
-post process cost time:1.61 ms
+post process cost time:1.54 ms
 --------------------------------------
-Repeat 10 times, avg time 1.15 ms, max_time 1.17 ms, min_time 1.14 ms
+Repeat 10 times, avg time 1.13 ms, max_time 1.16 ms, min_time 1.12 ms
 --------------------------------------
 detection num: 4
  0:  88%, [ 223,  405,  347,  857], person
@@ -342,9 +349,9 @@ detection num: 4
 
 #### YOLO11s-pose
 ```
-# ./ax_yolo11_pose -m models/yolo11s-pose.axmodel -i images/bus.jpg -r 10
+# ./ax_yolo11_pose -m models/yolo11s-pose_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolo11s-pose.axmodel
+model file : models/yolo11s-pose_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -354,9 +361,9 @@ Engine get io info is done.
 Engine alloc io is done.
 Engine push input is done.
 --------------------------------------
-post process cost time:1.59 ms
+post process cost time:1.54 ms
 --------------------------------------
-Repeat 10 times, avg time 1.19 ms, max_time 1.22 ms, min_time 1.16 ms
+Repeat 10 times, avg time 1.15 ms, max_time 1.17 ms, min_time 1.13 ms
 --------------------------------------
 detection num: 4
  0:  93%, [ 225,  407,  347,  858], person
@@ -369,9 +376,9 @@ detection num: 4
 
 #### YOLO26s-pose
 ```
-# ./ax_yolo26_pose -m models/yolo26s-pose.axmodel -i images/bus.jpg -r 10
+# ./ax_yolo26_pose -m models/yolo26s-pose_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
-model file : models/yolo26s-pose.axmodel
+model file : models/yolo26s-pose_npu4.axmodel
 image file : images/bus.jpg
 img_h, img_w : 640 640
 --------------------------------------
@@ -383,7 +390,7 @@ Engine push input is done.
 --------------------------------------
 post process cost time:0.22 ms
 --------------------------------------
-Repeat 10 times, avg time 1.25 ms, max_time 1.27 ms, min_time 1.23 ms
+Repeat 10 times, avg time 1.17 ms, max_time 1.18 ms, min_time 1.16 ms
 --------------------------------------
 detection num: 4
  0:  93%, [  53,  401,  256,  899], person
