@@ -26,19 +26,17 @@ export LD_LIBRARY_PATH=/opt/lib:$LD_LIBRARY_PATH
 
 ### 模型转换
 
-YOLO 系列模型由 [AXERA-TECH](https://huggingface.co/AXERA-TECH) 发布的 onnx 及其 `config.json` 使用 Pulsar2 7.0 转换，仅需将目标平台改为 AX8860：
+模型使用 Pulsar2 7.0 转换，目标平台为 AX8860：
 
 ```bash
 pulsar2 build --config config.json --target_hardware AX8860 --npu_mode NPU4
 ```
 
-- YOLO11 / YOLO26 系列直接使用原始 onnx。
-- YOLOv8 系列的 onnx 为每个 stride 拆分输出（box 64 + cls 80 / 1），需先在 onnx 中将同一 stride 的 box 与 cls 在通道维 Concat，得到与 `ax_yolov8*` 后处理一致的输出：
-  - YOLOv8s：3 x (1 x H x W x 144)
-  - YOLOv8s-seg：3 x (1 x H x W x 144)，3 x (1 x H x W x 32)，1 x 32 x 160 x 160
-  - YOLOv8s-pose：3 x (1 x H x W x 65)，3 x (1 x H x W x 51)
+YOLOv8 系列的 onnx 若为每个 stride 拆分输出（box 64 + cls 80 / 1），需先在 onnx 中将同一 stride 的 box 与 cls 在通道维 Concat，得到与 `ax_yolov8*` 后处理一致的输出：
 
-- YOLOv5s 使用 [AXERA-TECH/YOLOv5](https://huggingface.co/AXERA-TECH/YOLOv5) 中已裁剪检测头的 `yolov5s-cut.onnx`；MobileNetv2 使用 Pulsar2 quick start 中的 `mobilenetv2-sim.onnx`。
+- YOLOv8s：3 x (1 x H x W x 144)
+- YOLOv8s-seg：3 x (1 x H x W x 144)，3 x (1 x H x W x 32)，1 x 32 x 160 x 160
+- YOLOv8s-pose：3 x (1 x H x W x 65)，3 x (1 x H x W x 51)
 
 以下示例模型均为 NPU4 模式，检测、分割、关键点示例统一使用 [bus.jpg](https://ultralytics.com/images/bus.jpg) 测试。
 
