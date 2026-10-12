@@ -1,30 +1,69 @@
-# examples
+# AX8860 示例
 
-AX-Samples 将不断更新最流行、实用、有趣的 AX8860 示例代码。以下列表覆盖当前 `examples/ax8860` 目录中已经提供的应用，后续会随着模型支持一起扩充。
+本目录为 AX8860 芯片的 NPU 推理示例，包含图像分类、物体检测、物体分割、人体关键点四类共 11 个示例。编译方法见 [compile_8860.md](../../docs/compile_8860.md)。
 
-- 图像分类
-  - [MobileNetv2](#MobileNetv2)
-- 物体检测
-  - [YOLOv5s](#YOLOv5s)
-  - [YOLOv8s](#YOLOv8s)
-  - [YOLO11s](#YOLO11s)
-  - [YOLO26s](#YOLO26s)
-- 物体分割
-  - [YOLOv8s-seg](#YOLOv8s-seg)
-  - [YOLO11s-seg](#YOLO11s-seg)
-  - [YOLO26s-seg](#YOLO26s-seg)
-- 人体关键点
-  - [YOLOv8s-pose](#YOLOv8s-pose)
-  - [YOLO11s-pose](#YOLO11s-pose)
-  - [YOLO26s-pose](#YOLO26s-pose)
+## 目录结构
 
-编译方法见 [compile_8860.md](../../docs/compile_8860.md)。板端 BSP 动态库位于 `/opt/lib`，运行前请确认其在动态库搜索路径中：
-
-```bash
-export LD_LIBRARY_PATH=/opt/lib:$LD_LIBRARY_PATH
+```
+examples/ax8860
+├── CMakeLists.txt                 # 每个示例一行 axera_example(...)
+├── middleware/io.hpp              # NPU 输入输出内存申请/释放（输入必须填 nSize）
+├── ax_classification_steps.cc     # 图像分类（MobileNetv2 等 ImageNet 模型）
+├── ax_yolov5s_steps.cc            # YOLOv5s 检测
+├── ax_yolov8_steps.cc             # YOLOv8 检测
+├── ax_yolov8_seg_steps.cc         # YOLOv8 分割
+├── ax_yolov8_pose_steps.cc        # YOLOv8 关键点
+├── ax_yolo11_steps.cc             # YOLO11 检测
+├── ax_yolo11_seg_steps.cc         # YOLO11 分割
+├── ax_yolo11_pose_steps.cc        # YOLO11 关键点
+├── ax_yolo26_steps.cc             # YOLO26 检测
+├── ax_yolo26_seg_steps.cc         # YOLO26 分割
+├── ax_yolo26_pose_steps.cc        # YOLO26 关键点
+└── README.md
 ```
 
-### 模型转换
+示例共用的后处理在 [examples/base](../base)，命令行与计时工具在 [examples/utilities](../utilities)。
+
+## 快速运行
+
+1. 按 [compile_8860.md](../../docs/compile_8860.md) 编译，得到 `build_ax8860/install/ax8860/ax_*`。
+2. 将可执行文件、模型与测试图片拷贝到开发板，按如下方式组织：
+
+   ```
+   ax-samples/
+   ├── ax_classification, ax_yolov8, ...   # install/ax8860/ 下的可执行文件
+   ├── models/*.axmodel
+   └── images/{cat.jpg,bus.jpg}
+   ```
+
+3. 设置动态库路径并运行：
+
+   ```bash
+   export LD_LIBRARY_PATH=/opt/lib:$LD_LIBRARY_PATH
+   ./ax_yolov8 -m models/yolov8s_npu4.axmodel -i images/bus.jpg -r 10
+   ```
+
+参数说明：`-m` 模型（必填），`-i` 图片（必填），`-g` 模型输入尺寸 `h,w`（默认 640,640，分类为 224,224），`-r` 重复推理次数（用于测速）。检测、分割、关键点示例会在当前目录保存结果图 `<模型>_out.jpg`。
+
+## 模型列表
+
+所有模型均为 NPU4 模式，耗时为 NPU 推理 10 次平均值（不含前后处理）。
+
+| 模型 | 任务 | 示例程序 | 模型文件 | 测试图片 | 耗时 (ms) |
+| ---- | ---- | ---- | ---- | ---- | ---- |
+| [MobileNetv2](#mobilenetv2) | 图像分类 | `ax_classification` | `mobilenetv2_npu4.axmodel` | `cat.jpg` | 0.32 |
+| [YOLOv5s](#yolov5s) | 物体检测 | `ax_yolov5s` | `yolov5s_npu4.axmodel` | `bus.jpg` | 0.81 |
+| [YOLOv8s](#yolov8s) | 物体检测 | `ax_yolov8` | `yolov8s_npu4.axmodel` | `bus.jpg` | 0.96 |
+| [YOLO11s](#yolo11s) | 物体检测 | `ax_yolo11` | `yolo11s_npu4.axmodel` | `bus.jpg` | 0.94 |
+| [YOLO26s](#yolo26s) | 物体检测 | `ax_yolo26` | `yolo26s_npu4.axmodel` | `bus.jpg` | 0.98 |
+| [YOLOv8s-seg](#yolov8s-seg) | 物体分割 | `ax_yolov8_seg` | `yolov8s-seg_npu4.axmodel` | `bus.jpg` | 1.20 |
+| [YOLO11s-seg](#yolo11s-seg) | 物体分割 | `ax_yolo11_seg` | `yolo11s-seg_npu4.axmodel` | `bus.jpg` | 1.23 |
+| [YOLO26s-seg](#yolo26s-seg) | 物体分割 | `ax_yolo26_seg` | `yolo26s-seg_npu4.axmodel` | `bus.jpg` | 1.36 |
+| [YOLOv8s-pose](#yolov8s-pose) | 人体关键点 | `ax_yolov8_pose` | `yolov8s-pose_npu4.axmodel` | `bus.jpg` | 1.13 |
+| [YOLO11s-pose](#yolo11s-pose) | 人体关键点 | `ax_yolo11_pose` | `yolo11s-pose_npu4.axmodel` | `bus.jpg` | 1.15 |
+| [YOLO26s-pose](#yolo26s-pose) | 人体关键点 | `ax_yolo26_pose` | `yolo26s-pose_npu4.axmodel` | `bus.jpg` | 1.17 |
+
+## 模型转换
 
 模型使用 Pulsar2 7.0 转换，目标平台为 AX8860：
 
@@ -38,11 +77,29 @@ YOLOv8 系列的 onnx 若为每个 stride 拆分输出（box 64 + cls 80 / 1）�
 - YOLOv8s-seg：3 x (1 x H x W x 144)，3 x (1 x H x W x 32)，1 x 32 x 160 x 160
 - YOLOv8s-pose：3 x (1 x H x W x 65)，3 x (1 x H x W x 51)
 
-以下示例模型均为 NPU4 模式，检测、分割、关键点示例统一使用 [bus.jpg](https://ultralytics.com/images/bus.jpg) 测试。
+## 运行示例
 
-### 运行示例
+检测、分割、关键点示例统一使用 [bus.jpg](https://ultralytics.com/images/bus.jpg) 测试，点击「完整输出」查看日志。
 
-#### MobileNetv2
+### MobileNetv2
+
+```bash
+./ax_classification -m models/mobilenetv2_npu4.axmodel -i images/cat.jpg -r 10
+```
+
+top5（分数, ImageNet 类别 id）：
+
+```
+10.1433, 285
+9.4579, 282
+9.3208, 281
+8.9096, 283
+8.2243, 287
+```
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_classification -m models/mobilenetv2_npu4.axmodel -i images/cat.jpg -r 10
 --------------------------------------
@@ -67,7 +124,18 @@ Repeat 10 times, avg time 0.32 ms, max_time 0.33 ms, min_time 0.32 ms
 --------------------------------------
 ```
 
-#### YOLOv5s
+</details>
+
+### YOLOv5s
+
+```bash
+./ax_yolov5s -m models/yolov5s_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLOv5s](../../docs/ax8860/yolov5s_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolov5s -m models/yolov5s_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -93,9 +161,19 @@ detection num: 5
  0:  64%, [   1,  563,   66,  871], person
 --------------------------------------
 ```
-![YOLOv5s](../../docs/ax8860/yolov5s_out.jpg)
 
-#### YOLOv8s
+</details>
+
+### YOLOv8s
+
+```bash
+./ax_yolov8 -m models/yolov8s_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLOv8s](../../docs/ax8860/yolov8_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolov8 -m models/yolov8s_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -121,9 +199,19 @@ detection num: 5
  0:  56%, [   0,  555,   65,  869], person
 --------------------------------------
 ```
-![YOLOv8s](../../docs/ax8860/yolov8_out.jpg)
 
-#### YOLO11s
+</details>
+
+### YOLO11s
+
+```bash
+./ax_yolo11 -m models/yolo11s_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLO11s](../../docs/ax8860/yolo11_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolo11 -m models/yolo11s_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -149,9 +237,19 @@ detection num: 5
  0:  67%, [   0,  547,   80,  871], person
 --------------------------------------
 ```
-![YOLO11s](../../docs/ax8860/yolo11_out.jpg)
 
-#### YOLO26s
+</details>
+
+### YOLO26s
+
+```bash
+./ax_yolo26 -m models/yolo26s_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLO26s](../../docs/ax8860/yolo26_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolo26 -m models/yolo26s_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -177,9 +275,19 @@ detection num: 5
  0:  73%, [   1,  554,   67,  874], person
 --------------------------------------
 ```
-![YOLO26s](../../docs/ax8860/yolo26_out.jpg)
 
-#### YOLOv8s-seg
+</details>
+
+### YOLOv8s-seg
+
+```bash
+./ax_yolov8_seg -m models/yolov8s-seg_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLOv8s-seg](../../docs/ax8860/yolov8_seg_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolov8_seg -m models/yolov8s-seg_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -233,9 +341,19 @@ detection num: 5
  0:  55%, [   0,  553,   64,  871], person
 --------------------------------------
 ```
-![YOLOv8s-seg](../../docs/ax8860/yolov8_seg_out.jpg)
 
-#### YOLO11s-seg
+</details>
+
+### YOLO11s-seg
+
+```bash
+./ax_yolo11_seg -m models/yolo11s-seg_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLO11s-seg](../../docs/ax8860/yolo11_seg_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolo11_seg -m models/yolo11s-seg_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -289,9 +407,19 @@ detection num: 5
  0:  55%, [   0,  548,   63,  870], person
 --------------------------------------
 ```
-![YOLO11s-seg](../../docs/ax8860/yolo11_seg_out.jpg)
 
-#### YOLO26s-seg
+</details>
+
+### YOLO26s-seg
+
+```bash
+./ax_yolo26_seg -m models/yolo26s-seg_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLO26s-seg](../../docs/ax8860/yolo26_seg_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolo26_seg -m models/yolo26s-seg_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -316,9 +444,19 @@ detection num: 4
  0:  90%, [ 664,  402,  809,  876], person
 --------------------------------------
 ```
-![YOLO26s-seg](../../docs/ax8860/yolo26_seg_out.jpg)
 
-#### YOLOv8s-pose
+</details>
+
+### YOLOv8s-pose
+
+```bash
+./ax_yolov8_pose -m models/yolov8s-pose_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLOv8s-pose](../../docs/ax8860/yolov8_pose_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolov8_pose -m models/yolov8s-pose_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -343,9 +481,19 @@ detection num: 4
  0:  59%, [   1,  552,   68,  875], person
 --------------------------------------
 ```
-![YOLOv8s-pose](../../docs/ax8860/yolov8_pose_out.jpg)
 
-#### YOLO11s-pose
+</details>
+
+### YOLO11s-pose
+
+```bash
+./ax_yolo11_pose -m models/yolo11s-pose_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLO11s-pose](../../docs/ax8860/yolo11_pose_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolo11_pose -m models/yolo11s-pose_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -370,9 +518,19 @@ detection num: 4
  0:  54%, [   1,  556,   75,  877], person
 --------------------------------------
 ```
-![YOLO11s-pose](../../docs/ax8860/yolo11_pose_out.jpg)
 
-#### YOLO26s-pose
+</details>
+
+### YOLO26s-pose
+
+```bash
+./ax_yolo26_pose -m models/yolo26s-pose_npu4.axmodel -i images/bus.jpg -r 10
+```
+![YOLO26s-pose](../../docs/ax8860/yolo26_pose_out.jpg)
+
+<details>
+<summary>完整输出</summary>
+
 ```
 # ./ax_yolo26_pose -m models/yolo26s-pose_npu4.axmodel -i images/bus.jpg -r 10
 --------------------------------------
@@ -397,4 +555,5 @@ detection num: 4
  0:  41%, [   1,  547,   70,  896], person
 --------------------------------------
 ```
-![YOLO26s-pose](../../docs/ax8860/yolo26_pose_out.jpg)
+
+</details>
