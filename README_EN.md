@@ -58,7 +58,7 @@ ax-samples
 │   └── ax8860/            #   AX8860 samples
 ├── toolchains/            # cross-compile toolchain cmake files
 ├── CMakeLists.txt         # top-level cmake; pick the SoC with AXERA_TARGET_CHIP
-└── AGENTS_EN.md           # quick reference for AI agents: build commands, adding models/SoCs, pitfalls
+└── AGENTS.md              # quick reference for AI agents: build commands, adding models/SoCs, pitfalls
 ```
 
 Every SoC directory has the same layout:

@@ -58,7 +58,8 @@ ax-samples
 │   └── ax8860/            #   AX8860 示例
 ├── toolchains/            # 交叉编译工具链 cmake 文件
 ├── CMakeLists.txt         # 顶层 cmake，通过 AXERA_TARGET_CHIP 选择芯片
-└── AGENTS.md              # 面向 AI Agent 的速查：编译命令、新增模型/芯片步骤、常见坑（英文版 AGENTS_EN.md）
+├── AGENTS.md              # 面向 AI Agent 的速查（英文）：编译命令、新增模型/芯片步骤、常见坑
+└── AGENTS_ZH.md           # AGENTS.md 中文版
 ```
 
 每个芯片目录的组织方式相同：
