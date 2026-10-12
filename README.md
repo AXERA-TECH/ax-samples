@@ -48,6 +48,8 @@ ax-samples
 ├── benchmark/             # 各芯片常见模型推理耗时统计
 ├── cmake/                 # 各芯片的编译配置（axXXX.cmake）与编译检查脚本
 ├── docs/                  # 编译文档（compile_*.md）、示例结果图、开发板图片
+│   ├── AGENTS.md          #   面向 AI Agent 的速查（英文）：编译命令、新增模型/芯片步骤、常见坑
+│   └── AGENTS_ZH.md       #   AGENTS.md 中文版
 ├── examples/              # 示例源码
 │   ├── base/              #   通用后处理：检测、关键点、topk、坐标变换等
 │   ├── utilities/         #   通用工具：命令行解析、文件读取、计时器等
@@ -57,9 +59,7 @@ ax-samples
 │   ├── ax615/             #   AX615 示例
 │   └── ax8860/            #   AX8860 示例
 ├── toolchains/            # 交叉编译工具链 cmake 文件
-├── CMakeLists.txt         # 顶层 cmake，通过 AXERA_TARGET_CHIP 选择芯片
-├── AGENTS.md              # 面向 AI Agent 的速查（英文）：编译命令、新增模型/芯片步骤、常见坑
-└── AGENTS_ZH.md           # AGENTS.md 中文版
+└── CMakeLists.txt         # 顶层 cmake，通过 AXERA_TARGET_CHIP 选择芯片
 ```
 
 每个芯片目录的组织方式相同：

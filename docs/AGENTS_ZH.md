@@ -2,7 +2,7 @@
 
 # AGENTS.md
 
-面向 AI Agent / 新贡献者的速查。人类阅读入口见 [README.md](README.md)。
+面向 AI Agent / 新贡献者的速查。人类阅读入口见 [README.md](../README.md)。
 
 ## 项目是什么
 
@@ -29,12 +29,12 @@
 
 | 芯片 | `AXERA_TARGET_CHIP` | 示例目录 | 工具链文件 | OpenCV（解压到 `3rdparty/`） | 文档 |
 | ---- | ---- | ---- | ---- | ---- | ---- |
-| AX650A/AX650N/AX8850 | `ax650` | `examples/ax650` | `aarch64-none-linux-gnu` | `opencv-aarch64-linux` | [compile_650](docs/compile_650.md) |
-| AX637 | `ax637` | `examples/ax637` | `aarch64-none-linux-gnu` | `opencv-aarch64-linux` | [compile_637](docs/compile_637.md) |
-| AX630C | `ax630c` | `examples/ax620e` | `aarch64-none-linux-gnu` | `opencv-aarch64-linux` | [compile_620e](docs/compile_620e.md) |
-| AX620Q | `ax620q` | `examples/ax620e` | `arm-AX620E-linux-uclibcgnueabihf` | `opencv-arm-uclibc-linux` | [compile_620e](docs/compile_620e.md) |
-| AX615 | `ax615` | `examples/ax615` | `arm-linux-gnueabihf` | `opencv-arm-uclibc-linux` | [compile_615](docs/compile_615.md) |
-| AX8860 | `ax8860` | `examples/ax8860` | `aarch64-none-linux-gnu`（**须 Arm GNU 13.2，glibc ≥ 2.38**） | `opencv-aarch64-linux` | [compile_8860](docs/compile_8860.md) |
+| AX650A/AX650N/AX8850 | `ax650` | `examples/ax650` | `aarch64-none-linux-gnu` | `opencv-aarch64-linux` | [compile_650](./compile_650.md) |
+| AX637 | `ax637` | `examples/ax637` | `aarch64-none-linux-gnu` | `opencv-aarch64-linux` | [compile_637](./compile_637.md) |
+| AX630C | `ax630c` | `examples/ax620e` | `aarch64-none-linux-gnu` | `opencv-aarch64-linux` | [compile_620e](./compile_620e.md) |
+| AX620Q | `ax620q` | `examples/ax620e` | `arm-AX620E-linux-uclibcgnueabihf` | `opencv-arm-uclibc-linux` | [compile_620e](./compile_620e.md) |
+| AX615 | `ax615` | `examples/ax615` | `arm-linux-gnueabihf` | `opencv-arm-uclibc-linux` | [compile_615](./compile_615.md) |
+| AX8860 | `ax8860` | `examples/ax8860` | `aarch64-none-linux-gnu`（**须 Arm GNU 13.2，glibc ≥ 2.38**） | `opencv-aarch64-linux` | [compile_8860](./compile_8860.md) |
 
 通用编译命令（禁止在源码目录内编译）：
 

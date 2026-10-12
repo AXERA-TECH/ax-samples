@@ -48,6 +48,8 @@ ax-samples
 ├── benchmark/             # inference time of common models on each SoC
 ├── cmake/                 # per-SoC build configs (axXXX.cmake) and build checks
 ├── docs/                  # build guides (compile_*.md), result images, board photos
+│   ├── AGENTS.md          #   quick reference for AI agents: build commands, adding models/SoCs, pitfalls
+│   └── AGENTS_ZH.md       #   Chinese version of AGENTS.md
 ├── examples/              # sample sources
 │   ├── base/              #   shared post-processing: detection, pose, topk, transforms
 │   ├── utilities/         #   shared helpers: cmdline parsing, file io, timer
@@ -57,8 +59,7 @@ ax-samples
 │   ├── ax615/             #   AX615 samples
 │   └── ax8860/            #   AX8860 samples
 ├── toolchains/            # cross-compile toolchain cmake files
-├── CMakeLists.txt         # top-level cmake; pick the SoC with AXERA_TARGET_CHIP
-└── AGENTS.md              # quick reference for AI agents: build commands, adding models/SoCs, pitfalls
+└── CMakeLists.txt         # top-level cmake; pick the SoC with AXERA_TARGET_CHIP
 ```
 
 Every SoC directory has the same layout:
