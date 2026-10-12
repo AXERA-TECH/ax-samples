@@ -1,3 +1,5 @@
+[English](./AGENTS_EN.md) | 简体中文
+
 # AGENTS.md
 
 面向 AI Agent / 新贡献者的速查。人类阅读入口见 [README.md](README.md)。
